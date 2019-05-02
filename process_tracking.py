@@ -4,6 +4,7 @@ from process import Process
 from source import Source
 from tool import Tool
 
+
 class ProcessTracker:
 
     def __init__(self, process_name, actor_name, tool_name, source_name):
@@ -15,6 +16,6 @@ class ProcessTracker:
 
     def register_new_process_run(self):
         """
-        
+
         :return:
         """
