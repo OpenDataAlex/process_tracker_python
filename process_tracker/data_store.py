@@ -1,31 +1,9 @@
 
-import hashlib
-
 from process_tracker import session
+from models.process import ProcessTracking
 
 
 class DataStore:
-
-    def generate_universally_unique_identifier(self, **kwargs):
-        """
-        Given a set a values, append them into a single string to be converted into a UUID.  While this is designed for
-        generic input, as long as the use is identical within instances of an object type it should be universally
-        unique (sans the odds for collisions).
-        :param kwargs: Name/value pairs of attributes needed to ensure uniqueness for the given thing.
-        :return:
-        """
-        identification_string = ""
-
-        for key, value in kwargs.items():
-            identification_string.join("%s || " % value)
-            print(identification_string)
-
-        identification_string = identification_string.encode('utf-8')
-        identification_hash = hashlib.sha256(identification_string)
-
-        print("Testing hash: %s" % identification_hash)
-
-        return identification_hash.hexdigest()
 
     @staticmethod
     def get_or_create(model, create=True, **kwargs):
@@ -56,14 +34,20 @@ class DataStore:
         return instance
 
     @staticmethod
-    def get_latest_tracking_record(model, process):
+    def get_latest_tracking_record(process):
         """
         For the given process, find the latest tracking record.
-        :param model:
-        :param process:
+        :param process: The process' process_id.
+        :type process: integer
         :return:
         """
 
-        instance = session.query(model).filter(model.process_id == process ).order_by(model.run_id.desc()).first()
+        instance = session.query(ProcessTracking)\
+            .filter(ProcessTracking.process_id == process)\
+            .order_by(ProcessTracking.process_run_id.desc())\
+            .first()
+
+        if instance is None:
+            return False
 
         return instance

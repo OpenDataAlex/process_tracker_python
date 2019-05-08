@@ -8,9 +8,7 @@ verify_ssl = true
 [packages]
 sqlalchemy = "*"
 sqlalchemy-utils = "*"
-dateutil = "*"
 python-dateutil = "*"
-psycopg2 = "*"
 psycopg2-binary = "*"
 
 [requires]

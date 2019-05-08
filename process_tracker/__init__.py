@@ -70,6 +70,7 @@ if data_store_type in supported_data_stores:
 
     session = Session()
     session.execute("SET search_path TO %s" % data_store_name)
+
 else:
     raise Exception('Invalid data store type provided.  Please use: ' + ", ".join(supported_data_stores))
     exit()

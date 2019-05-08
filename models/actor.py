@@ -10,5 +10,5 @@ class Actor(Base):
 
     __tablename__ = "actor_lkup"
 
-    actor_uuid = Column(uuid.UUIDType, primary_key=True)
+    actor_id = Column(Integer, Sequence('actor_lkup_actor_id_seq'), primary_key=True)
     actor_name = Column(String(250), nullable=False, unique=True)
