@@ -15,10 +15,10 @@ class TestProcessTracking(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.process_tracker = ProcessTracker(process_name='Testing Process Tracking Initialization'
-                                         , process_type='Extract'
-                                         , actor_name='UnitTesting'
-                                         , tool_name='Spark'
-                                         , source_name='Unittests')
+                                             , process_type='Extract'
+                                             , actor_name='UnitTesting'
+                                             , tool_name='Spark'
+                                             , source_name='Unittests')
 
     @classmethod
     def tearDownClass(cls):
@@ -92,6 +92,25 @@ class TestProcessTracking(unittest.TestCase):
 
         return self.assertTrue('The process Testing Process Tracking Initialization '
                                'is currently running.' in str(context.exception))
+
+    def test_register_new_process_run_with_previous_run(self):
+        """
+        Testing that a new run record is created if there is another instance of same process in 'completed' or 'failed'
+        status.  Also flips the is_latest_run flag on previous run to False.
+        :return:
+        """
+
+        self.process_tracker.change_run_status(new_status='completed')
+        self.process_tracker.register_new_process_run()
+
+        process_runs = session.query(ProcessTracking)\
+                              .filter(ProcessTracking.process_id == self.process_id)\
+                              .order_by(ProcessTracking.process_tracking_id)
+
+        given_result = process_runs[0].is_latest_run
+        expected_result = False
+
+        self.assertEqual(given_result, expected_result)
 
     def test_change_run_status_complete(self):
         """

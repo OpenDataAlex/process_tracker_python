@@ -1,3 +1,6 @@
+# Process Tracking
+# Used in the creation and editing of process tracking records.
+
 from datetime import datetime
 import logging
 
@@ -13,7 +16,7 @@ class ProcessTracker:
 
     def __init__(self, process_name, process_type, actor_name, tool_name, source_name):
         """
-        ProcessTracker is the primary enginer for tracking data integration processes.
+        ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
@@ -58,6 +61,7 @@ class ProcessTracker:
             # Must validate that the process is not currently running.
 
             if last_run.process_status_id != self.process_status_running:
+                last_run.is_latest_run = False
                 new_run_flag = True
                 new_run_id = last_run.process_run_id + 1
             else:
@@ -68,7 +72,8 @@ class ProcessTracker:
                                       , process_status_id=self.process_status_running
                                       , process_run_id=new_run_id
                                       , process_run_start_date_time=datetime.now()
-                                      , process_run_actor_id=self.actor.actor_id)
+                                      , process_run_actor_id=self.actor.actor_id
+                                      , is_latest_run = True)
 
             session.add(new_run)
             session.commit()

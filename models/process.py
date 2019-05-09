@@ -2,10 +2,11 @@
 # Models for Process entities
 
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
 
 from models.model_base import default_date, Base
+from models.extract import Extract
 
 
 class ErrorType(Base):
@@ -132,9 +133,11 @@ class ProcessTracking(Base):
     process_run_end_date_time = Column(DateTime, nullable=True)
     process_run_record_count = Column(Integer, nullable=False, default=0)
     process_run_actor_id = Column(Integer, ForeignKey('actor_lkup.actor_id'))
+    is_latest_run = Column(Boolean, nullable=False, default=False)
 
-    process = relationship("Process", back_populates="process_tracking")
     errors = relationship("ErrorTracking", back_populates="error_tracking")
+    extracts = relationship("Extract", back_populates="process_tracking")
+    process = relationship("Process", back_populates="process_tracking")
 
     def __repr__(self):
 
