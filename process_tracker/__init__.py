@@ -68,7 +68,7 @@ if data_store_type in supported_data_stores:
 
     Session = sessionmaker(bind=engine)
 
-    session = Session()
+    session = Session(expire_on_commit=False)
     session.execute("SET search_path TO %s" % data_store_name)
 
 else:
