@@ -3,10 +3,13 @@
 
 from datetime import datetime
 import logging
+from os.path import join
 
 from process_tracker import session
 from process_tracker.data_store import DataStore
+
 from models.actor import Actor
+from models.extract import Extract, ExtractStatus, Location
 from models.process import ErrorTracking, ErrorType, Process, ProcessTracking, ProcessStatus, ProcessType
 from models.source import Source
 from models.tool import Tool
@@ -40,11 +43,176 @@ class ProcessTracker:
         self.process_name = process_name
         self.process_tracking_run = ProcessTracking()
 
+        # Getting all status types in the event there are custom status types added later.
         self.process_status_types = self.get_process_status_types()
 
+        # For specific status types, need to retrieve their ids to be used for those status types' logic.
         self.process_status_running = self.process_status_types['running']
         self.process_status_complete = self.process_status_types['completed']
         self.process_status_failed = self.process_status_types['failed']
+
+    def change_run_status(self, new_status, end_date=None):
+        """
+        Change a process tracking run record from 'running' to another status.
+        :param new_status: The name of the status that the run is being switched to.
+        :type new_status: string
+        :param end_date:  If there is a specific time required (i.e. to keep timestamps consistent between log and data
+        store)
+        :type end_date: datetime
+        :return:
+        """
+        if end_date is None:
+            end_date = datetime.now()
+
+        if self.process_status_types[new_status]:
+
+            self.process_tracking_run.process_status_id = self.process_status_types[new_status]
+
+            if (self.process_status_types[new_status] == self.process_status_complete) \
+                    or (self.process_status_types[new_status] == self.process_status_failed):
+
+                self.logger.info("Process status changing to failed or completed.")
+
+                self.process_tracking_run.process_run_end_date_time = end_date
+
+                if self.process_status_types[new_status] == self.process_status_failed:
+                    self.logger.info("Process recording as failed.  Setting process last_failed_run_date_time.")
+
+                    self.process.last_failed_run_date_time = end_date
+
+            session.commit()
+
+        else:
+            raise Exception('%s is not a valid process status type.  '
+                            'Please add the status to process_status_type_lkup' % new_status)
+
+    @staticmethod
+    def find_ready_extracts_by_filename(filename):
+        """
+        For the given filename, or filename part, find all matching extracts that are ready for processing.
+
+        :param filename:
+        :return:
+        """
+        extract_files = []
+
+        process_files = session.query(Extract, Location)\
+                               .join(Location)\
+                               .join(ExtractStatus)\
+                               .filter(Extract.extract_filename.like("%" + filename + "%"))\
+                               .filter(ExtractStatus.extract_status_name == 'ready')
+
+        for record in process_files:
+            extract_files.append(join(record.location_path, record.filename))
+
+        return extract_files
+
+    @staticmethod
+    def find_ready_extracts_by_location(location):
+        """
+        For the given location name, find all matching extracts that are ready for processing
+        :param location:
+        :return:
+        """
+        extract_files = []
+
+        process_files = session.query(Extract, Location)\
+                               .join(Location)\
+                               .join(ExtractStatus)\
+                               .filter(ExtractStatus.extract_status_name == 'ready')\
+                               .filter(Location.location_name == location)
+
+        for record in process_files:
+            extract_files.append(join(record.location_path, record.filename))
+
+        return extract_files
+
+    @staticmethod
+    def find_ready_extracts_by_process(self, extract_process_name):
+        """
+        For the given named process, find the extracts that are ready for processing.
+        :return: List of OS specific filepaths with filenames.
+        """
+        extract_files = []
+
+        process_files = session.query(Extract, Location) \
+            .join(Location) \
+            .join(ProcessTracking) \
+            .join(Process) \
+            .join(ExtractStatus)\
+            .filter(Process.process_name == extract_process_name
+                    , ExtractStatus.extract_status_name == 'ready')
+
+        for record in process_files:
+            extract_files.append(join(record.location_path, record.filename))
+
+        return extract_files
+
+    @staticmethod
+    def get_latest_tracking_record(process):
+        """
+        For the given process, find the latest tracking record.
+        :param process: The process' process_id.
+        :type process: integer
+        :return:
+        """
+
+        instance = session.query(ProcessTracking)\
+            .filter(ProcessTracking.process_id == process.process_id)\
+            .order_by(ProcessTracking.process_run_id.desc())\
+            .first()
+
+        if instance is None:
+            return False
+
+        return instance
+
+    @staticmethod
+    def get_process_status_types():
+        """
+        Get list of process status types and return dictionary.
+        :return:
+        """
+        status_types = {}
+
+        for record in session.query(ProcessStatus):
+            status_types[record.process_status_name] = record.process_status_id
+
+        return status_types
+
+    def raise_run_error(self, error_type_name, error_description=None, fail_run=False, end_date=None):
+        """
+        Raise a runtime error and fail the process run if the error is severe enough. The error also is recorded in
+        error_tracking.
+        :param error_type_name: The name of the type of error being triggered.
+        :param error_description: The description of the error to store in error tracking.
+        :param fail_run:  Flag for triggering a run failure, default False
+        :type fail_run: Boolean
+        :param end_date: If a specific datetime is required for the process_tracking end datetime.
+        :type end_date: datetime
+        :return:
+        """
+        if end_date is None:
+            end_date = datetime.now()  # Need the date to match across all parts of the event in case the run is failed.
+
+        if error_description is None:
+            error_description = 'Unspecified error.'
+
+        error_type = self.data_store.get_or_create(model=ErrorType, create=False, error_type_name=error_type_name)
+
+        run_error = ErrorTracking(error_type_id=error_type.error_type_id
+                                  , error_description=error_description
+                                  , process_tracking_id=self.process_tracking_run.process_tracking_id
+                                  , error_occurrence_date_time=end_date)
+
+        self.logger.error('%s - %s - %s' % (self.process_name, error_type_name, error_description))
+        session.add(run_error)
+        session.commit()
+
+        if fail_run:
+            self.change_run_status(new_status='failed', end_date=end_date)
+            session.commit()
+            raise Exception('Process halting.  An error triggered the process to fail.')
 
     def register_new_process_run(self):
         """
@@ -85,108 +253,3 @@ class ProcessTracker:
         else:
             raise Exception('The process %s is currently running.' % self.process_name)
             exit()
-
-    def change_run_status(self, new_status, end_date=None):
-        """
-        Change a process tracking run record from 'running' to another status.
-        :param new_status: The name of the status that the run is being switched to.
-        :type new_status: string
-        :param end_date:  If there is a specific time required (i.e. to keep timestamps consistent between log and data
-        store)
-        :type end_date: datetime
-        :return:
-        """
-        if end_date is None:
-            end_date = datetime.now()
-
-        if self.process_status_types[new_status]:
-
-            self.process_tracking_run.process_status_id = self.process_status_types[new_status]
-
-            if (self.process_status_types[new_status] == self.process_status_complete) \
-                    or (self.process_status_types[new_status] == self.process_status_failed):
-
-                self.logger.info("Process status changing to failed or completed.")
-                
-                self.process_tracking_run.process_run_end_date_time = end_date
-                
-                if self.process_status_types[new_status] == self.process_status_failed:
-
-                    self.logger.info("Process recording as failed.  Setting process last_failed_run_date_time.")
-
-                    self.process.last_failed_run_date_time = end_date
-
-            session.commit()
-
-        else:
-            raise Exception('%s is not a valid process status type.  '
-                            'Please add the status to process_status_type_lkup' % new_status)
-
-    def raise_run_error(self, error_type_name, error_description=None, fail_run=False, end_date=None):
-        """
-        Raise a runtime error and fail the process run if the error is severe enough. The error also is recorded in
-        error_tracking.
-        :param error_type_name: The name of the type of error being triggered.
-        :param error_description: The description of the error to store in error tracking.
-        :param fail_run:  Flag for triggering a run failure, default False
-        :type fail_run: Boolean
-        :param end_date: If a specific datetime is required for the process_tracking end datetime.
-        :type end_date: datetime
-        :return:
-        """
-        if end_date is None:
-            end_date = datetime.now()  # Need the date to match across all parts of the event in case the run is failed.
-
-        if error_description is None:
-            error_description = 'Unspecified error.'
-
-        error_type = self.data_store.get_or_create(model=ErrorType, create=False, error_type_name=error_type_name)
-
-        run_error = ErrorTracking(error_type_id=error_type.error_type_id
-                                  , error_description=error_description
-                                  , process_tracking_id=self.process_tracking_run.process_tracking_id
-                                  , error_occurrence_date_time=end_date)
-
-        self.logger.error('%s - %s - %s' % (self.process_name, error_type_name, error_description))
-        session.add(run_error)
-        session.commit()
-
-        if fail_run:
-            self.change_run_status(new_status='failed', end_date=end_date)
-            session.commit()
-            raise Exception('Process halting.  An error triggered the process to fail.')
-
-    @staticmethod
-    def get_process_status_types():
-        """
-        Get list of process status types and return dictionary.
-        :return:
-        """
-        status_types ={}
-
-        for record in session.query(ProcessStatus):
-            status_types[record.process_status_name] = record.process_status_id
-
-        return status_types
-
-    @staticmethod
-    def get_latest_tracking_record(process):
-        """
-        For the given process, find the latest tracking record.
-        :param process: The process' process_id.
-        :type process: integer
-        :return:
-        """
-
-        instance = session.query(ProcessTracking)\
-            .filter(ProcessTracking.process_id == process.process_id)\
-            .order_by(ProcessTracking.process_run_id.desc())\
-            .first()
-
-        if instance is None:
-            return False
-
-        return instance
-
-
-

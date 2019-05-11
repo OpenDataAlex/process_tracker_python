@@ -136,7 +136,7 @@ class ProcessTracking(Base):
     is_latest_run = Column(Boolean, nullable=False, default=False)
 
     errors = relationship("ErrorTracking", back_populates="error_tracking")
-    extracts = relationship("Extract", back_populates="process_tracking")
+    extracts = relationship("ExtractProcess", back_populates="extract_processes")
     process = relationship("Process", back_populates="process_tracking")
 
     def __repr__(self):
