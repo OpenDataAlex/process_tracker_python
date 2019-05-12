@@ -43,8 +43,6 @@ class ExtractTracker:
                                                      , extract_location_id=self.location.location_id
                                                      , extract_source_id=self.source.source_id)
 
-        self.extract_process = self.retrieve_extract_process()
-
         # Getting all status types in the event there are custom status types added later.
         self.extract_status_types = self.get_extract_status_types()
 
@@ -58,6 +56,8 @@ class ExtractTracker:
         self.extract_status_deleted = self.extract_status_types['deleted']
         self.extract_status_error = self.extract_status_types['error']
 
+        self.extract_process = self.retrieve_extract_process()
+
     def change_extract_status(self, new_status):
         """
         Change an extract record status.
@@ -66,10 +66,10 @@ class ExtractTracker:
         status_date = datetime.now()
         new_status = self.extract_status_types[new_status]
 
-        if self.extract_status_types[new_status]:
+        if new_status:
             self.extract.extract_status_id = new_status
 
-            self.extract_process.extract_status_id = new_status
+            self.extract_process.extract_process_status_id = new_status
             self.extract_process.extract_process_event_date_time = status_date
 
             session.commit()
@@ -88,16 +88,19 @@ class ExtractTracker:
         # Idea is to generalize things like grabbing the last directory name in the path,
         # what type of path is it (normal, s3, etc.)
 
+        location_prefix = None
+        location_name = ""
+
         location_path = location_path.lower()  # Don't care about casing.
 
         if "s3" in location_path:
             # If the path is an S3 Bucket, prefix to name.
 
             location_prefix = "s3"
-        else:
-            location_prefix = ""
 
-        location_name = location_prefix + " - "
+        if location_prefix is not None:
+
+            location_name = location_prefix + " - "
 
         location_name += basename(normpath(location_path))
 
@@ -124,7 +127,8 @@ class ExtractTracker:
 
         extract_process = self.data_store.get_or_create(model=ExtractProcess
                                                         , extract_tracking_id=self.extract.extract_id
-                                                        , process_tracking_id=self.process_run.process_tracking_id)
+                                                        , process_tracking_id=self.process_run.process_tracking_run
+                                                                                              .process_tracking_id)
 
         # Only need to set to 'initializing' when it's the first time a process run is trying to work with files.
         if extract_process.extract_process_status_id is None:

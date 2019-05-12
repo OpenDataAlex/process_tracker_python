@@ -13,14 +13,6 @@ from process_tracker.process_tracking import ProcessTracker
 class TestProcessTracking(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
-        cls.process_tracker = ProcessTracker(process_name='Testing Process Tracking Initialization'
-                                             , process_type='Extract'
-                                             , actor_name='UnitTesting'
-                                             , tool_name='Spark'
-                                             , source_name='Unittests')
-
-    @classmethod
     def tearDownClass(cls):
         session.query(Process).delete()
         session.commit()
@@ -30,8 +22,11 @@ class TestProcessTracking(unittest.TestCase):
         Creating an initial process tracking run record for testing.
         :return:
         """
-
-        self.process_tracker.register_new_process_run()
+        self.process_tracker = ProcessTracker(process_name='Testing Process Tracking Initialization'
+                                             , process_type='Extract'
+                                             , actor_name='UnitTesting'
+                                             , tool_name='Spark'
+                                             , source_name='Unittests')
 
         self.process_id = self.process_tracker.process.process_id
         self.provided_end_date = datetime.now()
@@ -55,7 +50,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = data_store_type
         expected_result = 'postgresql'
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_initializing_process_tracking(self):
         """
@@ -65,7 +60,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = self.process_tracker.actor.actor_name
         expected_result = 'UnitTesting'
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_register_new_process_run(self):
         """
@@ -77,7 +72,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id).count()
         expected_result = 1
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_register_new_process_run_exception(self):
         """
@@ -110,7 +105,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = process_runs[0].is_latest_run
         expected_result = False
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_change_run_status_complete(self):
         """
@@ -124,7 +119,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = run_record[0].process_status_id
         expected_result = self.process_tracker.process_status_complete
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_change_run_status_failed(self):
         """
@@ -138,7 +133,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = run_record[0].process_status_id
         expected_result = self.process_tracker.process_status_failed
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_change_run_status_with_end_date(self):
         """
@@ -153,7 +148,7 @@ class TestProcessTracking(unittest.TestCase):
         given_result = run_record[0].process_run_end_date_time
         expected_result = self.provided_end_date
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_raise_run_error_type_exists_no_fail(self):
         """
@@ -172,7 +167,7 @@ class TestProcessTracking(unittest.TestCase):
 
         expected_result = 1
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_raise_run_error_type_not_exists(self):
         """
@@ -219,7 +214,7 @@ class TestProcessTracking(unittest.TestCase):
                            , self.provided_end_date]
 
         with self.subTest():
-            self.assertEqual(given_result, expected_result)
+            self.assertEqual(expected_result, given_result)
         with self.subTest():
             self.assertTrue('Process halting.  An error triggered the process to fail.' in str(context.exception))
 

@@ -3,7 +3,7 @@
 from datetime import datetime
 import unittest
 
-from models.extract import Extract, ExtractProcess, ExtractStatus
+from models.extract import Extract, ExtractProcess, ExtractStatus, Location
 from models.process import Process, ProcessTracking
 
 from process_tracker import session
@@ -21,12 +21,12 @@ class TestExtractTracking(unittest.TestCase):
                                              , tool_name='Spark'
                                              , source_name='Unittests')
 
-        cls.process_tracker.register_new_process_run()
-
-        cls.process_run = cls.process_tracker.process_tracking_run
+        cls.process_run = cls.process_tracker
 
     @classmethod
     def tearDownClass(cls):
+
+        session.query(ProcessTracking).delete()
         session.query(Process).delete()
         session.commit()
 
@@ -46,9 +46,9 @@ class TestExtractTracking(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
-        session.query(ProcessTracking).delete()
         session.query(ExtractProcess).delete()
         session.query(Extract).delete()
+        session.query(Location).delete()
         session.commit()
 
     def test_change_extract_status(self):
@@ -69,4 +69,63 @@ class TestExtractTracking(unittest.TestCase):
         expected_result = [self.extract.extract_status_ready
                            , self.extract.extract_status_ready]
 
-        self.assertEqual(given_result, expected_result)
+        self.assertEqual(expected_result, given_result)
+
+    def test_change_extract_status_initialization(self):
+        """
+        Testing that when the extract is first being worked on by a process, the status is set to 'initializing'
+        :return:
+        """
+        extract_id = self.extract.extract.extract_id
+        self.extract.retrieve_extract_process()
+
+        extract_process_record = session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
+
+        given_result = extract_process_record[0].extract_process_status_id
+        expected_result = self.extract.extract_status_initializing
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_derive_location_name_local_path(self):
+        """
+        Testing that if a location name is not provided, one is created from the local path provided.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_run
+                                      , filename='test_extract_filename2.csv'
+                                      , location_path='/home/test/extract_dir2')
+
+        location = session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
+
+        given_result = location[0].location_name
+        expected_result = 'extract_dir2'
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_derive_location_name_s3(self):
+        """
+        Testing that if a location name is not provided, one is created from the s3 path provided.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_run
+                                 , filename='test_extract_filename2.csv'
+                                 , location_path='https://test-test.s3.amazonaws.com/test/extract_dir')
+
+        location = session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
+
+        given_result = location[0].location_name
+        expected_result = 's3 - extract_dir'
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_location_name_provided(self):
+        """
+        Testing that if a location name is provided (like with default extract), one is not created.
+        :return:
+        """
+        location = session.query(Location).filter(Location.location_id == self.extract.extract.extract_location_id)
+
+        given_result = location[0].location_name
+        expected_result = 'Test Location'
+
+        self.assertEqual(expected_result, given_result)

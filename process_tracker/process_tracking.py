@@ -41,7 +41,6 @@ class ProcessTracker:
                                                      , process_tool_id=self.tool.tool_id)
 
         self.process_name = process_name
-        self.process_tracking_run = ProcessTracking()
 
         # Getting all status types in the event there are custom status types added later.
         self.process_status_types = self.get_process_status_types()
@@ -50,6 +49,8 @@ class ProcessTracker:
         self.process_status_running = self.process_status_types['running']
         self.process_status_complete = self.process_status_types['completed']
         self.process_status_failed = self.process_status_types['failed']
+
+        self.process_tracking_run = self.register_new_process_run()
 
     def change_run_status(self, new_status, end_date=None):
         """
@@ -241,12 +242,12 @@ class ProcessTracker:
                                       , process_run_id=new_run_id
                                       , process_run_start_date_time=datetime.now()
                                       , process_run_actor_id=self.actor.actor_id
-                                      , is_latest_run = True)
+                                      , is_latest_run=True)
 
             session.add(new_run)
             session.commit()
 
-            self.process_tracking_run = new_run
+            return new_run
 
             self.logger.info('Process tracking record added for %s' % self.process_name)
 
