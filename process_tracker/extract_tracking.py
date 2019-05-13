@@ -58,6 +58,9 @@ class ExtractTracker:
 
         self.extract_process = self.retrieve_extract_process()
 
+        self.extract.extract_status_id = self.extract_status_initializing
+        session.commit()
+
     def change_extract_status(self, new_status):
         """
         Change an extract record status.

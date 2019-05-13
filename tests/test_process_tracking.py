@@ -3,10 +3,11 @@
 from datetime import datetime
 import unittest
 
+from models.extract import Extract, ExtractProcess
 from models.process import ErrorType, ErrorTracking, Process, ProcessTracking
 
-from process_tracker import data_store_type
-from process_tracker import session
+from process_tracker import data_store_type, session
+from process_tracker.extract_tracking import ExtractTracker
 from process_tracker.process_tracking import ProcessTracker
 
 
@@ -36,7 +37,9 @@ class TestProcessTracking(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
+        session.query(ExtractProcess).delete()
         session.query(ProcessTracking).delete()
+        session.query(Extract).delete()
         session.query(ErrorTracking).delete()
         session.query(ErrorType).delete()
         session.commit()
@@ -49,6 +52,90 @@ class TestProcessTracking(unittest.TestCase):
 
         given_result = data_store_type
         expected_result = 'postgresql'
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_filename_full(self):
+        """
+        Testing that for the given full filename, find the extract, provided it's in 'ready' state.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename2.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename2.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename2.csv')
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_filename_partial(self):
+        """
+        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename3.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename3.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_location(self):
+        """
+        Testing that for the given location name, find the extracts, provided they are in 'ready' state.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename4.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename4.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_process(self):
+        """
+        Testing that for the given process name, find the extracts, provided they are in 'ready' state.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename5.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename5.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
 
         self.assertEqual(expected_result, given_result)
 

@@ -34,6 +34,7 @@ class Extract(Base):
 #    extract_archive_date_time = Column(DateTime, nullable=False, default=default_date)
 
     extract_process = relationship("ExtractProcess", back_populates='process_extracts')
+    locations = relationship("Location", foreign_keys=[extract_location_id])
 
 
 class ExtractProcess(Base):

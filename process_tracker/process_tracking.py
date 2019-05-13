@@ -9,7 +9,7 @@ from process_tracker import session
 from process_tracker.data_store import DataStore
 
 from models.actor import Actor
-from models.extract import Extract, ExtractStatus, Location
+from models.extract import Extract, ExtractProcess, ExtractStatus, Location
 from models.process import ErrorTracking, ErrorType, Process, ProcessTracking, ProcessStatus, ProcessType
 from models.source import Source
 from models.tool import Tool
@@ -97,14 +97,14 @@ class ProcessTracker:
         """
         extract_files = []
 
-        process_files = session.query(Extract, Location)\
+        process_files = session.query(Extract.extract_filename, Location.location_path)\
                                .join(Location)\
                                .join(ExtractStatus)\
                                .filter(Extract.extract_filename.like("%" + filename + "%"))\
                                .filter(ExtractStatus.extract_status_name == 'ready')
 
         for record in process_files:
-            extract_files.append(join(record.location_path, record.filename))
+            extract_files.append(join(record.location_path, record.extract_filename))
 
         return extract_files
 
@@ -117,35 +117,36 @@ class ProcessTracker:
         """
         extract_files = []
 
-        process_files = session.query(Extract, Location)\
+        process_files = session.query(Extract.extract_filename, Location.location_path)\
                                .join(Location)\
                                .join(ExtractStatus)\
                                .filter(ExtractStatus.extract_status_name == 'ready')\
                                .filter(Location.location_name == location)
 
         for record in process_files:
-            extract_files.append(join(record.location_path, record.filename))
+            extract_files.append(join(record.location_path, record.extract_filename))
 
         return extract_files
 
     @staticmethod
-    def find_ready_extracts_by_process(self, extract_process_name):
+    def find_ready_extracts_by_process(extract_process_name):
         """
         For the given named process, find the extracts that are ready for processing.
         :return: List of OS specific filepaths with filenames.
         """
         extract_files = []
 
-        process_files = session.query(Extract, Location) \
-            .join(Location) \
+        process_files = session.query(Extract.extract_filename, Location.location_path) \
+            .join(ExtractStatus, Extract.extract_status_id == ExtractStatus.extract_status_id) \
+            .join(Location, Extract.extract_location_id == Location.location_id) \
+            .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
             .join(ProcessTracking) \
             .join(Process) \
-            .join(ExtractStatus)\
             .filter(Process.process_name == extract_process_name
                     , ExtractStatus.extract_status_name == 'ready')
 
         for record in process_files:
-            extract_files.append(join(record.location_path, record.filename))
+            extract_files.append(join(record.location_path, record.extract_filename))
 
         return extract_files
 
