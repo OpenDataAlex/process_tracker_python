@@ -2,4 +2,4 @@ init:
 	pipenv install --dev
 
 test:
-	python -m unittest
+	python -m unittest discover
