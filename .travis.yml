@@ -14,4 +14,4 @@ before_script:
   - psql -f dbscripts/postgresql_account_create.sql process_tracker -U postgres
   - psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
 env:
-  - process_tracking_data_store_host= process_tracking_data_store_port=5432 process_tracking_data_store_name=process_tracking process_tracking_data_store_type=postgresql process_tracking_data_store_password=Testing1! proccess_tracking_data_store_username=pt_admin
+  - process_tracking_data_store_host=localhost process_tracking_data_store_port=5432 process_tracking_data_store_name=process_tracking process_tracking_data_store_type=postgresql process_tracking_data_store_password=Testing1! proccess_tracking_data_store_username=pt_admin
