@@ -1,6 +1,5 @@
 init:
-	pip install pipenv
 	pipenv install --dev
 
 test:
-	python -m unittest tests
+	python -m unittest process_tracker_python/tests
