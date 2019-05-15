@@ -7,8 +7,8 @@ from models.extract import Extract, ExtractProcess, ExtractStatus, Location
 from models.process import Process, ProcessTracking
 
 from process_tracker import session
-from process_tracker.extract_tracking import ExtractTracker
-from process_tracker.process_tracking import ProcessTracker
+from process_tracker.extract_tracker import ExtractTracker
+from process_tracker.process_tracker import ProcessTracker
 
 
 class TestExtractTracking(unittest.TestCase):

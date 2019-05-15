@@ -10,7 +10,7 @@ from models.extract import Extract, ExtractProcess, ExtractStatus, Location
 
 
 class ExtractTracker:
-
+# TODO:  Add filename/path variable
     def __init__(self, process_run, filename, location_path, location_name=None):
         """
         ExtractTracker is the primary engine for tracking data extracts

@@ -7,8 +7,8 @@ from models.extract import Extract, ExtractProcess
 from models.process import ErrorType, ErrorTracking, Process, ProcessTracking
 
 from process_tracker import data_store_type, session
-from process_tracker.extract_tracking import ExtractTracker
-from process_tracker.process_tracking import ProcessTracker
+from process_tracker.extract_tracker import ExtractTracker
+from process_tracker.process_tracker import ProcessTracker
 
 
 class TestProcessTracking(unittest.TestCase):

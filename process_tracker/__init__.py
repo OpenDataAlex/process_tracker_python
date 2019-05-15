@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 Based on environment variables, create the data store connection engine.
 :return:
 """
+
 data_store_type = os.environ.get('process_tracking_data_store_type')
 data_store_username = os.environ.get('process_tracking_data_store_username')
 data_store_password = os.environ.get('process_tracking_data_store_password')
@@ -63,13 +64,14 @@ if data_store_type in supported_data_stores:
                                                                                 , data_store_host
                                                                                 , data_store_port))
 
+        Session = sessionmaker(bind=engine)
+
+        session = Session(expire_on_commit=False)
+        session.execute("SET search_path TO %s" % data_store_name)
+
     elif data_store_type in nonrelational_stores:
         Session = ''
 
-    Session = sessionmaker(bind=engine)
-
-    session = Session(expire_on_commit=False)
-    session.execute("SET search_path TO %s" % data_store_name)
 
 else:
     raise Exception('Invalid data store type provided.  Please use: ' + ", ".join(supported_data_stores))
