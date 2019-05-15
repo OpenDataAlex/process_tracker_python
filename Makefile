@@ -2,4 +2,4 @@ init:
 	pipenv install --dev
 
 test:
-	python -m unittest discover
+	coverage run setup.py test
