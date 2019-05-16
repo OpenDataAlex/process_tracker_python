@@ -3,7 +3,7 @@
 
 from sqlalchemy import Column, Integer, Sequence, String
 
-from models.model_base import Base
+from process_tracker.models.model_base import Base
 
 
 class Tool(Base):

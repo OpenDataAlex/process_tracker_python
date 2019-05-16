@@ -1,12 +1,11 @@
 # Tests for validating extract_tracking
 
-from datetime import datetime
 import unittest
 
-from models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from models.process import Process, ProcessTracking
+from process_tracker.models.extract import Extract, ExtractProcess, Location
+from process_tracker.models.process import Process, ProcessTracking
 
-from process_tracker import session
+from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
 
@@ -23,12 +22,15 @@ class TestExtractTracking(unittest.TestCase):
 
         cls.process_run = cls.process_tracker
 
+        data_store = DataStore()
+        cls.session=data_store.session
+
     @classmethod
     def tearDownClass(cls):
 
-        session.query(ProcessTracking).delete()
-        session.query(Process).delete()
-        session.commit()
+        cls.session.query(ProcessTracking).delete()
+        cls.session.query(Process).delete()
+        cls.session.commit()
 
     def setUp(self):
         """
@@ -46,10 +48,10 @@ class TestExtractTracking(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
-        session.query(ExtractProcess).delete()
-        session.query(Extract).delete()
-        session.query(Location).delete()
-        session.commit()
+        self.session.query(ExtractProcess).delete()
+        self.session.query(Extract).delete()
+        self.session.query(Location).delete()
+        self.session.commit()
 
     def test_change_extract_status(self):
         """
@@ -60,8 +62,8 @@ class TestExtractTracking(unittest.TestCase):
         extract_id = self.extract.extract.extract_id
         self.extract.change_extract_status('ready')
 
-        extract_record = session.query(Extract).filter(Extract.extract_id == extract_id)
-        extract_process_record = session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
+        extract_record = self.session.query(Extract).filter(Extract.extract_id == extract_id)
+        extract_process_record = self.session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
 
         given_result = [extract_record[0].extract_status_id
                         , extract_process_record[0].extract_process_status_id]
@@ -79,7 +81,7 @@ class TestExtractTracking(unittest.TestCase):
         extract_id = self.extract.extract.extract_id
         self.extract.retrieve_extract_process()
 
-        extract_process_record = session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
+        extract_process_record = self.session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
 
         given_result = extract_process_record[0].extract_process_status_id
         expected_result = self.extract.extract_status_initializing
@@ -95,7 +97,7 @@ class TestExtractTracking(unittest.TestCase):
                                       , filename='test_extract_filename2.csv'
                                       , location_path='/home/test/extract_dir2')
 
-        location = session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
+        location = self.session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
 
         given_result = location[0].location_name
         expected_result = 'extract_dir2'
@@ -111,7 +113,7 @@ class TestExtractTracking(unittest.TestCase):
                                  , filename='test_extract_filename2.csv'
                                  , location_path='https://test-test.s3.amazonaws.com/test/extract_dir')
 
-        location = session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
+        location = self.session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
 
         given_result = location[0].location_name
         expected_result = 's3 - extract_dir'
@@ -123,7 +125,7 @@ class TestExtractTracking(unittest.TestCase):
         Testing that if a location name is provided (like with default extract), one is not created.
         :return:
         """
-        location = session.query(Location).filter(Location.location_id == self.extract.extract.extract_location_id)
+        location = self.session.query(Location).filter(Location.location_id == self.extract.extract.extract_location_id)
 
         given_result = location[0].location_name
         expected_result = 'Test Location'

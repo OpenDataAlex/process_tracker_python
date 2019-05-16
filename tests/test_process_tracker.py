@@ -3,10 +3,12 @@
 from datetime import datetime
 import unittest
 
-from models.extract import Extract, ExtractProcess
-from models.process import ErrorType, ErrorTracking, Process, ProcessTracking
+from sqlalchemy.orm import Session
 
-from process_tracker import data_store_type, session
+from process_tracker.models.extract import Extract, ExtractProcess
+from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessTracking
+
+from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
 
@@ -14,9 +16,15 @@ from process_tracker.process_tracker import ProcessTracker
 class TestProcessTracking(unittest.TestCase):
 
     @classmethod
+    def setUpClass(cls):
+        data_store = DataStore()
+        cls.session = data_store.session
+        cls.data_store_type = data_store.data_store_type
+
+    @classmethod
     def tearDownClass(cls):
-        session.query(Process).delete()
-        session.commit()
+        cls.session.query(Process).delete()
+        cls.session.commit()
 
     def setUp(self):
         """
@@ -37,12 +45,12 @@ class TestProcessTracking(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
-        session.query(ExtractProcess).delete()
-        session.query(ProcessTracking).delete()
-        session.query(Extract).delete()
-        session.query(ErrorTracking).delete()
-        session.query(ErrorType).delete()
-        session.commit()
+        self.session.query(ExtractProcess).delete()
+        self.session.query(ProcessTracking).delete()
+        self.session.query(Extract).delete()
+        self.session.query(ErrorTracking).delete()
+        self.session.query(ErrorType).delete()
+        self.session.commit()
 
     def test_verify_session_variables_postgresql(self):
         """
@@ -50,7 +58,7 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
 
-        given_result = data_store_type
+        given_result = self.data_store_type
         expected_result = 'postgresql'
 
         self.assertEqual(expected_result, given_result)
@@ -67,7 +75,7 @@ class TestProcessTracking(unittest.TestCase):
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
-
+        session = Session.object_session(extract.extract)
         session.commit()
 
         expected_result = ['/home/test/extract_dir/test_extract_filename2.csv']
@@ -88,7 +96,7 @@ class TestProcessTracking(unittest.TestCase):
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
-
+        session = Session.object_session(extract.extract)
         session.commit()
 
         expected_result = ['/home/test/extract_dir/test_extract_filename3.csv']
@@ -109,7 +117,7 @@ class TestProcessTracking(unittest.TestCase):
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
-
+        session = Session.object_session(extract.extract)
         session.commit()
 
         expected_result = ['/home/test/extract_dir/test_extract_filename4.csv']
@@ -130,7 +138,7 @@ class TestProcessTracking(unittest.TestCase):
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
-
+        session = Session.object_session(extract.extract)
         session.commit()
 
         expected_result = ['/home/test/extract_dir/test_extract_filename5.csv']
@@ -156,7 +164,7 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
 
-        given_result = session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id).count()
+        given_result = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id).count()
         expected_result = 1
 
         self.assertEqual(expected_result, given_result)
@@ -185,7 +193,7 @@ class TestProcessTracking(unittest.TestCase):
         self.process_tracker.change_run_status(new_status='completed')
         self.process_tracker.register_new_process_run()
 
-        process_runs = session.query(ProcessTracking)\
+        process_runs = self.session.query(ProcessTracking)\
                               .filter(ProcessTracking.process_id == self.process_id)\
                               .order_by(ProcessTracking.process_tracking_id)
 
@@ -201,7 +209,7 @@ class TestProcessTracking(unittest.TestCase):
         """
         self.process_tracker.change_run_status(new_status='completed')
 
-        run_record = session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
+        run_record = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
 
         given_result = run_record[0].process_status_id
         expected_result = self.process_tracker.process_status_complete
@@ -215,7 +223,7 @@ class TestProcessTracking(unittest.TestCase):
         """
         self.process_tracker.change_run_status(new_status='failed')
 
-        run_record = session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
+        run_record = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
 
         given_result = run_record[0].process_status_id
         expected_result = self.process_tracker.process_status_failed
@@ -230,7 +238,7 @@ class TestProcessTracking(unittest.TestCase):
 
         self.process_tracker.change_run_status(new_status='completed', end_date=self.provided_end_date)
 
-        run_record = session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
+        run_record = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
 
         given_result = run_record[0].process_run_end_date_time
         expected_result = self.provided_end_date
@@ -243,12 +251,12 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         error_type = ErrorType(error_type_name='Does Exist')
-        session.add(error_type)
-        session.commit()
+        self.session.add(error_type)
+        self.session.commit()
 
         self.process_tracker.raise_run_error(error_type_name='Does Exist')
 
-        given_result = session.query(ErrorTracking)\
+        given_result = self.session.query(ErrorTracking)\
                               .filter(ErrorTracking.error_type_id == error_type.error_type_id)\
                               .count()
 
@@ -275,8 +283,8 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         error_type = ErrorType(error_type_name='Fail Check')
-        session.add(error_type)
-        session.commit()
+        self.session.add(error_type)
+        self.session.commit()
 
         with self.assertRaises(Exception) as context:
 
@@ -284,13 +292,13 @@ class TestProcessTracking(unittest.TestCase):
                                                  , fail_run=True
                                                  , end_date=self.provided_end_date)
 
-        run_error = session.query(ErrorTracking)\
+        run_error = self.session.query(ErrorTracking)\
                            .filter(ErrorTracking.error_type_id == error_type.error_type_id)
 
-        process_tracking_run = session.query(ProcessTracking)\
+        process_tracking_run = self.session.query(ProcessTracking)\
                                       .filter(ProcessTracking.process_tracking_id == run_error[0].process_tracking_id)
 
-        process = session.query(Process).filter(Process.process_id == process_tracking_run[0].process_id)
+        process = self.session.query(Process).filter(Process.process_id == process_tracking_run[0].process_id)
 
         given_result = [process_tracking_run[0].process_status_id
                         , process_tracking_run[0].process_run_end_date_time

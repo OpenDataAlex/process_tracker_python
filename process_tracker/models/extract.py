@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
 
-from models.model_base import Base
+from process_tracker.models.model_base import Base
 
 
 class ExtractStatus(Base):

@@ -5,8 +5,7 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
 
-from models.model_base import default_date, Base
-from models.extract import Extract
+from process_tracker.models.model_base import default_date, Base
 
 
 class ErrorType(Base):

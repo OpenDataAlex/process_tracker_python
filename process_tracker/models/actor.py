@@ -2,8 +2,7 @@
 # Models for Actor entities
 
 from sqlalchemy import Column, Integer, Sequence, String
-from sqlalchemy_utils.types import uuid
-from models.model_base import Base
+from process_tracker.models.model_base import Base
 
 
 class Actor(Base):

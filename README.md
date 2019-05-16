@@ -3,6 +3,7 @@ ProcessTracker - Python
 Data integration process management made easy!
 
 [![Coverage Status](https://coveralls.io/repos/github/OpenDataAlex/process_tracker_python/badge.svg?branch=master)](https://coveralls.io/github/OpenDataAlex/process_tracker_python?branch=master)
+[![Build Status](https://travis-ci.org/OpenDataAlex/process_tracker_python.svg?branch=master)](https://travis-ci.org/OpenDataAlex/process_tracker_python)
 
 This is the Python implementation of the ProcessTracker framework.  ProcessTracker builds a standard framework that is
 tool agnostic.  If you are working with data integration/cleansing processes within Python (i.e. using PySpark, Pandas, etc.)

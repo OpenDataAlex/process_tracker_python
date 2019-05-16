@@ -3,10 +3,9 @@
 from datetime import datetime
 from os.path import basename, normpath
 
-from process_tracker import session
 from process_tracker.data_store import DataStore
 
-from models.extract import Extract, ExtractProcess, ExtractStatus, Location
+from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
 
 
 class ExtractTracker:
@@ -26,6 +25,7 @@ class ExtractTracker:
         :type location_name: string
         """
         self.data_store = DataStore()
+        self.session = self.data_store.session
         self.process_run = process_run
 
         if location_name is None:
@@ -59,7 +59,7 @@ class ExtractTracker:
         self.extract_process = self.retrieve_extract_process()
 
         self.extract.extract_status_id = self.extract_status_initializing
-        session.commit()
+        self.session.commit()
 
     def change_extract_status(self, new_status):
         """
@@ -75,7 +75,7 @@ class ExtractTracker:
             self.extract_process.extract_process_status_id = new_status
             self.extract_process.extract_process_event_date_time = status_date
 
-            session.commit()
+            self.session.commit()
 
         else:
             raise Exception('%s is not a valid extract status type.  '
@@ -109,15 +109,14 @@ class ExtractTracker:
 
         return location_name
 
-    @staticmethod
-    def get_extract_status_types():
+    def get_extract_status_types(self):
         """
         Get list of process status types and return dictionary.
         :return:
         """
         status_types = {}
 
-        for record in session.query(ExtractStatus):
+        for record in self.session.query(ExtractStatus):
             status_types[record.extract_status_name] = record.extract_status_id
 
         return status_types
@@ -137,6 +136,6 @@ class ExtractTracker:
         if extract_process.extract_process_status_id is None:
 
             extract_process.extract_process_status_id = self.extract_status_initializing
-            session.commit()
+            self.session.commit()
 
         return extract_process
