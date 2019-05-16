@@ -86,11 +86,17 @@ class TestProcessTracking(unittest.TestCase):
 
     def test_find_ready_extracts_by_filename_partial(self):
         """
-        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.
+        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.  Should return
+        them in ascending order by registration datetime.
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename3.csv'
+                       , filename='test_extract_filename3-1.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        extract2 = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename3-2.csv'
                        , location_name='Test Location'
                        , location_path='/home/test/extract_dir')
 
@@ -99,19 +105,30 @@ class TestProcessTracking(unittest.TestCase):
         session = Session.object_session(extract.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename3.csv']
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename3-1.csv'
+                           , '/home/test/extract_dir/test_extract_filename3-2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
 
         self.assertEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_location(self):
+    def test_find_ready_extracts_by_filename_partial_not_descending(self):
         """
-        Testing that for the given location name, find the extracts, provided they are in 'ready' state.
+        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.  Verifying
+        that records are NOT returned in descending order.
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename4.csv'
+                       , filename='test_extract_filename3-1.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        extract2 = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename3-2.csv'
                        , location_name='Test Location'
                        , location_path='/home/test/extract_dir')
 
@@ -120,11 +137,80 @@ class TestProcessTracking(unittest.TestCase):
         session = Session.object_session(extract.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename4.csv']
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename3-2.csv'
+                           , '/home/test/extract_dir/test_extract_filename3-1.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+
+        self.assertNotEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_location(self):
+        """
+        Testing that for the given location name, find the extracts, provided they are in 'ready' state.  Should return
+        them in ascending order by registration datettime.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename4-1.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        extract2 = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename4-2.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+        session = Session.object_session(extract.extract)
+        session.commit()
+
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename4-1.csv'
+                           , '/home/test/extract_dir/test_extract_filename4-2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
 
         self.assertEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_location_not_descending(self):
+        """
+        Testing that for the given location name, find the extracts, provided they are in 'ready' state.  Verifying that
+        records NOT returned in descending order.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename4-1.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        extract2 = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename4-2.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+        session = Session.object_session(extract.extract)
+        session.commit()
+
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename4-2.csv'
+                           , '/home/test/extract_dir/test_extract_filename4-1.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
+
+        self.assertNotEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_process(self):
         """
@@ -132,7 +218,12 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename5.csv'
+                       , filename='test_extract_filename5-1.csv'
+                       , location_name='Test Location'
+                       , location_path='/home/test/extract_dir')
+
+        extract2 = ExtractTracker(process_run=self.process_tracker
+                       , filename='test_extract_filename5-2.csv'
                        , location_name='Test Location'
                        , location_path='/home/test/extract_dir')
 
@@ -141,11 +232,48 @@ class TestProcessTracking(unittest.TestCase):
         session = Session.object_session(extract.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename5.csv']
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename5-1.csv'
+                           , '/home/test/extract_dir/test_extract_filename5-2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
 
         self.assertEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_process_not_descending(self):
+        """
+        Testing that for the given process name, find the extracts, provided they are in 'ready' state.  Verifying that
+        records are NOT returned in Descending order.
+        :return:
+        """
+        extract = ExtractTracker(process_run=self.process_tracker
+                                 , filename='test_extract_filename5-1.csv'
+                                 , location_name='Test Location'
+                                 , location_path='/home/test/extract_dir')
+
+        extract2 = ExtractTracker(process_run=self.process_tracker
+                                  , filename='test_extract_filename5-2.csv'
+                                  , location_name='Test Location'
+                                  , location_path='/home/test/extract_dir')
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+        session = Session.object_session(extract.extract)
+        session.commit()
+
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = ['/home/test/extract_dir/test_extract_filename5-2.csv'
+            , '/home/test/extract_dir/test_extract_filename5-1.csv']
+
+        given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
+
+        self.assertNotEqual(expected_result, given_result)
 
     def test_initializing_process_tracking(self):
         """

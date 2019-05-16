@@ -97,10 +97,11 @@ class ProcessTracker:
         extract_files = []
 
         process_files = self.session.query(Extract.extract_filename, Location.location_path)\
-                               .join(Location)\
-                               .join(ExtractStatus)\
-                               .filter(Extract.extract_filename.like("%" + filename + "%"))\
-                               .filter(ExtractStatus.extract_status_name == 'ready')
+                                           .join(Location)\
+                                           .join(ExtractStatus)\
+                                           .filter(Extract.extract_filename.like("%" + filename + "%"))\
+                                           .filter(ExtractStatus.extract_status_name == 'ready') \
+                                           .order_by(Extract.extract_registration_date_time)
 
         for record in process_files:
             extract_files.append(join(record.location_path, record.extract_filename))
@@ -119,7 +120,8 @@ class ProcessTracker:
                                .join(Location)\
                                .join(ExtractStatus)\
                                .filter(ExtractStatus.extract_status_name == 'ready')\
-                               .filter(Location.location_name == location)
+                               .filter(Location.location_name == location) \
+                               .order_by(Extract.extract_registration_date_time)
 
         for record in process_files:
             extract_files.append(join(record.location_path, record.extract_filename))
@@ -140,7 +142,8 @@ class ProcessTracker:
             .join(ProcessTracking) \
             .join(Process) \
             .filter(Process.process_name == extract_process_name
-                    , ExtractStatus.extract_status_name == 'ready')
+                    , ExtractStatus.extract_status_name == 'ready') \
+            .order_by(Extract.extract_registration_date_time)
 
         for record in process_files:
             extract_files.append(join(record.location_path, record.extract_filename))
