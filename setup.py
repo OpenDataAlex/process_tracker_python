@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/opendataalex/process_tracker_python",
     packages=setuptools.find_packages(),
-    test_suite='process_tracker.tests.process_tracker_test_suite',
+    test_suite='tests.process_tracker_test_suite',
     install_requires=[
         'sqlalchemy >= 1.3.3',
         'sqlalchemy-utils >= 0.33.11',
