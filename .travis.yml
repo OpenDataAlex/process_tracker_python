@@ -18,10 +18,9 @@ env:
   process_tracking_data_store_name=process_tracking process_tracking_data_store_type=postgresql
   process_tracking_data_store_password=Testing1! process_tracking_data_store_username=pt_admin
 deploy:
-  matrix:
   - provider: pypi
-  - user: opendataalex
-  - password:
+    user: opendataalex
+    password:
       secure: jYe8ygGYuJox5f1vQvraIDNlR2Yk/+/afIXdsxaxRi/QN135rIHxRih24iYv8ZQewfW+w4CveEPz2pr0ew5NG8hm2MD5hQZI/A2QE4BC53Tr3xMAWSdPQgcI1rX4Ieu6BHTS3jet212yLuBk41GdASKztz+s/CVvVqT0A29U1b85OVzoVHz6OTgaM1m0pKeJE6Ho66r5O6J7ClZfEY4RJ8jROmrT7ufW3hEs/VQXwfAUWcjy6l5H5VYTLa/g94MgQ+0WmgcdUbB8s3c2q7n4RiaVEowZOLtBmRElDIPiLJC8JGAIFKcf5W8pzXK/ZhZhY3ppgmBvRVeyPdiAwjysionzl4vIlNxC28acI3HzvJbAdvwPsuMD+pnTo/LKRqqvGey2NSnMPmzGXxzqVUqQ5Wa1Yzdcqg8mbWHFRw9icMWKM84CnDBvqkmJcfnj5R4X6Rc77mr9jc5LMMBBblNtY7dQc2AooframujGA2mP1xABQ9vOSg89MdnlhHrgEK6m+Pz0S2hhlsGRw9yMF9L4Q1ie7xKeE49L3HKZSjKEgSMv9y9RbqnmW32F0UoKgWkCJE8DV9wbZe5Htn+lpwmXI0vu+cxnqsiZvG8wjm+klJGn5F84OFTN3zQOC/kIBXQXvutZYtgF0vofdCmKQzK9istl16Eur1r4NCbov3oM97o=
     on:
       tags: true
