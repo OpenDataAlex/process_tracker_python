@@ -17,11 +17,14 @@ env:
 - process_tracking_data_store_host=localhost process_tracking_data_store_port=5432
   process_tracking_data_store_name=process_tracking process_tracking_data_store_type=postgresql
   process_tracking_data_store_password=Testing1! process_tracking_data_store_username=pt_admin
+before_deploy:
+  - export RELEASE_PKG_FILE=$(ls *.tar.gz)
+  - echo "deploying $RELEASE_PKG_FILE to Github releases"
 deploy:
   - provider: releases
     api_key:
       secure: T02NqddtE6qN/2ugvx/anZFzqmfnpWy2uCWcW4jg+pgiNI8GhRr0zh5Fwfe3aGnzAZLEgEMSgNWsM5CpniSbquioijqOEL/9xo8gZn6wV9VEjToR1/FEvGZm08T/Grc4rEYzjNgZu8eLUtC6Mg5l1nm6tGNEBE1oAKvflL77pnSGPL9enhmQupzbSQxNJ7rOuR7OgxuaFygP0Tne56Ca1LU6rAHmzqKJh6hI6eZARSikjLvgEHThcvZPc3gPfYMAc7i+dTx17Q3zQQGaHvySuLp+5aR3a+3xaFQPCmecLeiuX2yCiVVs9BOcrTeJOHivRYv6Cj9i60NUblvBlwOfJdo6uiArYTbVP/Aj8d1+8ruM5RdSeEyzlZlKarRN24CvH99OxU+LZGF5JgKV9UrTlytWl6ENOJcZq91LjejzkxGtKFp67abh8WPqqSGdcwA5VeI+QcHWDvc/3T/CdvljH4ivZRKeTCArAe4ce94WRvnJ6W0o3PoxrYxprhDFUyGUmrRJaLy/22qkkaifBQ9ljFgWNqeJtSGej87QhUVlfVnSS/6intr/sgd/vT0sDOU8RMTDxji3vkKKO1hfzBPKousqq48ddWGUxzAGwRoGULVbpwf8IIYApxlqotp40GpNOPJR6WrMUhHu/7jWGmvy66HPi4rQXKlaIWJLaH1f1yo=
-    file: ''
+    file: "${RELEASE_PKG_FILE}"
     on:
       repo: OpenDataAlex/process_tracker_python
   - provider: pypi
