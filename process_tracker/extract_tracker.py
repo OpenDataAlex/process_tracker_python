@@ -1,7 +1,7 @@
 # Extract Tracking
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
-from os.path import basename, normpath
+from os.path import basename, join, normpath
 
 from process_tracker.data_store import DataStore
 
@@ -9,7 +9,7 @@ from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatu
 
 
 class ExtractTracker:
-# TODO:  Add filename/path variable
+
     def __init__(self, process_run, filename, location_path, location_name=None):
         """
         ExtractTracker is the primary engine for tracking data extracts
@@ -33,6 +33,7 @@ class ExtractTracker:
 
         self.source = self.process_run.source
         self.filename = filename
+        self.full_filename = join(location_path, filename)
 
         self.location = self.data_store.get_or_create(model=Location
                                                       , location_name=location_name

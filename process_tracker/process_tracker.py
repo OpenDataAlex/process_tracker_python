@@ -253,3 +253,42 @@ class ProcessTracker:
         else:
             raise Exception('The process %s is currently running.' % self.process_name)
             exit()
+
+    def set_process_run_low_high_dates(self, low_date=None, high_date=None):
+        """
+        For the given process run, set the process_run_low_date_time and/or process_run_high_date_time.
+        :param low_date: For the set of data being processed, the lowest datetime tracked.  If set multiple times within
+         a run, will compare the new to old and adjust accordingly.
+        :type low_date: datetime
+        :param high_date: For the set of data being processed, the highest datetime tracked.
+        :type high_date: datetime
+        :return:
+        """
+        previous_low_date_time = self.process_tracking_run.process_run_low_date_time
+        previous_high_date_time = self.process_tracking_run.process_run_low_date_time
+
+        if low_date is not None and (previous_low_date_time is None or low_date < previous_low_date_time):
+            self.process_tracking_run.process_run_low_date_time = low_date
+
+        if high_date is not None and (previous_high_date_time is None or high_date > previous_high_date_time):
+            self.process_tracking_run.process_run_high_date_time = high_date
+
+        self.session.commit()
+
+    def set_process_run_record_count(self, num_records):
+        """
+        For the given process run, set the process_run_record_count for the number of records processed.  Will also
+        update the process' total_record_count - the total number of records ever processed by that process
+        :param num_records:
+        :return:
+        """
+        process_run_records = self.process.total_record_count
+
+        if process_run_records == 0:
+
+            self.process.total_record_count += num_records
+        else:
+            self.process.total_record_count = self.process.total_record_count + (num_records - process_run_records)
+
+        self.process_tracking_run.process_run_record_count = num_records
+        self.session.commit()

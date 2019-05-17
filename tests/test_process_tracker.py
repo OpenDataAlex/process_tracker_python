@@ -1,6 +1,6 @@
 # Tests for validating process_tracking works as expected.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import unittest
 
 from sqlalchemy.orm import Session
@@ -441,3 +441,101 @@ class TestProcessTracking(unittest.TestCase):
         with self.subTest():
             self.assertTrue('Process halting.  An error triggered the process to fail.' in str(context.exception))
 
+    def test_set_run_low_high_dates(self):
+        """
+        Testing that if low and high date are not set, the process_tracking_record low/high dates are set.
+        :return:
+        """
+        low_date = datetime.now() - timedelta(hours=1)
+        high_date = datetime.now()
+
+        self.process_tracker.set_process_run_low_high_dates(low_date=low_date, high_date=high_date)
+
+        given_dates = self.session.query(ProcessTracking.process_run_low_date_time, ProcessTracking.process_run_high_date_time)\
+                                  .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        expected_result = [low_date, high_date]
+        given_result = [given_dates[0].process_run_low_date_time, given_dates[0].process_run_high_date_time]
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_run_low_high_dates_lower_low_date(self):
+        """
+        Testing that if a new low date comes in for a given process_run, set the process_run_low_date_time to the new
+        low date.
+        :return:
+        """
+        low_date = datetime.now() - timedelta(hours=1)
+        lower_low_date = low_date - timedelta(hours=1)
+
+        self.process_tracker.set_process_run_low_high_dates(low_date=low_date)
+
+        self.process_tracker.set_process_run_low_high_dates(low_date=lower_low_date)
+
+        given_dates = self.session.query(ProcessTracking.process_run_low_date_time) \
+            .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        expected_result = lower_low_date
+        given_result = given_dates[0].process_run_low_date_time
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_run_low_high_dates_higher_high_date(self):
+        """
+        Testing that if a new low date comes in for a given process_run, set the process_run_low_date_time to the new
+        low date.
+        :return:
+        """
+        high_date = datetime.now()
+        higher_high_date = high_date + timedelta(hours=1)
+
+        self.process_tracker.set_process_run_low_high_dates(high_date=high_date)
+
+        self.process_tracker.set_process_run_low_high_dates(high_date=higher_high_date)
+
+        given_dates = self.session.query(ProcessTracking.process_run_high_date_time) \
+            .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        expected_result = higher_high_date
+        given_result = given_dates[0].process_run_high_date_time
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_process_run_record_count(self):
+        """
+        Testing that if record counts are provided for a given process_run, set the process_run_record_count and process'
+        total_record_counts correctly.
+        :return:
+        """
+        initial_record_count = 1000
+
+        self.process_tracker.set_process_run_record_count(num_records=initial_record_count)
+
+        given_counts = self.session.query(ProcessTracking.process_run_record_count, Process.total_record_count) \
+                                   .join(Process)\
+                                   .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        expected_result = [initial_record_count, initial_record_count]
+        given_result = [given_counts[0].process_run_record_count, given_counts[0].total_record_count]
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_process_run_record_count_twice(self):
+        """
+        Testing that if record counts get set multiple times, then the process total record count will be set correctly.
+        :return:
+        """
+        initial_record_count = 1000
+        modified_record_count = 1500
+
+        self.process_tracker.set_process_run_record_count(num_records=initial_record_count)
+        self.process_tracker.set_process_run_record_count(num_records=modified_record_count)
+
+        given_counts = self.session.query(ProcessTracking.process_run_record_count, Process.total_record_count) \
+                                  .join(Process)\
+                                  .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        expected_result = [modified_record_count, modified_record_count]
+        given_result = [given_counts[0].process_run_record_count, given_counts[0].total_record_count]
+
+        self.assertEqual(expected_result, given_result)
