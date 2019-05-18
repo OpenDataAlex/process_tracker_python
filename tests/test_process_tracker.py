@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import unittest
 
 import boto3
-import moto
 from sqlalchemy.orm import aliased, Session
 
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
