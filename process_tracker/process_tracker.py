@@ -228,9 +228,15 @@ class ProcessTracker:
         """
         location = LocationTracker(location_path=location_path, location_name=location_name)
 
-        if location.location_type == "s3":
-            s3 = boto3.resource('s3')
-            bucket = s3.Bucket(location.location_path)
+        if location.location_type.location_type_name == "s3":
+            s3 = boto3.resource("s3")
+
+            path = location.location_path
+
+            if path.startswith("s3://"):
+                path = path[len("s3://")]
+
+            bucket = s3.Bucket(path)
 
             for file in bucket.objects.all():
                 ExtractTracker(process_run=self

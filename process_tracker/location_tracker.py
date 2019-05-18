@@ -14,13 +14,13 @@ class LocationTracker:
         self.data_store = DataStore()
 
         self.location_path = location_path.lower()
-        self.location_type = self.derive_location_type()
 
         if location_name is None:
             self.location_name = self.derive_location_name()
         else:
             self.location_name = location_name
 
+        self.location_type = self.derive_location_type()
         self.location = self.data_store.get_or_create(model=Location
                                                       , location_name=self.location_name
                                                       , location_path=location_path
@@ -56,7 +56,7 @@ class LocationTracker:
         :return:
         """
 
-        if "s3" in self.location_path:
+        if "s3" in self.location_path or "s3" in self.location_name:
 
             location_type = self.data_store.get_or_create(model=LocationType
                                                           , location_type_name="s3")
