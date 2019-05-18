@@ -405,24 +405,70 @@ class TestProcessTracking(unittest.TestCase):
         Testing that when a new process is registered, a source registered as well.
         :return:
         """
+        given_result = self.session.query(ProcessSource) \
+                                 .join(Process) \
+                                 .filter(Process.process_name == 'Testing Process Tracking Initialization') \
+                                 .count()
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
 
     def test_register_process_sources_two_sources(self):
         """
         Testing that when a new process is registered, multiple sources can be registered as well.
         :return:
         """
+        ProcessTracker(process_name='Multiple Source, Target Test'
+                       , process_type='Extract'
+                       , actor_name='UnitTesting'
+                       , tool_name='Spark'
+                       , sources=['Unittests', 'Unittests2']
+                       , targets=['Unittests', 'Unittests2'])
+
+        given_result = self.session.query(ProcessSource) \
+            .join(Process) \
+            .filter(Process.process_name == 'Multiple Source, Target Test') \
+            .count()
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
 
     def test_register_process_targets_one_target(self):
         """
         Testing that when a new process is registered, a target registered as well.
         :return:
         """
+        given_result = self.session.query(ProcessTarget) \
+                                 .join(Process) \
+                                 .filter(Process.process_name == 'Testing Process Tracking Initialization') \
+                                 .count()
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
 
     def test_register_process_targets_two_targets(self):
         """
         Testing that when a new process is registered, multiple targets can be registered as well.
         :return:
         """
+        ProcessTracker(process_name='Multiple Source, Target Test'
+                       , process_type='Extract'
+                       , actor_name='UnitTesting'
+                       , tool_name='Spark'
+                       , sources=['Unittests', 'Unittests2']
+                       , targets=['Unittests', 'Unittests2'])
+
+        given_result = self.session.query(ProcessTarget) \
+            .join(Process) \
+            .filter(Process.process_name == 'Multiple Source, Target Test') \
+            .count()
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
 
     def test_change_run_status_complete(self):
         """

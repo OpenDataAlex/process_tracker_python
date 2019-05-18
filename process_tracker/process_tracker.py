@@ -297,9 +297,8 @@ class ProcessTracker:
         :param sources: List of source name(s)
         :return: List of source objects.
         """
-        if sources != list:
+        if isinstance(sources, str):
             sources = [sources]
-
         source_list = []
 
         for source in sources:
@@ -317,10 +316,9 @@ class ProcessTracker:
         :param targets: List of source name(s)
         :return: List of source objects.
         """
-        if targets != list:
+        if isinstance(targets, str):
             targets = [targets]
-
-        source_list = []
+        target_list = []
 
         for target in targets:
             source = self.data_store.get_or_create(model=Source, source_name=target)
@@ -328,8 +326,8 @@ class ProcessTracker:
             self.data_store.get_or_create(model=ProcessTarget, target_source_id=source.source_id
                                           , process_id=self.process.process_id)
 
-            source_list.append(source)
-        return source_list
+            target_list.append(source)
+        return target_list
 
     def set_process_run_low_high_dates(self, low_date=None, high_date=None):
         """
