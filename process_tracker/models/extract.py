@@ -24,14 +24,10 @@ class Extract(Base):
     __tablename__ = "extract_tracking"
 
     extract_id = Column(Integer, Sequence('extract_tracking_extract_id_seq'), primary_key=True)
-    extract_source_id = Column(Integer, ForeignKey("source_lkup.source_id"))
     extract_filename = Column(String(750), nullable=False, unique=True)
     extract_location_id = Column(Integer, ForeignKey('location_lkup.location_id'))
-#    extract_process_run_id = Column(Integer, ForeignKey('process_tracking.process_tracking_id'))
     extract_status_id = Column(Integer, ForeignKey('extract_status_lkup.extract_status_id'))
     extract_registration_date_time = Column(DateTime, nullable=False, default=datetime.now())
-#    extract_load_date_time = Column(DateTime, nullable=False, default=default_date)
-#    extract_archive_date_time = Column(DateTime, nullable=False, default=default_date)
 
     extract_process = relationship("ExtractProcess", back_populates='process_extracts')
     locations = relationship("Location", foreign_keys=[extract_location_id])
@@ -50,6 +46,16 @@ class ExtractProcess(Base):
     extract_processes = relationship('ProcessTracking', foreign_keys=[process_tracking_id])
 
 
+class LocationType(Base):
+
+    __tablename__ = "location_type_lkup"
+
+    location_type_id = Column(Integer, Sequence('location_type_lkup_location_type_id_seq'), primary_key=True)
+    location_type_name = Column(String(25), unique=True, nullable=False)
+
+    locations = relationship('Location', back_populates='location_types')
+    
+
 class Location(Base):
 
     __tablename__ = "location_lkup"
@@ -57,5 +63,8 @@ class Location(Base):
     location_id = Column(Integer, Sequence('location_lkup_location_id_seq'), primary_key=True)
     location_name = Column(String(750), nullable=False, unique=True)
     location_path = Column(String(750), nullable=False, unique=True)
+    location_type = Column(Integer, ForeignKey("location_type_lkup.location_type_id"))
 
     extracts = relationship("Extract")
+
+    location_types = relationship('LocationType', foreign_keys=[location_type])

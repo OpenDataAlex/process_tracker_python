@@ -59,35 +59,32 @@ class DataStore:
         data_store_port = os.environ.get('process_tracking_data_store_port')
         data_store_name = os.environ.get('process_tracking_data_store_name')
 
-        data_store_error_flag = False
+        errors = []
 
         if data_store_type is None:
-            raise Exception('Data store type is not set.')
-            data_store_error_flag = True
+            errors.append(Exception('Data store type is not set.'))
 
         if data_store_username is None:
-            raise Exception('Data store username is not set.')
-            data_store_error_flag = True
+            errors.append(Exception('Data store username is not set.'))
 
         if data_store_password is None:
-            raise Exception('Data store password is not set')
-            data_store_error_flag = True
+            errors.append(Exception('Data store password is not set'))
 
         if data_store_host is None:
-            raise Exception('Data store host is not set')
-            data_store_error_flag = True
+            errors.append(Exception('Data store host is not set'))
 
         if data_store_port is None:
-            raise Exception('Data store port is not set')
-            data_store_error_flag = True
+            errors.append(Exception('Data store port is not set'))
 
         if data_store_name is None:
-            raise Exception('Data store name is not set')
-            data_store_error_flag = True
+            errors.append(Exception('Data store name is not set'))
 
-        if data_store_error_flag:
-            raise Exception('Data store has not been properly configured.  Please read how to set up the Process '
-                            'Tracking data store by going to: <insert read the docs url here>')
+        if errors:
+
+            errors.append(Exception('Data store has not been properly configured.  Please read how to set up the Process '
+                                    'Tracking data store by going to: <insert read the docs url here>'))
+
+            raise Exception(errors)
 
         relational_stores = ['postgresql']
         nonrelational_stores = []

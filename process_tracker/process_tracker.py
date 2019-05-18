@@ -3,26 +3,33 @@
 
 from datetime import datetime
 import logging
+import os
 from os.path import join
 
+import boto3
+from sqlalchemy.orm import aliased
+
 from process_tracker.data_store import DataStore
+from process_tracker.extract_tracker import ExtractTracker
+from process_tracker.location_tracker import LocationTracker
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessTracking, ProcessStatus, ProcessType
+from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessDependency, ProcessTracking, ProcessStatus, ProcessSource, ProcessTarget, ProcessType
 from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
 
 class ProcessTracker:
 
-    def __init__(self, process_name, process_type, actor_name, tool_name, source_name):
+    def __init__(self, process_name, process_type, actor_name, tool_name, sources, targets):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
-        :param source_name: Name of the source that the data is coming from.
+        :param sources: A single source name or list of source names for the given process.
+        :type sources: list
         """
 
         self.logger = logging.getLogger(__name__)
@@ -32,13 +39,14 @@ class ProcessTracker:
 
         self.actor = self.data_store.get_or_create(model=Actor, actor_name=actor_name)
         self.process_type = self.data_store.get_or_create(model=ProcessType, process_type_name=process_type)
-        self.source = self.data_store.get_or_create(model=Source, source_name=source_name)
         self.tool = self.data_store.get_or_create(model=Tool, tool_name=tool_name)
 
         self.process = self.data_store.get_or_create(model=Process, process_name=process_name
-                                                     , process_source_id=self.source.source_id
                                                      , process_type_id=self.process_type.process_type_id
                                                      , process_tool_id=self.tool.tool_id)
+
+        self.sources = self.register_process_sources(sources=sources)
+        self.targets = self.register_process_targets(targets=targets)
 
         self.process_name = process_name
 
@@ -214,16 +222,63 @@ class ProcessTracker:
             self.session.commit()
             raise Exception('Process halting.  An error triggered the process to fail.')
 
+    def register_extracts_by_location(self, location_path, location_name=None):
+        """
+        For a given location, find all files and attempt to register them.
+        :param location_name: Name of the location
+        :param location_path: Path of the location
+        :return:
+        """
+        location = LocationTracker(location_path=location_path, location_name=location_name)
+
+        if location.location_type.location_type_name == "s3":
+            s3 = boto3.resource("s3")
+
+            path = location.location_path
+
+            if path.startswith("s3://"):
+                path = path[len("s3://")]
+
+            bucket = s3.Bucket(path)
+
+            for file in bucket.objects.all():
+                ExtractTracker(process_run=self
+                               , filename=file
+                               , location=location
+                               , status='ready')
+        else:
+            for file in os.listdir(location_path):
+                ExtractTracker(process_run=self
+                               , filename=file
+                               , location=location
+                               , status='ready')
+
     def register_new_process_run(self):
         """
         When a new process instance is starting, register the run in process tracking.
         :return:
         """
+        child_process = aliased(Process)
+        parent_process = aliased(Process)
 
         last_run = self.get_latest_tracking_record(process=self.process)
 
         new_run_flag = True
         new_run_id = 1
+
+        # Need to check the status of any dependencies.  If dependencies are running or failed, halt this process.
+
+        dependency_hold = self.session.query(ProcessDependency)\
+                                      .join(parent_process, ProcessDependency.parent_process_id == parent_process.process_id)\
+                                      .join(child_process, ProcessDependency.child_process_id == child_process.process_id)\
+                                      .join(ProcessTracking, ProcessTracking.process_id == parent_process.process_id) \
+                                      .join(ProcessStatus, ProcessStatus.process_status_id == ProcessTracking.process_status_id) \
+                                      .filter(child_process.process_id == self.process.process_id) \
+                                      .filter(ProcessStatus.process_status_name.in_(('running', 'failed'))) \
+                                      .count()
+
+        if dependency_hold > 0:
+            raise Exception('Processes that this process is dependent on are running or failed.')
 
         if last_run:
             # Must validate that the process is not currently running.
@@ -252,7 +307,44 @@ class ProcessTracker:
 
         else:
             raise Exception('The process %s is currently running.' % self.process_name)
-            exit()
+
+    def register_process_sources(self, sources):
+        """
+        Register source(s) to a given process.
+        :param sources: List of source name(s)
+        :return: List of source objects.
+        """
+        if isinstance(sources, str):
+            sources = [sources]
+        source_list = []
+
+        for source in sources:
+            source = self.data_store.get_or_create(model=Source, source_name=source)
+
+            self.data_store.get_or_create(model=ProcessSource, source_id=source.source_id
+                                          , process_id=self.process.process_id)
+
+            source_list.append(source)
+        return source_list
+
+    def register_process_targets(self, targets):
+        """
+        Register target source(s) to a given process.
+        :param targets: List of source name(s)
+        :return: List of source objects.
+        """
+        if isinstance(targets, str):
+            targets = [targets]
+        target_list = []
+
+        for target in targets:
+            source = self.data_store.get_or_create(model=Source, source_name=target)
+
+            self.data_store.get_or_create(model=ProcessTarget, target_source_id=source.source_id
+                                          , process_id=self.process.process_id)
+
+            target_list.append(source)
+        return target_list
 
     def set_process_run_low_high_dates(self, low_date=None, high_date=None):
         """

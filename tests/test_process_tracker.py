@@ -2,11 +2,13 @@
 
 from datetime import datetime, timedelta
 import unittest
+from unittest.mock import patch
 
-from sqlalchemy.orm import Session
+import boto3
+from sqlalchemy.orm import aliased, Session
 
-from process_tracker.models.extract import Extract, ExtractProcess
-from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessTracking
+from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
+from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessDependency, ProcessSource, ProcessTarget, ProcessTracking
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -17,12 +19,16 @@ class TestProcessTracking(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        data_store = DataStore()
-        cls.session = data_store.session
-        cls.data_store_type = data_store.data_store_type
+        cls.data_store = DataStore()
+        cls.session = cls.data_store.session
+        cls.data_store_type = cls.data_store.data_store_type
 
     @classmethod
     def tearDownClass(cls):
+        cls.session.query(Location).delete()
+        cls.session.query(ProcessSource).delete()
+        cls.session.query(ProcessTarget).delete()
+        cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
 
@@ -32,10 +38,11 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         self.process_tracker = ProcessTracker(process_name='Testing Process Tracking Initialization'
-                                             , process_type='Extract'
-                                             , actor_name='UnitTesting'
-                                             , tool_name='Spark'
-                                             , source_name='Unittests')
+                                              , process_type='Extract'
+                                              , actor_name='UnitTesting'
+                                              , tool_name='Spark'
+                                              , sources='Unittests'
+                                              , targets='Unittests')
 
         self.process_id = self.process_tracker.process.process_id
         self.provided_end_date = datetime.now()
@@ -69,9 +76,9 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+                                 , filename='test_extract_filename2.csv'
+                                 , location_name='Test Location'
+                                 , location_path='/home/test/extract_dir')
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -285,6 +292,70 @@ class TestProcessTracking(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_register_extracts_by_location_local(self):
+        """
+        Testing that when the location is local, all the extracts are registered and set to 'ready' status.
+        The process/extract relationship should also be set to 'ready' since that is the last status the process set
+        the extracts to.
+        :return:
+        """
+        process_status = aliased(ExtractStatus)
+        extract_status = aliased(ExtractStatus)
+
+        with patch('os.listdir') as mocked_os_listdir:
+            mocked_os_listdir.return_value = ['test_local_dir_1.csv', 'test_local_dir_2.csv']
+
+            self.process_tracker.register_extracts_by_location(location_path='/test/local/dir/')
+
+        extracts = self.session.query(Extract.extract_filename, extract_status.extract_status_name, process_status.extract_status_name)\
+                               .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
+                               .join(extract_status, Extract.extract_status_id == extract_status.extract_status_id) \
+                               .join(process_status, ExtractProcess.extract_process_status_id == process_status.extract_status_id) \
+                               .filter(ExtractProcess.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        given_result = [[extracts[0].extract_filename, extracts[0].extract_status_name, extracts[0].extract_status_name]
+                        ,[extracts[1].extract_filename, extracts[1].extract_status_name, extracts[1].extract_status_name]]
+
+        expected_result = [['test_local_dir_1.csv', 'ready', 'ready']
+                          ,['test_local_dir_2.csv', 'ready', 'ready']]
+
+        self.assertEqual(expected_result, given_result)
+
+    # def test_register_extracts_by_location_s3(self):
+    #     """
+    #     Testing that when the location is s3, all the extracts are registered and set to 'ready' status.
+    #     The process/extract relationship should also be set to 'ready' since that is the last status the process set
+    #     the extracts to.
+    #     :return:
+    #     """
+    #     process_status = aliased(ExtractStatus)
+    #     extract_status = aliased(ExtractStatus)
+    #
+    #     expected_keys = 'test_local_dir_1.csv', 'test_local_dir_2.csv'
+    #
+    #     with moto.mock_s3():
+    #         conn = boto3.resource('s3', region_name='us-east-1')
+    #         conn.create_bucket(Bucket='test_bucket')
+    #
+    #         for file in expected_keys:
+    #             conn.Object('test_bucket', file)
+    #
+    #         self.process_tracker.register_extracts_by_location(location_path='s3://test_bucket')
+    #
+    #     extracts = self.session.query(Extract.extract_filename, extract_status.extract_status_name, process_status.extract_status_name)\
+    #                            .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
+    #                            .join(extract_status, Extract.extract_status_id == extract_status.extract_status_id) \
+    #                            .join(process_status, ExtractProcess.extract_process_status_id == process_status.extract_status_id) \
+    #                            .filter(ExtractProcess.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+    #
+    #     given_result = [[extracts[0].extract_filename, extracts[0].extract_status_name, extracts[0].extract_status_name]
+    #                     ,[extracts[1].extract_filename, extracts[1].extract_status_name, extracts[1].extract_status_name]]
+    #
+    #     expected_result = [['test_local_dir_1.csv', 'ready', 'ready']
+    #                       ,['test_local_dir_2.csv', 'ready', 'ready']]
+    #
+    #     self.assertEqual(expected_result, given_result)
+
     def test_register_new_process_run(self):
         """
         Testing that a new run record is created if there is no other instance of the same
@@ -327,6 +398,150 @@ class TestProcessTracking(unittest.TestCase):
 
         given_result = process_runs[0].is_latest_run
         expected_result = False
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_new_process_run_dependencies_completed(self):
+        """
+        Testing that for a given process, if there are completed dependencies, then the process run is created.
+        :return:
+        """
+        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency'
+                                           , process_type='Extract'
+                                           , actor_name='UnitTesting'
+                                           , tool_name='Spark'
+                                           , sources='Unittests'
+                                           , targets='Unittests')
+
+        dependent_process.change_run_status(new_status='completed')
+        self.process_tracker.change_run_status(new_status='completed')
+        self.data_store.get_or_create(model=ProcessDependency
+                                      , parent_process_id=dependent_process.process_tracking_run.process_id
+                                      , child_process_id=self.process_id)
+
+        self.process_tracker.register_new_process_run()
+
+        given_count = self.session.query(ProcessTracking) \
+                                  .filter(ProcessTracking.process_id == self.process_id) \
+                                  .count()
+
+        expected_count = 2
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_register_new_process_run_dependencies_running(self):
+        """
+        Testing that for a given process, if there are running dependencies, then the process run is prevented from starting.
+        :return:
+        """
+        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency Running'
+                                           , process_type='Extract'
+                                           , actor_name='UnitTesting'
+                                           , tool_name='Spark'
+                                           , sources='Unittests'
+                                           , targets='Unittests')
+
+        dependent_process.change_run_status(new_status='running')
+        self.process_tracker.change_run_status(new_status='completed')
+        self.data_store.get_or_create(model=ProcessDependency
+                                      , parent_process_id=dependent_process.process_tracking_run.process_id
+                                      , child_process_id=self.process_id)
+
+        with self.assertRaises(Exception) as context:
+            self.process_tracker.register_new_process_run()
+
+        return self.assertTrue('Processes that this process is dependent on are running or failed.' in str(context.exception))
+
+    def test_register_new_process_run_dependencies_failed(self):
+        """
+        Testing that for a given process, if there are failed dependencies, then the process run is prevented from starting.
+        :return:
+        """
+        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency Failed'
+                                           , process_type='Extract'
+                                           , actor_name='UnitTesting'
+                                           , tool_name='Spark'
+                                           , sources='Unittests'
+                                           , targets='Unittests')
+
+        dependent_process.change_run_status(new_status='failed')
+        self.process_tracker.change_run_status(new_status='completed')
+        self.data_store.get_or_create(model=ProcessDependency
+                                      , parent_process_id=dependent_process.process_tracking_run.process_id
+                                      , child_process_id=self.process_id)
+
+        with self.assertRaises(Exception) as context:
+            self.process_tracker.register_new_process_run()
+
+        return self.assertTrue('Processes that this process is dependent on are running or failed.' in str(context.exception))
+
+    def test_register_process_sources_one_source(self):
+        """
+        Testing that when a new process is registered, a source registered as well.
+        :return:
+        """
+        given_result = self.session.query(ProcessSource) \
+                                 .join(Process) \
+                                 .filter(Process.process_name == 'Testing Process Tracking Initialization') \
+                                 .count()
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_sources_two_sources(self):
+        """
+        Testing that when a new process is registered, multiple sources can be registered as well.
+        :return:
+        """
+        ProcessTracker(process_name='Multiple Source, Target Test'
+                       , process_type='Extract'
+                       , actor_name='UnitTesting'
+                       , tool_name='Spark'
+                       , sources=['Unittests', 'Unittests2']
+                       , targets=['Unittests', 'Unittests2'])
+
+        given_result = self.session.query(ProcessSource) \
+            .join(Process) \
+            .filter(Process.process_name == 'Multiple Source, Target Test') \
+            .count()
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_targets_one_target(self):
+        """
+        Testing that when a new process is registered, a target registered as well.
+        :return:
+        """
+        given_result = self.session.query(ProcessTarget) \
+                                 .join(Process) \
+                                 .filter(Process.process_name == 'Testing Process Tracking Initialization') \
+                                 .count()
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_targets_two_targets(self):
+        """
+        Testing that when a new process is registered, multiple targets can be registered as well.
+        :return:
+        """
+        ProcessTracker(process_name='Multiple Source, Target Test'
+                       , process_type='Extract'
+                       , actor_name='UnitTesting'
+                       , tool_name='Spark'
+                       , sources=['Unittests', 'Unittests2']
+                       , targets=['Unittests', 'Unittests2'])
+
+        given_result = self.session.query(ProcessTarget) \
+            .join(Process) \
+            .filter(Process.process_name == 'Multiple Source, Target Test') \
+            .count()
+
+        expected_result = 2
 
         self.assertEqual(expected_result, given_result)
 

@@ -75,31 +75,52 @@ class Process(Base):
 
     process_id = Column(Integer, Sequence('process_process_id_seq'), primary_key=True)
     process_name = Column(String(250), nullable=False, unique=True)
-    process_source_id = Column(Integer, ForeignKey('source_lkup.source_id'))
-#    latest_run_low_date_time = Column(DateTime(timezone=True), nullable=False, default=default_date)
-#    latest_run_high_date_time = Column(DateTime(timezone=True), nullable=False, default=default_date)
-#    latest_run_id = Column(Integer, nullable=False, default=0)
-#    latest_run_start_date_time = Column(DateTime(timezone=True), nullable=False, default=default_date)
-#    latest_run_end_date_time = Column(DateTime(timezone=True), nullable=False, default=default_date)
-#    latest_run_process_status = Column(Integer, nullable=False, default=0)
-#    latest_run_record_count = Column(Integer, nullable=False, default=0)
     total_record_count = Column(Integer, nullable=False, default=0)
-#    latest_run_actor_id = Column(id.idType, ForeignKey('actor.actor_id'))
     process_type_id = Column(Integer, ForeignKey('process_type_lkup.process_type_id'))
     process_tool_id = Column(Integer, ForeignKey('tool_lkup.tool_id'))
     last_failed_run_date_time = Column(DateTime(timezone=True), nullable=False, default=default_date)
 
     process_tracking = relationship("ProcessTracking")
     process_type = relationship("ProcessType", back_populates="processes")
-    source = relationship("Source")
+    sources = relationship("ProcessSource")
+    targets = relationship("ProcessTarget")
     tool = relationship("Tool")
 
     def __repr__(self):
 
-        return "<Process (id=%s, name=%s, source=%s, type=%s)>" % (self.process_id
-                                                                     , self.process_name
-                                                                     , self.process_source_id
-                                                                     , self.process_type_id)
+        return "<Process (id=%s, name=%s, type=%s)>" % (self.process_id
+                                                        , self.process_name
+                                                        , self.process_type_id)
+
+
+class ProcessSource(Base):
+
+    __tablename__ = 'process_source'
+
+    source_id = Column(Integer, ForeignKey('source_lkup.source_id'), primary_key=True)
+    process_id = Column(Integer, ForeignKey('process.process_id'), primary_key=True)
+
+    sources = relationship("Source")
+    processes = relationship("Process")
+
+    def __repr__(self):
+
+        return "<ProcessSource (process=%s, source=%s)>" % (self.process_id
+                                                                   , self.source_id)
+
+
+class ProcessTarget(Base):
+    __tablename__ = 'process_target'
+
+    target_source_id = Column(Integer, ForeignKey('source_lkup.source_id'), primary_key=True)
+    process_id = Column(Integer, ForeignKey('process.process_id'), primary_key=True)
+
+    targets = relationship("Source")
+    processes = relationship("Process")
+
+    def __repr__(self):
+        return "<ProcessSource (process=%s, target_source=%s)>" % (self.process_id
+                                                                   , self.source_id)
 
 
 class ProcessDependency(Base):
