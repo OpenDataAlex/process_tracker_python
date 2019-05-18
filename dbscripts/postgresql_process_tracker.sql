@@ -4,28 +4,13 @@ create schema process_tracking;
 
 alter schema process_tracking owner to pt_admin;
 
+create schema process_tracking;
+
+alter schema process_tracking owner to pt_admin;
+
 create sequence actor_lkup_actor_id_seq;
 
 alter sequence actor_lkup_actor_id_seq owner to pt_admin;
-
-create table location_lkup
-(
-	location_id serial not null
-		constraint location_lkup_pk
-			primary key,
-	location_name varchar(750) not null,
-	location_path varchar(750) not null
-);
-
-comment on table location_lkup is 'Locations where files are located.';
-
-alter table location_lkup owner to pt_admin;
-
-create unique index location_lkup_udx01
-	on location_lkup (location_name);
-
-create unique index location_lkup_udx02
-	on location_lkup (location_path);
 
 create table error_type_lkup
 (
@@ -136,9 +121,6 @@ create table process
 		constraint process_pk
 			primary key,
 	process_name varchar(250) not null,
-	process_source_id integer not null
-		constraint process_fk01
-			references source_lkup,
 	total_record_count integer default 0 not null,
 	process_type_id integer not null
 		constraint process_fk02
@@ -152,8 +134,6 @@ create table process
 comment on table process is 'Processes being tracked';
 
 comment on column process.process_name is 'Unique name for process.';
-
-comment on column process.process_source_id is 'The source that the process is extracting from.';
 
 comment on column process.total_record_count is 'Total number of records processed over all runs of process.';
 
@@ -274,12 +254,45 @@ alter table extract_status_lkup owner to pt_admin;
 create unique index extract_status_lkup_extract_status_name_uindex
 	on extract_status_lkup (extract_status_name);
 
+create table location_type_lkup
+(
+	location_type_id serial not null
+		constraint location_type_lkup_pk
+			primary key,
+	location_type_name varchar(25) not null
+);
+
+comment on table location_type_lkup is 'Listing of location types';
+
+alter table location_type_lkup owner to pt_admin;
+
+create table location_lkup
+(
+	location_id serial not null
+		constraint location_lkup_pk
+			primary key,
+	location_name varchar(750) not null,
+	location_path varchar(750) not null,
+	location_type integer not null
+		constraint location_lkup_fk01
+			references location_type_lkup
+);
+
+comment on table location_lkup is 'Locations where files are located.';
+
+alter table location_lkup owner to pt_admin;
+
+create unique index location_lkup_udx01
+	on location_lkup (location_name);
+
+create unique index location_lkup_udx02
+	on location_lkup (location_path);
+
 create table extract_tracking
 (
 	extract_id serial not null
 		constraint extract_tracking_pk
 			primary key,
-	extract_source_id integer not null,
 	extract_filename varchar(750) not null,
 	extract_location_id integer not null
 		constraint extract_tracking_fk01
@@ -295,8 +308,6 @@ create table extract_tracking
 
 comment on table extract_tracking is 'Tracking table for all extract/staging data files.';
 
-comment on column extract_tracking.extract_source_id is 'Source identifier (source_lkup) for where the extract originated.';
-
 comment on column extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
 
 comment on column extract_tracking.extract_location_id is 'The location where the given extract can be found.';
@@ -308,9 +319,6 @@ comment on column extract_tracking.extract_status_id is 'The status of the extra
 comment on column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
 
 alter table extract_tracking owner to pt_admin;
-
-create unique index extract_tracking_udx01
-	on extract_tracking (extract_source_id, extract_filename);
 
 create table extract_process_tracking
 (
@@ -331,6 +339,43 @@ create table extract_process_tracking
 comment on table extract_process_tracking is 'Showing which processes have impacted which extracts';
 
 alter table extract_process_tracking owner to pt_admin;
+
+create unique index location_type_lkup_udx01
+	on location_type_lkup (location_type_name);
+
+create table process_source
+(
+	source_id integer not null
+		constraint process_source_fk01
+			references source_lkup,
+	process_id integer not null
+		constraint process_source_fk02
+			references process,
+	constraint process_source_pk
+		primary key (source_id, process_id)
+);
+
+comment on table process_source is 'List of sources for given processes';
+
+alter table process_source owner to pt_admin;
+
+create table process_target
+(
+	target_source_id integer not null
+		constraint process_target_fk01
+			references source_lkup,
+	process_id integer not null
+		constraint process_target_fk02
+			references process,
+	constraint process_target_pk
+		primary key (target_source_id, process_id)
+);
+
+comment on table process_target is 'List of targets for given processes';
+
+alter table process_target owner to pt_admin;
+
+
 
 INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (1, 'initializing');
 INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (2, 'ready');

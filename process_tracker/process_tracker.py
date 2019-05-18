@@ -14,20 +14,21 @@ from process_tracker.location_tracker import LocationTracker
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessTracking, ProcessStatus, ProcessType
+from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessTracking, ProcessStatus, ProcessSource, ProcessTarget, ProcessType
 from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
 
 class ProcessTracker:
 
-    def __init__(self, process_name, process_type, actor_name, tool_name, source_name):
+    def __init__(self, process_name, process_type, actor_name, tool_name, sources, targets):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
-        :param source_name: Name of the source that the data is coming from.
+        :param sources: A single source name or list of source names for the given process.
+        :type sources: list
         """
 
         self.logger = logging.getLogger(__name__)
@@ -37,13 +38,14 @@ class ProcessTracker:
 
         self.actor = self.data_store.get_or_create(model=Actor, actor_name=actor_name)
         self.process_type = self.data_store.get_or_create(model=ProcessType, process_type_name=process_type)
-        self.source = self.data_store.get_or_create(model=Source, source_name=source_name)
         self.tool = self.data_store.get_or_create(model=Tool, tool_name=tool_name)
 
         self.process = self.data_store.get_or_create(model=Process, process_name=process_name
-                                                     , process_source_id=self.source.source_id
                                                      , process_type_id=self.process_type.process_type_id
                                                      , process_tool_id=self.tool.tool_id)
+
+        self.sources = self.register_process_sources(sources=sources)
+        self.targets = self.register_process_targets(targets=targets)
 
         self.process_name = process_name
 
@@ -288,6 +290,46 @@ class ProcessTracker:
 
         else:
             raise Exception('The process %s is currently running.' % self.process_name)
+
+    def register_process_sources(self, sources):
+        """
+        Register source(s) to a given process.
+        :param sources: List of source name(s)
+        :return: List of source objects.
+        """
+        if sources != list:
+            sources = [sources]
+
+        source_list = []
+
+        for source in sources:
+            source = self.data_store.get_or_create(model=Source, source_name=source)
+
+            self.data_store.get_or_create(model=ProcessSource, source_id=source.source_id
+                                          , process_id=self.process.process_id)
+
+            source_list.append(source)
+        return source_list
+
+    def register_process_targets(self, targets):
+        """
+        Register target source(s) to a given process.
+        :param targets: List of source name(s)
+        :return: List of source objects.
+        """
+        if targets != list:
+            targets = [targets]
+
+        source_list = []
+
+        for target in targets:
+            source = self.data_store.get_or_create(model=Source, source_name=target)
+
+            self.data_store.get_or_create(model=ProcessTarget, target_source_id=source.source_id
+                                          , process_id=self.process.process_id)
+
+            source_list.append(source)
+        return source_list
 
     def set_process_run_low_high_dates(self, low_date=None, high_date=None):
         """

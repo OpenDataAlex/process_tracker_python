@@ -3,7 +3,7 @@
 import unittest
 
 from process_tracker.models.extract import Extract, ExtractProcess, Location
-from process_tracker.models.process import Process, ProcessTracking
+from process_tracker.models.process import Process, ProcessSource, ProcessTarget, ProcessTracking
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -18,7 +18,8 @@ class TestExtractTracking(unittest.TestCase):
                                              , process_type='Load'
                                              , actor_name='UnitTesting'
                                              , tool_name='Spark'
-                                             , source_name='Unittests')
+                                             , sources='Unittests'
+                                             , targets='Unittests')
 
         cls.process_run = cls.process_tracker
 
@@ -29,6 +30,8 @@ class TestExtractTracking(unittest.TestCase):
     def tearDownClass(cls):
 
         cls.session.query(ProcessTracking).delete()
+        cls.session.query(ProcessSource).delete()
+        cls.session.query(ProcessTarget).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
 

@@ -36,7 +36,6 @@ class ExtractTracker:
         self.session = self.data_store.session
         self.process_run = process_run
 
-        self.source = self.process_run.source
         self.filename = filename
 
         if location is not None:
@@ -48,8 +47,7 @@ class ExtractTracker:
 
         self.extract = self.data_store.get_or_create(model=Extract
                                                      , extract_filename=filename
-                                                     , extract_location_id=self.location.location.location_id
-                                                     , extract_source_id=self.source.source_id)
+                                                     , extract_location_id=self.location.location.location_id)
 
         if location_path is not None:
             self.full_filename = join(location_path, filename)

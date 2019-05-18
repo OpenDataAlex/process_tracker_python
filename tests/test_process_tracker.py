@@ -8,7 +8,7 @@ import moto
 from sqlalchemy.orm import aliased, Session
 
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessTracking
+from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessSource, ProcessTarget, ProcessTracking
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -26,6 +26,8 @@ class TestProcessTracking(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.session.query(Location).delete()
+        cls.session.query(ProcessSource).delete()
+        cls.session.query(ProcessTarget).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
 
@@ -38,7 +40,8 @@ class TestProcessTracking(unittest.TestCase):
                                               , process_type='Extract'
                                               , actor_name='UnitTesting'
                                               , tool_name='Spark'
-                                              , source_name='Unittests')
+                                              , sources='Unittests'
+                                              , targets='Unittests')
 
         self.process_id = self.process_tracker.process.process_id
         self.provided_end_date = datetime.now()
@@ -72,9 +75,9 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+                                 , filename='test_extract_filename2.csv'
+                                 , location_name='Test Location'
+                                 , location_path='/home/test/extract_dir')
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -396,6 +399,30 @@ class TestProcessTracking(unittest.TestCase):
         expected_result = False
 
         self.assertEqual(expected_result, given_result)
+
+    def test_register_process_sources_one_source(self):
+        """
+        Testing that when a new process is registered, a source registered as well.
+        :return:
+        """
+
+    def test_register_process_sources_two_sources(self):
+        """
+        Testing that when a new process is registered, multiple sources can be registered as well.
+        :return:
+        """
+
+    def test_register_process_targets_one_target(self):
+        """
+        Testing that when a new process is registered, a target registered as well.
+        :return:
+        """
+
+    def test_register_process_targets_two_targets(self):
+        """
+        Testing that when a new process is registered, multiple targets can be registered as well.
+        :return:
+        """
 
     def test_change_run_status_complete(self):
         """
