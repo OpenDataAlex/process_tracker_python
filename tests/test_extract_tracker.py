@@ -94,8 +94,8 @@ class TestExtractTracking(unittest.TestCase):
         :return:
         """
         extract = ExtractTracker(process_run=self.process_run
-                                      , filename='test_extract_filename2.csv'
-                                      , location_path='/home/test/extract_dir2')
+                                 , filename='test_extract_filename2.csv'
+                                 , location_path='/home/test/extract_dir2')
 
         location = self.session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
 

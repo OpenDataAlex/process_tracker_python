@@ -50,6 +50,16 @@ class ExtractProcess(Base):
     extract_processes = relationship('ProcessTracking', foreign_keys=[process_tracking_id])
 
 
+class LocationType(Base):
+
+    __tablename__ = "location_type_lkup"
+
+    location_type_id = Column(Integer, Sequence('location_type_lkup_location_type_id_seq'), primary_key=True)
+    location_type_name = Column(String(25), unique=True, nullable=False)
+
+    locations = relationship('Location', back_populates='location_types')
+    
+
 class Location(Base):
 
     __tablename__ = "location_lkup"
@@ -57,5 +67,8 @@ class Location(Base):
     location_id = Column(Integer, Sequence('location_lkup_location_id_seq'), primary_key=True)
     location_name = Column(String(750), nullable=False, unique=True)
     location_path = Column(String(750), nullable=False, unique=True)
+    location_type = Column(Integer, ForeignKey("location_type_lkup.location_type_id"))
 
     extracts = relationship("Extract")
+
+    location_types = relationship('LocationType', foreign_keys=[location_type])

@@ -5,11 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 coverage="*"
+moto="*"
 python-coveralls="*"
 coveralls="*"
-twine="*"
 
 [packages]
+boto3="*"
 sqlalchemy="*"
 sqlalchemy-utils="*"
 python-dateutil="*"

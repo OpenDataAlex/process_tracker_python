@@ -15,6 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     test_suite='tests.process_tracker_test_suite',
     install_requires=[
+        'boto3 >= 1.9.150',
         'sqlalchemy >= 1.3.3',
         'sqlalchemy-utils >= 0.33.11',
         'python-dateutil >= 2.8.0',
@@ -23,9 +24,9 @@ setuptools.setup(
     extras_requires={
         'dev': [
             'coverage >= "4.0.3',
+            'moto >= 1.3.8'
             'python-coveralls >= 2.9.1',
             'coveralls >= 1.7.0',
-            'twine >= 1.13.0'
         ]
     },
     classifiers=[

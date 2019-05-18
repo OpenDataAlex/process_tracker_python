@@ -3,9 +3,14 @@
 
 from datetime import datetime
 import logging
+import os
 from os.path import join
 
+import boto3
+
 from process_tracker.data_store import DataStore
+from process_tracker.extract_tracker import ExtractTracker
+from process_tracker.location_tracker import LocationTracker
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
@@ -214,6 +219,31 @@ class ProcessTracker:
             self.session.commit()
             raise Exception('Process halting.  An error triggered the process to fail.')
 
+    def register_extracts_by_location(self, location_path, location_name=None):
+        """
+        For a given location, find all files and attempt to register them.
+        :param location_name: Name of the location
+        :param location_path: Path of the location
+        :return:
+        """
+        location = LocationTracker(location_path=location_path, location_name=location_name)
+
+        if location.location_type == "s3":
+            s3 = boto3.resource('s3')
+            bucket = s3.Bucket(location.location_path)
+
+            for file in bucket.objects.all():
+                ExtractTracker(process_run=self
+                               , filename=file
+                               , location=location
+                               , status='ready')
+        else:
+            for file in os.listdir(location_path):
+                ExtractTracker(process_run=self
+                               , filename=file
+                               , location=location
+                               , status='ready')
+
     def register_new_process_run(self):
         """
         When a new process instance is starting, register the run in process tracking.
@@ -252,7 +282,6 @@ class ProcessTracker:
 
         else:
             raise Exception('The process %s is currently running.' % self.process_name)
-            exit()
 
     def set_process_run_low_high_dates(self, low_date=None, high_date=None):
         """

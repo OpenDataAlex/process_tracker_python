@@ -3,9 +3,10 @@
 from datetime import datetime, timedelta
 import unittest
 
-from sqlalchemy.orm import Session
+import moto
+from sqlalchemy.orm import aliased, Session
 
-from process_tracker.models.extract import Extract, ExtractProcess
+from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
 from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessTracking
 
 from process_tracker.data_store import DataStore
@@ -23,6 +24,7 @@ class TestProcessTracking(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.session.query(Location).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
 
@@ -32,10 +34,10 @@ class TestProcessTracking(unittest.TestCase):
         :return:
         """
         self.process_tracker = ProcessTracker(process_name='Testing Process Tracking Initialization'
-                                             , process_type='Extract'
-                                             , actor_name='UnitTesting'
-                                             , tool_name='Spark'
-                                             , source_name='Unittests')
+                                              , process_type='Extract'
+                                              , actor_name='UnitTesting'
+                                              , tool_name='Spark'
+                                              , source_name='Unittests')
 
         self.process_id = self.process_tracker.process.process_id
         self.provided_end_date = datetime.now()
@@ -284,6 +286,43 @@ class TestProcessTracking(unittest.TestCase):
         expected_result = 'UnitTesting'
 
         self.assertEqual(expected_result, given_result)
+
+    def test_register_extracts_by_location_local(self):
+        """
+        Testing that when the location is local, all the extracts are registered and set to 'ready' status.
+        The process/extract relationship should also be set to 'ready' since that is the last status the process set
+        the extracts to.
+        :return:
+        """
+        process_status = aliased(ExtractStatus)
+        extract_status = aliased(ExtractStatus)
+
+        with unittest.mock.patch('os.listdir') as mocked_os_listdir:
+            mocked_os_listdir.return_value = ['test_local_dir_1.csv', 'test_local_dir_2.csv']
+
+            self.process_tracker.register_extracts_by_location(location_path='/test/local/dir/')
+
+        extracts = self.session.query(Extract.extract_filename, extract_status.extract_status_name, process_status.extract_status_name)\
+                               .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
+                               .join(extract_status, Extract.extract_status_id == extract_status.extract_status_id) \
+                               .join(process_status, ExtractProcess.extract_process_status_id == process_status.extract_status_id) \
+                               .filter(ExtractProcess.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+
+        given_result = [[extracts[0].extract_filename, extracts[0].extract_status_name, extracts[0].extract_status_name]
+                        ,[extracts[1].extract_filename, extracts[1].extract_status_name, extracts[1].extract_status_name]]
+
+        expected_result = [['test_local_dir_1.csv', 'ready', 'ready']
+                          ,['test_local_dir_2.csv', 'ready', 'ready']]
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_extracts_by_location_s3(self):
+        """
+        Testing that when the location is s3, all the extracts are registered and set to 'ready' status.
+        :return:
+        """
+
+
 
     def test_register_new_process_run(self):
         """
