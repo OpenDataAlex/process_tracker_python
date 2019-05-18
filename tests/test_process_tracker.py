@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 import unittest
+from unittest.mock import patch
 
 import boto3
 from sqlalchemy.orm import aliased, Session
@@ -300,7 +301,7 @@ class TestProcessTracking(unittest.TestCase):
         process_status = aliased(ExtractStatus)
         extract_status = aliased(ExtractStatus)
 
-        with unittest.mock.patch('os.listdir') as mocked_os_listdir:
+        with patch('os.listdir') as mocked_os_listdir:
             mocked_os_listdir.return_value = ['test_local_dir_1.csv', 'test_local_dir_2.csv']
 
             self.process_tracker.register_extracts_by_location(location_path='/test/local/dir/')
