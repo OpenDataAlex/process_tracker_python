@@ -7,6 +7,7 @@ import os
 from os.path import join
 
 import boto3
+from sqlalchemy.orm import aliased
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -14,7 +15,7 @@ from process_tracker.location_tracker import LocationTracker
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessTracking, ProcessStatus, ProcessSource, ProcessTarget, ProcessType
+from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessDependency, ProcessTracking, ProcessStatus, ProcessSource, ProcessTarget, ProcessType
 from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
@@ -257,11 +258,27 @@ class ProcessTracker:
         When a new process instance is starting, register the run in process tracking.
         :return:
         """
+        child_process = aliased(Process)
+        parent_process = aliased(Process)
 
         last_run = self.get_latest_tracking_record(process=self.process)
 
         new_run_flag = True
         new_run_id = 1
+
+        # Need to check the status of any dependencies.  If dependencies are running or failed, halt this process.
+
+        dependency_hold = self.session.query(ProcessDependency)\
+                                      .join(parent_process, ProcessDependency.parent_process_id == parent_process.process_id)\
+                                      .join(child_process, ProcessDependency.child_process_id == child_process.process_id)\
+                                      .join(ProcessTracking, ProcessTracking.process_id == parent_process.process_id) \
+                                      .join(ProcessStatus, ProcessStatus.process_status_id == ProcessTracking.process_status_id) \
+                                      .filter(child_process.process_id == self.process.process_id) \
+                                      .filter(ProcessStatus.process_status_name.in_(('running', 'failed'))) \
+                                      .count()
+
+        if dependency_hold > 0:
+            raise Exception('Processes that this process is dependent on are running or failed.')
 
         if last_run:
             # Must validate that the process is not currently running.

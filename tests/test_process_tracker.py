@@ -8,7 +8,7 @@ import boto3
 from sqlalchemy.orm import aliased, Session
 
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessSource, ProcessTarget, ProcessTracking
+from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessDependency, ProcessSource, ProcessTarget, ProcessTracking
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -19,15 +19,16 @@ class TestProcessTracking(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        data_store = DataStore()
-        cls.session = data_store.session
-        cls.data_store_type = data_store.data_store_type
+        cls.data_store = DataStore()
+        cls.session = cls.data_store.session
+        cls.data_store_type = cls.data_store.data_store_type
 
     @classmethod
     def tearDownClass(cls):
         cls.session.query(Location).delete()
         cls.session.query(ProcessSource).delete()
         cls.session.query(ProcessTarget).delete()
+        cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
 
@@ -399,6 +400,80 @@ class TestProcessTracking(unittest.TestCase):
         expected_result = False
 
         self.assertEqual(expected_result, given_result)
+
+    def test_register_new_process_run_dependencies_completed(self):
+        """
+        Testing that for a given process, if there are completed dependencies, then the process run is created.
+        :return:
+        """
+        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency'
+                                           , process_type='Extract'
+                                           , actor_name='UnitTesting'
+                                           , tool_name='Spark'
+                                           , sources='Unittests'
+                                           , targets='Unittests')
+
+        dependent_process.change_run_status(new_status='completed')
+        self.process_tracker.change_run_status(new_status='completed')
+        self.data_store.get_or_create(model=ProcessDependency
+                                      , parent_process_id=dependent_process.process_tracking_run.process_id
+                                      , child_process_id=self.process_id)
+
+        self.process_tracker.register_new_process_run()
+
+        given_count = self.session.query(ProcessTracking) \
+                                  .filter(ProcessTracking.process_id == self.process_id) \
+                                  .count()
+
+        expected_count = 2
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_register_new_process_run_dependencies_running(self):
+        """
+        Testing that for a given process, if there are running dependencies, then the process run is prevented from starting.
+        :return:
+        """
+        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency Running'
+                                           , process_type='Extract'
+                                           , actor_name='UnitTesting'
+                                           , tool_name='Spark'
+                                           , sources='Unittests'
+                                           , targets='Unittests')
+
+        dependent_process.change_run_status(new_status='running')
+        self.process_tracker.change_run_status(new_status='completed')
+        self.data_store.get_or_create(model=ProcessDependency
+                                      , parent_process_id=dependent_process.process_tracking_run.process_id
+                                      , child_process_id=self.process_id)
+
+        with self.assertRaises(Exception) as context:
+            self.process_tracker.register_new_process_run()
+
+        return self.assertTrue('Processes that this process is dependent on are running or failed.' in str(context.exception))
+
+    def test_register_new_process_run_dependencies_failed(self):
+        """
+        Testing that for a given process, if there are failed dependencies, then the process run is prevented from starting.
+        :return:
+        """
+        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency Failed'
+                                           , process_type='Extract'
+                                           , actor_name='UnitTesting'
+                                           , tool_name='Spark'
+                                           , sources='Unittests'
+                                           , targets='Unittests')
+
+        dependent_process.change_run_status(new_status='failed')
+        self.process_tracker.change_run_status(new_status='completed')
+        self.data_store.get_or_create(model=ProcessDependency
+                                      , parent_process_id=dependent_process.process_tracking_run.process_id
+                                      , child_process_id=self.process_id)
+
+        with self.assertRaises(Exception) as context:
+            self.process_tracker.register_new_process_run()
+
+        return self.assertTrue('Processes that this process is dependent on are running or failed.' in str(context.exception))
 
     def test_register_process_sources_one_source(self):
         """

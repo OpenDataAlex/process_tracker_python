@@ -3,7 +3,7 @@
 import unittest
 
 from process_tracker.models.extract import Extract, ExtractProcess, Location
-from process_tracker.models.process import Process, ProcessSource, ProcessTarget, ProcessTracking
+from process_tracker.models.process import Process, ProcessDependency, ProcessSource, ProcessTarget, ProcessTracking
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -32,6 +32,7 @@ class TestExtractTracking(unittest.TestCase):
         cls.session.query(ProcessTracking).delete()
         cls.session.query(ProcessSource).delete()
         cls.session.query(ProcessTarget).delete()
+        cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
 
