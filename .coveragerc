@@ -1,4 +1,5 @@
 [report]
 omit =
     home/*
+    travis/*
     tests/*
