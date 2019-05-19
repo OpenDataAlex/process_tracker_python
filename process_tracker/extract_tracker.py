@@ -69,14 +69,9 @@ class ExtractTracker:
 
         self.extract_process = self.retrieve_extract_process()
 
-        if status is not None and self.extract_status_types[status]:
-            self.logger.info('Setting extract status to %s' % status)
-            self.extract.extract_status_id = self.extract_status_types[status]
-            self.extract_process.extract_process_status_id = self.extract_status_types[status]
+        if status is not None:
+            self.change_extract_status(new_status=status)
         else:
-            if status is not None:
-                self.logger.error('Provided status %s is not in extract_status_types_lkup.  '
-                                  'Setting to initializing.' % status)
             self.extract.extract_status_id = self.extract_status_initializing
 
         self.session.commit()
@@ -86,10 +81,13 @@ class ExtractTracker:
         Change an extract record status.
         :return:
         """
-        status_date = datetime.now()
-        new_status = self.extract_status_types[new_status]
 
-        if new_status:
+        status_date = datetime.now()
+        if new_status in self.extract_status_types:
+            self.logger.info('Setting extract status to %s' % new_status)
+
+            new_status = self.extract_status_types[new_status]
+
             self.extract.extract_status_id = new_status
 
             self.extract_process.extract_process_status_id = new_status

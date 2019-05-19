@@ -57,6 +57,19 @@ class TestExtractTracking(unittest.TestCase):
         self.session.query(Location).delete()
         self.session.commit()
 
+    def test_initialization_no_location_no_location_path(self):
+        """
+        Testing that if no location or location path is set, an error is thrown.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+            # Running registration a second time to mimic job being run twice
+            ExtractTracker(process_run=self.process_run
+                           , filename='test_extract_filename.csv')
+
+        return self.assertTrue('A location object or location_path must be provided.' in str(context.exception))
+
     def test_change_extract_status(self):
         """
         Testing that when changing the extract status, the extract record and extract process record updates
@@ -76,6 +89,19 @@ class TestExtractTracking(unittest.TestCase):
                            , self.extract.extract_status_ready]
 
         self.assertEqual(expected_result, given_result)
+
+    def test_change_extract_status_invalid_type(self):
+        """
+        When trying to change a extract's status and the status is an invalid type, throw and error.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+            # Running registration a second time to mimic job being run twice
+            self.extract.change_extract_status(new_status='blarg')
+
+        return self.assertTrue('blarg is not a valid extract status type.  '
+                               'Please add the status to extract_status_lkup' in str(context.exception))
 
     def test_change_extract_status_initialization(self):
         """
