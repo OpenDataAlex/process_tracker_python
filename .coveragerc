@@ -1,5 +1,4 @@
 [run]
-branch = True
 source = process_tracker/
 [report]
 omit =
