@@ -1,8 +1,7 @@
 [run]
 branch = True
-source = process_tracker
+source = process_tracker/
 [report]
 omit =
     home/*
-    travis/*
     tests/*
