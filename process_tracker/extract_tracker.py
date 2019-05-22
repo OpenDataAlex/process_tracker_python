@@ -45,9 +45,9 @@ class ExtractTracker:
         else:
             raise Exception('A location object or location_path must be provided.')
 
-        self.extract = self.data_store.get_or_create(model=Extract
-                                                     , extract_filename=filename
-                                                     , extract_location_id=self.location.location.location_id)
+        self.extract = self.data_store.get_or_create_item(model=Extract
+                                                          , extract_filename=filename
+                                                          , extract_location_id=self.location.location.location_id)
 
         if location_path is not None:
             self.full_filename = join(location_path, filename)
@@ -117,10 +117,10 @@ class ExtractTracker:
         :return:
         """
 
-        extract_process = self.data_store.get_or_create(model=ExtractProcess
-                                                        , extract_tracking_id=self.extract.extract_id
-                                                        , process_tracking_id=self.process_run.process_tracking_run
-                                                                                              .process_tracking_id)
+        extract_process = self.data_store.get_or_create_item(model=ExtractProcess
+                                                             , extract_tracking_id=self.extract.extract_id
+                                                             , process_tracking_id=self.process_run.process_tracking_run
+                                                             .process_tracking_id)
 
         # Only need to set to 'initializing' when it's the first time a process run is trying to work with files.
         if extract_process.extract_process_status_id is None:

@@ -47,7 +47,7 @@ class ProcessStatus(Base):
 
     __tablename__ = 'process_status_lkup'
 
-    process_status_id = Column(Integer, primary_key=True)
+    process_status_id = Column(Integer, Sequence('process_status_lkup_process_status_id_seq'), primary_key=True)
     process_status_name = Column(String(75), nullable=False, unique=True)
 
     def __repr__(self):

@@ -1,11 +1,13 @@
 import setuptools
 
+from process_tracker import __version__
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="processtracker",
-    version="0.0.1",
+    version=__version__,
     author="Alex Meadows",
     author_email="alexmeadows@bluefiredatasolutions.com",
     description="A framework for managing data integration processes and their data",
@@ -16,6 +18,7 @@ setuptools.setup(
     test_suite='tests.process_tracker_test_suite',
     install_requires=[
         'boto3 >= 1.9.150',
+        'Click >= 7.0',
         'sqlalchemy >= 1.3.3',
         'sqlalchemy-utils >= 0.33.11',
         'python-dateutil >= 2.8.0',
@@ -28,6 +31,9 @@ setuptools.setup(
             'python-coveralls >= 2.9.1',
             'coveralls >= 1.7.0',
         ]
+    },
+    entry_points = {
+      'console_scripts': ['process_tracker=process_tracker.cli:main']
     },
     classifiers=[
         "Programming Language :: Python :: 3",

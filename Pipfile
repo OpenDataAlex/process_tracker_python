@@ -11,6 +11,7 @@ coveralls="*"
 
 [packages]
 boto3="*"
+Click="*"
 sqlalchemy="*"
 sqlalchemy-utils="*"
 python-dateutil="*"

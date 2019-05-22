@@ -15,7 +15,7 @@ from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
 
 
-class TestProcessTracking(unittest.TestCase):
+class TestProcessTracker(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -415,9 +415,9 @@ class TestProcessTracking(unittest.TestCase):
 
         dependent_process.change_run_status(new_status='completed')
         self.process_tracker.change_run_status(new_status='completed')
-        self.data_store.get_or_create(model=ProcessDependency
-                                      , parent_process_id=dependent_process.process_tracking_run.process_id
-                                      , child_process_id=self.process_id)
+        self.data_store.get_or_create_item(model=ProcessDependency
+                                           , parent_process_id=dependent_process.process_tracking_run.process_id
+                                           , child_process_id=self.process_id)
 
         self.process_tracker.register_new_process_run()
 
@@ -443,9 +443,9 @@ class TestProcessTracking(unittest.TestCase):
 
         dependent_process.change_run_status(new_status='running')
         self.process_tracker.change_run_status(new_status='completed')
-        self.data_store.get_or_create(model=ProcessDependency
-                                      , parent_process_id=dependent_process.process_tracking_run.process_id
-                                      , child_process_id=self.process_id)
+        self.data_store.get_or_create_item(model=ProcessDependency
+                                           , parent_process_id=dependent_process.process_tracking_run.process_id
+                                           , child_process_id=self.process_id)
 
         with self.assertRaises(Exception) as context:
             self.process_tracker.register_new_process_run()
@@ -466,9 +466,9 @@ class TestProcessTracking(unittest.TestCase):
 
         dependent_process.change_run_status(new_status='failed')
         self.process_tracker.change_run_status(new_status='completed')
-        self.data_store.get_or_create(model=ProcessDependency
-                                      , parent_process_id=dependent_process.process_tracking_run.process_id
-                                      , child_process_id=self.process_id)
+        self.data_store.get_or_create_item(model=ProcessDependency
+                                           , parent_process_id=dependent_process.process_tracking_run.process_id
+                                           , child_process_id=self.process_id)
 
         with self.assertRaises(Exception) as context:
             self.process_tracker.register_new_process_run()

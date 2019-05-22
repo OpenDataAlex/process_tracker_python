@@ -13,7 +13,7 @@ class ExtractStatus(Base):
 
     __tablename__ = "extract_status_lkup"
 
-    extract_status_id = Column(Integer, Sequence('extract_status_lkup_status_id_seq'), primary_key=True)
+    extract_status_id = Column(Integer, Sequence('extract_status_lkup_extract_status_id_seq'), primary_key=True)
     extract_status_name = Column(String(75), nullable=False, unique=True)
 
     extracts = relationship("ExtractProcess")

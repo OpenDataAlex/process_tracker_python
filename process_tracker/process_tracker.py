@@ -37,13 +37,13 @@ class ProcessTracker:
         self.data_store = DataStore()
         self.session = self.data_store.session
 
-        self.actor = self.data_store.get_or_create(model=Actor, actor_name=actor_name)
-        self.process_type = self.data_store.get_or_create(model=ProcessType, process_type_name=process_type)
-        self.tool = self.data_store.get_or_create(model=Tool, tool_name=tool_name)
+        self.actor = self.data_store.get_or_create_item(model=Actor, actor_name=actor_name)
+        self.process_type = self.data_store.get_or_create_item(model=ProcessType, process_type_name=process_type)
+        self.tool = self.data_store.get_or_create_item(model=Tool, tool_name=tool_name)
 
-        self.process = self.data_store.get_or_create(model=Process, process_name=process_name
-                                                     , process_type_id=self.process_type.process_type_id
-                                                     , process_tool_id=self.tool.tool_id)
+        self.process = self.data_store.get_or_create_item(model=Process, process_name=process_name
+                                                          , process_type_id=self.process_type.process_type_id
+                                                          , process_tool_id=self.tool.tool_id)
 
         self.sources = self.register_process_sources(sources=sources)
         self.targets = self.register_process_targets(targets=targets)
@@ -206,7 +206,7 @@ class ProcessTracker:
         if error_description is None:
             error_description = 'Unspecified error.'
 
-        error_type = self.data_store.get_or_create(model=ErrorType, create=False, error_type_name=error_type_name)
+        error_type = self.data_store.get_or_create_item(model=ErrorType, create=False, error_type_name=error_type_name)
 
         run_error = ErrorTracking(error_type_id=error_type.error_type_id
                                   , error_description=error_description
@@ -319,10 +319,10 @@ class ProcessTracker:
         source_list = []
 
         for source in sources:
-            source = self.data_store.get_or_create(model=Source, source_name=source)
+            source = self.data_store.get_or_create_item(model=Source, source_name=source)
 
-            self.data_store.get_or_create(model=ProcessSource, source_id=source.source_id
-                                          , process_id=self.process.process_id)
+            self.data_store.get_or_create_item(model=ProcessSource, source_id=source.source_id
+                                               , process_id=self.process.process_id)
 
             source_list.append(source)
         return source_list
@@ -338,10 +338,10 @@ class ProcessTracker:
         target_list = []
 
         for target in targets:
-            source = self.data_store.get_or_create(model=Source, source_name=target)
+            source = self.data_store.get_or_create_item(model=Source, source_name=target)
 
-            self.data_store.get_or_create(model=ProcessTarget, target_source_id=source.source_id
-                                          , process_id=self.process.process_id)
+            self.data_store.get_or_create_item(model=ProcessTarget, target_source_id=source.source_id
+                                               , process_id=self.process.process_id)
 
             target_list.append(source)
         return target_list

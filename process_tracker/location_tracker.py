@@ -21,10 +21,10 @@ class LocationTracker:
             self.location_name = location_name
 
         self.location_type = self.derive_location_type()
-        self.location = self.data_store.get_or_create(model=Location
-                                                      , location_name=self.location_name
-                                                      , location_path=location_path
-                                                      , location_type=self.location_type.location_type_id)
+        self.location = self.data_store.get_or_create_item(model=Location
+                                                           , location_name=self.location_name
+                                                           , location_path=location_path
+                                                           , location_type=self.location_type.location_type_id)
 
     def derive_location_name(self):
         """
@@ -58,11 +58,11 @@ class LocationTracker:
 
         if "s3" in self.location_path or "s3" in self.location_name:
 
-            location_type = self.data_store.get_or_create(model=LocationType
-                                                          , location_type_name="s3")
+            location_type = self.data_store.get_or_create_item(model=LocationType
+                                                               , location_type_name="s3")
 
         else:
-            location_type = self.data_store.get_or_create(model=LocationType
-                                                          , location_type_name="local directory")
+            location_type = self.data_store.get_or_create_item(model=LocationType
+                                                               , location_type_name="local directory")
 
         return location_type
