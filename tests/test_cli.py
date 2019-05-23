@@ -1,5 +1,6 @@
 from click.testing import CliRunner
 import unittest
+import time
 
 import process_tracker.cli
 from process_tracker.data_store import DataStore
@@ -31,6 +32,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t actor -n "Test Test"')
 
+        time.sleep(2)
+
         instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
         given_name = instance.actor_name
 
@@ -45,6 +48,8 @@ class TestCli(unittest.TestCase):
         :return:
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t "extract status" -n "New Status"')
+
+        time.sleep(2)
 
         instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'New Status').first()
         given_name = instance.extract_status_name
