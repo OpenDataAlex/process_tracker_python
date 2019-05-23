@@ -71,11 +71,5 @@ def delete(topic, name):
 @click.option('-n', '--name', help='The new name for the topic.')
 def update(topic, initial_name, name):
 
-    topic = data_store.topic_validator(topic)
-
-    if topic:
-        click.echo('Attempting to update %s with name %s to %s' % (topic, initial_name, name))
-        item = data_store.get_item(topic=topic, name=initial_name)
-        data_store.topic_updater(topic=topic, item=item, name=name)
-    else:
-        raise Exception('Invalid topic type.')
+    click.echo('Attempting to update %s with name %s to %s' % (topic, initial_name, name))
+    data_store.topic_updater(topic=topic, initial_name=initial_name, name=name)

@@ -37,33 +37,6 @@ class DataStore:
         self.data_store_port = data_store['data_store_port']
         self.data_store_name = data_store['data_store_name']
 
-    def get_item(self, topic, name):
-        """
-        For the command line tool, find the given item and return it.  Intentionally not as flexible as
-        get_or_create_item.
-        :param topic:
-        :param name:
-        :return:
-        """
-        if topic == Actor:
-            item = self.get_or_create_item(model=topic, create=False, actor_name=name)
-        elif topic == ExtractStatus and name not in preload_extract_status_types:
-            item = self.get_or_create_item(model=topic, create=False, extract_status_name=name)
-        elif topic == ErrorType and name not in preload_error_types:
-            item = self.get_or_create_item(model=topic, create=False, error_type_name=name)
-        elif topic == ProcessType and name not in preload_process_types:
-            item = self.get_or_create_item(model=topic, create=False, process_type_name=name)
-        elif topic == ProcessStatus and name not in preload_process_status_types:
-            item = self.get_or_create_item(model=topic, create=False, process_status_name=name)
-        elif topic == Source:
-            item = self.get_or_create_item(model=topic, create=False, source_name=name)
-        elif topic == Tool:
-            item = self.get_or_create_item(model=topic, create=False, tool_name=name)
-        else:
-            ClickException('The item is a protected record.').show()
-
-        return item
-
     def get_or_create_item(self, model, create=True, **kwargs):
         """
         Testing if an entity instance exists or not.  If does, return entity key.  If not, create entity instance
@@ -218,37 +191,50 @@ class DataStore:
         if item_delete:
             self.session.commit()
 
-    @staticmethod
-    def topic_updater(topic, item, name):
+    def topic_updater(self, topic, initial_name, name):
         """
         For the command line tool, validate that the topic name is not a default value and if not, update it.
-        :param topic: The SQLAlchemy object type
-        :type topic: SQLAlchemy object
-        :param item: The SQLALchemy record to be updated.
-        :type item: SQLAlchemy record
-        :param name: The name of the item to be deleted.
-        :type name: str
+        :param topic: name of the SQLAlchemy object
+        :type topic: string
+        :param initial_name: The name of the object to be updated.
+        :type initial_name: string
+        :param name: The updated name of the object to be updated.
+        :type name: string
         :return:
         """
-        if topic == Actor:
-            item.actor_name = name
-        elif topic == ExtractStatus and item.extract_status_name not in preload_extract_status_types:
-            item.extract_status_name = name
-        elif topic == ErrorType and item.error_type_name not in preload_error_types:
-            item.error_type_name = name
-        elif topic == ProcessType and item.process_type_name not in preload_process_types:
-            item.process_type_name = name
-        elif topic == ProcessStatus and item.process_status_name not in preload_process_status_types:
-            item.process_status_name = name
-        elif topic == Source:
-            item.source_name = name
-        elif topic == Tool:
-            item.tool_name = name
-        else:
-            raise Exception('The item could not be updated because it is a protected record.')
+        if self.topic_validator(topic=topic):
+            if topic == 'actor':
+                item = self.get_or_create_item(model=Actor, create=False, actor_name=initial_name)
+                item.actor_name = name
 
-        item_session = Session.object_session(item)
-        item_session.commit()
+            elif topic == 'extract status' and initial_name not in preload_extract_status_types:
+                item = self.get_or_create_item(model=ExtractStatus, create=False, extract_status_name=initial_name)
+                item.extract_status_name = name
+
+            elif topic == 'error type' and initial_name not in preload_error_types:
+                item = self.get_or_create_item(model=ErrorType, create=False, error_type_name=initial_name)
+                item.error_type_name = name
+
+            elif topic == 'process type' and initial_name not in preload_process_types:
+                item = self.get_or_create_item(model=ProcessType, create=False, process_type_name=initial_name)
+                item.process_type_name = name
+
+            elif topic == 'process status' and initial_name not in preload_process_status_types:
+                item = self.get_or_create_item(model=ProcessStatus, create=False, process_status_name=initial_name)
+                item.process_status_name = name
+            elif topic == 'source':
+                item = self.get_or_create_item(model=Source, create=False, source_name=initial_name)
+                item.source_name = name
+            elif topic == 'tool':
+                item = self.get_or_create_item(model=Tool, create=False, tool_name=initial_name)
+                item.tool_name = name
+            else:
+                ClickException('The item could not be updated because it is a protected record.').show()
+
+            self.session.commit()
+
+        else:
+            ClickException('Invalid topic.  Unable to update instance.').show()
 
     def topic_validator(self, topic):
         """
