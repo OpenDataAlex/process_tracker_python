@@ -225,14 +225,14 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename5-1.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+                                 , filename='test_extract_filename5-1.csv'
+                                 , location_name='Test Location'
+                                 , location_path='/home/test/extract_dir')
 
         extract2 = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename5-2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+                                  , filename='test_extract_filename5-2.csv'
+                                  , location_name='Test Location'
+                                  , location_path='/home/test/extract_dir')
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -248,7 +248,7 @@ class TestProcessTracker(unittest.TestCase):
 
         given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
 
-        self.assertEqual(expected_result, given_result)
+        self.assertEqual(sorted(expected_result), sorted(given_result))
 
     def test_find_ready_extracts_by_process_not_descending(self):
         """

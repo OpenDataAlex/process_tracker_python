@@ -325,7 +325,6 @@ class TestCli(unittest.TestCase):
         expected_result = 'The item could not be updated because it is a protected record.'
 
         self.assertIn(expected_result, result.output)
-        self.assertEqual(0, result.exit_code)
 
     def test_update_error_type(self):
         """
@@ -353,7 +352,6 @@ class TestCli(unittest.TestCase):
         expected_result = 'The item could not be updated because it is a protected record.'
 
         self.assertIn(expected_result, result.output)
-        self.assertEqual(0, result.exit_code)
 
     def test_update_process_type(self):
         """
@@ -381,7 +379,6 @@ class TestCli(unittest.TestCase):
         expected_result = 'The item could not be updated because it is a protected record.'
 
         self.assertIn(expected_result, result.output)
-        self.assertEqual(0, result.exit_code)
 
     def test_update_process_status(self):
         """
@@ -410,7 +407,6 @@ class TestCli(unittest.TestCase):
         expected_result = 'The item could not be updated because it is a protected record.'
 
         self.assertIn(expected_result, result.output)
-        self.assertEqual(0, result.exit_code)
 
     def test_update_source(self):
         """
