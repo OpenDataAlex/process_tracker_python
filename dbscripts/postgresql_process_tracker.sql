@@ -15,10 +15,6 @@ create schema process_tracking;
 
 alter schema process_tracking owner to pt_admin;
 
-create sequence actor_lkup_actor_id_seq;
-
-alter sequence actor_lkup_actor_id_seq owner to pt_admin;
-
 create table error_type_lkup
 (
 	error_type_id serial not null
