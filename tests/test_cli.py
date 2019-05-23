@@ -31,8 +31,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t actor -n "Test Test"')
 
-        instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test')
-        given_name = instance[0].actor_name
+        instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
+        given_name = instance.actor_name
 
         self.runner.invoke(process_tracker.cli.main, 'delete -t actor -n "Test Test"')
 
@@ -46,8 +46,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t "extract status" -n "New Status"')
 
-        instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'New Status')
-        given_name = instance[0].extract_status_name
+        instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'New Status').first()
+        given_name = instance.extract_status_name
         self.runner.invoke(process_tracker.cli.main, 'delete -t "extract status" -n "New Status"')
 
         self.assertEqual('New Status', given_name)
@@ -61,8 +61,8 @@ class TestCli(unittest.TestCase):
 
         result = self.runner.invoke(process_tracker.cli.main, 'create -t "error type" -n "New Error Type"')
 
-        instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type')
-        given_name = instance[0].error_type_name
+        instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type').first()
+        given_name = instance.error_type_name
 
         self.runner.invoke(process_tracker.cli.main, 'delete -t "error type" -n "New Error Type"')
 
@@ -76,8 +76,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t "process type" -n "New Process Type"')
 
-        instance = self.session.query(ProcessType).filter(ProcessType.process_type_name == 'New Process Type')
-        given_name = instance[0].process_type_name
+        instance = self.session.query(ProcessType).filter(ProcessType.process_type_name == 'New Process Type').first()
+        given_name = instance.process_type_name
 
         self.runner.invoke(process_tracker.cli.main, 'delete -t "process type" -n "New Process Type"')
 
@@ -91,8 +91,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t "process status" -n "New Status Type"')
 
-        instance = self.session.query(ProcessStatus).filter(ProcessStatus.process_status_name == 'New Status Type')
-        given_name = instance[0].process_status_name
+        instance = self.session.query(ProcessStatus).filter(ProcessStatus.process_status_name == 'New Status Type').first()
+        given_name = instance.process_status_name
 
         self.runner.invoke(process_tracker.cli.main, 'delete -t "process status" -n "New Status Type"')
 
@@ -106,8 +106,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t source -n "New Source"')
 
-        instance = self.session.query(Source).filter(Source.source_name == 'New Source')
-        given_name = instance[0].source_name
+        instance = self.session.query(Source).filter(Source.source_name == 'New Source').first()
+        given_name = instance.source_name
 
         self.runner.invoke(process_tracker.cli.main, 'delete -t "source" -n "New Source"')
 
@@ -121,8 +121,8 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(process_tracker.cli.main, 'create -t tool -n "New Tool"')
 
-        instance = self.session.query(Tool).filter(Tool.tool_name == 'New Tool')
-        given_name = instance[0].tool_name
+        instance = self.session.query(Tool).filter(Tool.tool_name == 'New Tool').first()
+        given_name = instance.tool_name
 
         self.runner.invoke(process_tracker.cli.main, 'delete -t "tool" -n "New Tool"')
 
