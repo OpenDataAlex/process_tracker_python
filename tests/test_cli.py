@@ -14,10 +14,14 @@ from process_tracker.models.tool import Tool
 
 class TestCli(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
 
+        cls.data_store = DataStore()
+        cls.session = cls.data_store.session
+
+    def setUp(self):
         self.runner = CliRunner()
-        self.session = DataStore().session
 
     # def test_setup(self):
     #
@@ -145,12 +149,10 @@ class TestCli(unittest.TestCase):
         :return:
         """
         self.runner.invoke(process_tracker.cli.main, 'create -t actor -n "Test Test"')
-        instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
-        print(instance.actor_name)
         result = self.runner.invoke(process_tracker.cli.main, 'delete -t actor -n "Test Test"')
 
         instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
-
+        print(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
 

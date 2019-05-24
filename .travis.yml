@@ -10,6 +10,8 @@ script:
 - make test
 after_success:
 - coveralls
+after_failure:
+-
 before_script:
 - psql -f dbscripts/postgresql_account_create.sql -U postgres
 - psql -f dbscripts/postgresql_process_tracker.sql process_tracking -U postgres

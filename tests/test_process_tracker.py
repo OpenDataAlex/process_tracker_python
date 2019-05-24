@@ -1,6 +1,7 @@
 # Tests for validating process_tracking works as expected.
 
 from datetime import datetime, timedelta
+import time
 import unittest
 from unittest.mock import patch
 
@@ -261,6 +262,8 @@ class TestProcessTracker(unittest.TestCase):
                                  , location_name='Test Location'
                                  , location_path='/home/test/extract_dir')
 
+        time.sleep(3)
+
         extract2 = ExtractTracker(process_run=self.process_tracker
                                   , filename='test_extract_filename5-2.csv'
                                   , location_name='Test Location'
@@ -272,6 +275,7 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
+        extract2.extract.extract_registration_date_time = datetime.now()  # Records were being committed too close together.
         session = Session.object_session(extract2.extract)
         session.commit()
 
