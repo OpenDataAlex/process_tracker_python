@@ -19,6 +19,7 @@ setuptools.setup(
     install_requires=[
         'boto3 >= 1.9.150',
         'Click >= 7.0',
+        'google-compute-engine >= 2.8.13',
         'sqlalchemy >= 1.3.3',
         'sqlalchemy-utils >= 0.33.11',
         'python-dateutil >= 2.8.0',

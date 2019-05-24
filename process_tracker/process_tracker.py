@@ -33,7 +33,7 @@ class ProcessTracker:
         """
 
         self.logger = logging.getLogger(__name__)
-        self.logger.level(os.environ.get('log_level', 'error').upper())
+        self.logger.level(os.environ.get('log_level', 'ERROR'))
 
         self.data_store = DataStore()
         self.session = self.data_store.session

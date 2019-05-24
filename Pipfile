@@ -16,6 +16,7 @@ sqlalchemy="*"
 sqlalchemy-utils="*"
 python-dateutil="*"
 psycopg2-binary="*"
+google-compute-engine = "*"
 
 [requires]
 python_version = "3.7"
