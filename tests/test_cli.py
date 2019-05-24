@@ -30,12 +30,12 @@ class TestCli(unittest.TestCase):
         Testing that when creating an actor record it is added.
         :return:
         """
-        result = self.runner.invoke(main, 'create -t actor -n "Test Test"')
+        result = self.runner.invoke(main, ['create',  '-t', 'actor', '-n', "Test Test"])
 
         instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
         given_name = instance.actor_name
 
-        self.runner.invoke(main, 'delete -t actor -n "Test Test"')
+        self.runner.invoke(main, ['delete', '-t', 'actor', '-n', "Test Test"])
 
         self.assertEqual('Test Test', given_name)
         self.assertEqual(0, result.exit_code)
@@ -45,11 +45,11 @@ class TestCli(unittest.TestCase):
         Testing that when creating an extract status record it is added.
         :return:
         """
-        result = self.runner.invoke(main, 'create -t "extract status" -n "New Status"')
+        result = self.runner.invoke(main, ['create', '-t', "extract status", '-n', "New Status"])
 
         instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'New Status').first()
         given_name = instance.extract_status_name
-        self.runner.invoke(main, 'delete -t "extract status" -n "New Status"')
+        self.runner.invoke(main, ['delete', '-t', "extract status", '-n', "New Status"])
 
         self.assertEqual('New Status', given_name)
         self.assertEqual(0, result.exit_code)
