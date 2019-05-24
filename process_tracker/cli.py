@@ -9,7 +9,7 @@ from process_tracker.data_store import DataStore
 
 data_store = DataStore()
 logger = logging.getLogger('Process Tracker')
-logger.setLevel(os.environ.get('log_level', 'ERROR'))
+logger.setLevel(os.environ.get('log_level', 'INFO'))
 
 
 @click.group()

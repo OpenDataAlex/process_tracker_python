@@ -12,7 +12,7 @@ class LocationTracker:
 
     def __init__(self, location_path, location_name=None):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(os.environ.get('log_level', 'ERROR'))
+        self.logger.setLevel(os.environ.get('log_level', 'INFO'))
 
         self.data_store = DataStore()
 

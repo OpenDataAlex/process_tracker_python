@@ -14,13 +14,9 @@ from process_tracker.models.tool import Tool
 
 class TestCli(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-
-        cls.data_store = DataStore()
-        cls.session = cls.data_store.session
-
     def setUp(self):
+        self.data_store = DataStore()
+        self.session = self.data_store.session
         self.runner = CliRunner()
 
     # def test_setup(self):
