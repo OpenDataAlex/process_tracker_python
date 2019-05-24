@@ -1,6 +1,7 @@
 # Location
 # For processes dealing with Extract Locations.
-
+import logging
+import os
 from os.path import basename, normpath
 
 from process_tracker.data_store import DataStore
@@ -10,6 +11,8 @@ from process_tracker.models.extract import Location, LocationType
 class LocationTracker:
 
     def __init__(self, location_path, location_name=None):
+        self.logger = logging.getLogger(__name__)
+        self.logger.level(os.environ.get('log_level', 'error').upper())
 
         self.data_store = DataStore()
 

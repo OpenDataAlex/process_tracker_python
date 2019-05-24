@@ -1,11 +1,14 @@
 # Tests for validating process_tracking works as expected.
 
 from datetime import datetime, timedelta
+import os
 import time
 import unittest
 from unittest.mock import patch
 
 import boto3
+import botocore
+import moto
 from sqlalchemy.orm import aliased, Session
 
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
@@ -15,7 +18,9 @@ from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
 
+test_bucket = "test_bucket"
 
+#@mock_s3
 class TestProcessTracker(unittest.TestCase):
 
     @classmethod
@@ -23,6 +28,28 @@ class TestProcessTracker(unittest.TestCase):
         cls.data_store = DataStore()
         cls.session = cls.data_store.session
         cls.data_store_type = cls.data_store.data_store_type
+
+        # cls.client = boto3.client("s3"
+        #                           , region_name="us_east-1"
+        #                           , aws_access_key_id="fake_access_key"
+        #                           , aws_secret_access_key="fake_secret_key")
+        #
+        # try:
+        #     cls.s3 = boto3.resource("s3"
+        #                         , region_name="us_east-1"
+        #                         , aws_access_key_id="fake_access_key"
+        #                         , aws_secret_access_key="fake_secret_key")
+        #     cls.s3.meta.client.head_bucket(Bucket=test_bucket)
+        # except botocore.exceptions.ClientError:
+        #     pass
+        # else:
+        #     err = "{bucket} should not exist.".format(bucket=test_bucket)
+        #     raise EnvironmentError(err)
+        #
+        # cls.client.create_bucket(Bucket=test_bucket)
+        # current_dir = os.path.dirname(__file__)
+        # fixtures_dir = os.path.join(current_dir, "fixtures")
+        # _upload_fixtures(test_bucket, fixtures_dir)
 
     @classmethod
     def tearDownClass(cls):
@@ -32,6 +59,11 @@ class TestProcessTracker(unittest.TestCase):
         cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
+
+        # bucket = cls.s3.Bucket(test_bucket)
+        # for key in bucket.objects.all():
+        #     key.delete()
+        # bucket.delete()
 
     def setUp(self):
         """
@@ -337,6 +369,8 @@ class TestProcessTracker(unittest.TestCase):
     #
     #     expected_keys = 'test_local_dir_1.csv', 'test_local_dir_2.csv'
     #
+    #     client
+    #
     #     with moto.mock_s3():
     #         conn = boto3.resource('s3', region_name='us-east-1')
     #         conn.create_bucket(Bucket='test_bucket')
@@ -356,7 +390,7 @@ class TestProcessTracker(unittest.TestCase):
     #                     ,[extracts[1].extract_filename, extracts[1].extract_status_name, extracts[1].extract_status_name]]
     #
     #     expected_result = [['test_local_dir_1.csv', 'ready', 'ready']
-    #                       ,['test_local_dir_2.csv', 'ready', 'ready']]
+    #                        , ['test_local_dir_2.csv', 'ready', 'ready']]
     #
     #     self.assertEqual(expected_result, given_result)
 

@@ -2,6 +2,7 @@
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
 import logging
+import os
 from os.path import join
 
 from sqlalchemy.orm import Session
@@ -31,6 +32,7 @@ class ExtractTracker:
         :type status: string
         """
         self.logger = logging.getLogger(__name__)
+        self.logger.level(os.environ.get('log_level', 'error').upper())
 
         self.data_store = DataStore()
         self.session = self.data_store.session

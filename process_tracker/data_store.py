@@ -28,6 +28,7 @@ class DataStore:
         Need to initialize the data store connection when starting to access the data store.
         """
         self.logger = logging.getLogger(__name__)
+        self.logger.level(os.environ.get('log_level', 'error').upper())
 
         data_store = self.verify_and_connect_to_data_store()
         self.session = data_store['session']
@@ -120,26 +121,38 @@ class DataStore:
         :param name:
         :return:
         """
+        self.logger.info('Attempting to create %s item: %s' % (topic, name))
 
         if self.topic_validator(topic=topic):
             if topic == 'actor':
                 item = self.get_or_create_item(model=Actor, actor_name=name)
+                self.logger.info('Actor created: %s' % item.__repr__)
             elif topic == 'extract status':
                 item = self.get_or_create_item(model=ExtractStatus, extract_status_name=name)
+                self.logger.info('Extract Status created: %s' % item.__repr__)
             elif topic == 'error type':
                 item = self.get_or_create_item(model=ErrorType, error_type_name=name)
+                self.logger.info('Error Type created: %s' % item.__repr__)
             elif topic == 'process type':
                 item = self.get_or_create_item(model=ProcessType, process_type_name=name)
+                self.logger.info('Process Type created: %s' % item.__repr__)
             elif topic == 'process status':
                 item = self.get_or_create_item(model=ProcessStatus, process_status_name=name)
+                self.logger.info('Process Status created: %s' % item.__repr__)
             elif topic == 'source':
                 item = self.get_or_create_item(model=Source, source_name=name)
+                self.logger.info('Source created: %s' % item.__repr__)
             elif topic == 'tool':
                 item = self.get_or_create_item(model=Tool, tool_name=name)
+                self.logger.info('Tool created: %s' % item.__repr__)
             else:
                 ClickException('Invalid topic type.').show()
+
+                self.logger.error('Invalid topic type.')
         else:
             ClickException('Invalid topic type.').show()
+
+            self.logger.error('Invalid topic type.')
 
         return item
 
@@ -154,39 +167,50 @@ class DataStore:
         """
         item_delete = False
 
+        self.logger.info('Attempting to delete %s item %s' % (topic, name))
+
         if self.topic_validator(topic=topic):
             if topic == 'actor':
                 item_delete = True
                 self.session.query(Actor).filter(Actor.actor_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             elif topic == 'extract status' and name not in preload_extract_status_types:
                 item_delete = True
                 self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             elif topic == 'error type' and name not in preload_error_types:
                 item_delete = True
                 self.session.query(ErrorType).filter(ErrorType.error_type_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             elif topic == 'process type' and name not in preload_process_types:
                 item_delete = True
                 self.session.query(ProcessType).filter(ProcessType.process_type_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             elif topic == 'process status' and name not in preload_process_status_types:
                 item_delete = True
                 self.session.query(ProcessStatus).filter(ProcessStatus.process_status_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             elif topic == 'source':
                 item_delete = True
                 self.session.query(Source).filter(Source.source_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             elif topic == 'tool':
                 item_delete = True
                 self.session.query(Tool).filter(Tool.tool_name == name).delete()
+                self.logger.info('%s %s deleted.' % (topic, name))
 
             else:
                 ClickException('The item could not be deleted because it is a protected record.').show()
+                self.logger.error('%s %s could not be deleted because it is  a protected record.' % (topic, name))
         else:
             ClickException('Invalid topic.  Unable to delete instance.').show()
+            self.logger.error('%s is an invalid topic.  Unable to delete.' % topic)
 
         if item_delete:
             self.session.commit()
@@ -206,35 +230,47 @@ class DataStore:
             if topic == 'actor':
                 item = self.get_or_create_item(model=Actor, create=False, actor_name=initial_name)
                 item.actor_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
 
             elif topic == 'extract status' and initial_name not in preload_extract_status_types:
                 item = self.get_or_create_item(model=ExtractStatus, create=False, extract_status_name=initial_name)
                 item.extract_status_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
 
             elif topic == 'error type' and initial_name not in preload_error_types:
                 item = self.get_or_create_item(model=ErrorType, create=False, error_type_name=initial_name)
                 item.error_type_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
 
             elif topic == 'process type' and initial_name not in preload_process_types:
                 item = self.get_or_create_item(model=ProcessType, create=False, process_type_name=initial_name)
                 item.process_type_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
 
             elif topic == 'process status' and initial_name not in preload_process_status_types:
                 item = self.get_or_create_item(model=ProcessStatus, create=False, process_status_name=initial_name)
                 item.process_status_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
+
             elif topic == 'source':
                 item = self.get_or_create_item(model=Source, create=False, source_name=initial_name)
                 item.source_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
+
             elif topic == 'tool':
                 item = self.get_or_create_item(model=Tool, create=False, tool_name=initial_name)
                 item.tool_name = name
+                self.logger.info('%s %s updated.' % (topic, name))
+
             else:
                 ClickException('The item could not be updated because it is a protected record.').show()
+                self.logger.error('%s %s could not be updated because it is  a protected record.' % (topic, name))
 
             self.session.commit()
 
         else:
             ClickException('Invalid topic.  Unable to update instance.').show()
+            self.logger.error('%s is an invalid topic.  Unable to update.' % topic)
 
     def topic_validator(self, topic):
         """
