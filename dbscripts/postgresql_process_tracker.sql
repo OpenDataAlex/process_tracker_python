@@ -382,25 +382,3 @@ alter table system_lkup owner to pt_admin;
 
 create unique index system_lkup_system_key_uindex
 	on system_lkup (system_key);
-
-
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (1, 'initializing');
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (2, 'ready');
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (3, 'loading');
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (4, 'loaded');
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (5, 'archived');
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (6, 'deleted');
-INSERT INTO process_tracking.extract_status_lkup (extract_status_id, extract_status_name) VALUES (7, 'error');
-
-INSERT INTO process_tracking.process_status_lkup (process_status_id, process_status_name) VALUES (1, 'running');
-INSERT INTO process_tracking.process_status_lkup (process_status_id, process_status_name) VALUES (2, 'completed');
-INSERT INTO process_tracking.process_status_lkup (process_status_id, process_status_name) VALUES (3, 'failed');
-
-INSERT INTO process_tracking.error_type_lkup (error_type_id, error_type_name) VALUES (1, 'File Error');
-INSERT INTO process_tracking.error_type_lkup (error_type_id, error_type_name) VALUES (2, 'Data Error');
-INSERT INTO process_tracking.error_type_lkup (error_type_id, error_type_name) VALUES (3, 'Process Error');
-
-INSERT INTO process_tracking.process_type_lkup (process_type_id, process_type_name) VALUES (1, 'Extract');
-INSERT INTO process_tracking.process_type_lkup (process_type_id, process_type_name) VALUES (2, 'Load');
-
-INSERT INTO process_tracking.system_lkup (system_id, system_key, system_value) VALUES (1, 'version', '0.1.0');
