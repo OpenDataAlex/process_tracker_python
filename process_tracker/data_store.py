@@ -51,8 +51,7 @@ class DataStore:
         """
 
         instance = self.session.query(model).filter_by(**kwargs).first()
-
-        if not instance:
+        if instance is None:
 
             if create:
                 instance = model(**kwargs)
