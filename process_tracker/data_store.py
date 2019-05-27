@@ -52,12 +52,18 @@ class DataStore:
 
         instance = self.session.query(model).filter_by(**kwargs).first()
         if instance is None:
-
+            self.logger.info('instance not found create = '+ str(create)+'\n')
             if create:
+                self.logger.info('creating instance\n')
                 instance = model(**kwargs)
-                self.session.add(instance)
-                self.session.commit()
-
+                try:
+                    self.session.add(instance)
+                except Exception as e:
+                    self.logger.error(e)
+                try:
+                    self.session.commit()
+                except Exception as e:
+                    self.logger.error(e)
             else:
                 raise Exception('There is no record match in %s .' % model.__tablename__)
         else:
