@@ -28,7 +28,7 @@ class DataStore:
         Need to initialize the data store connection when starting to access the data store.
         """
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(os.environ.get('log_level', 'INFO'))
+        self.logger.setLevel(os.environ.get('log_level', 'DEBUG'))
 
         data_store = self.verify_and_connect_to_data_store()
         self.session = data_store['session']
