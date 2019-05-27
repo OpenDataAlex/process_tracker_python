@@ -32,7 +32,7 @@ class ExtractTracker:
         :type status: string
         """
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(os.environ.get('log_level', 'TRACE'))
+        self.logger.setLevel(os.environ.get('log_level', 'ERROR'))
 
         self.data_store = DataStore()
         self.session = self.data_store.session
