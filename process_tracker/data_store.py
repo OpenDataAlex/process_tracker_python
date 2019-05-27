@@ -129,28 +129,29 @@ class DataStore:
         self.logger.info('Attempting to create %s item: %s' % (topic, name))
 
         if self.topic_validator(topic=topic):
-            if topic == 'actor':
-                item = self.get_or_create_item(model=Actor, actor_name=name)
-                self.logger.info('Actor created: %s' % item.__repr__)
-            elif topic == 'extract status':
-                item = self.get_or_create_item(model=ExtractStatus, extract_status_name=name)
-                self.logger.info('Extract Status created: %s' % item.__repr__)
-            elif topic == 'error type':
-                item = self.get_or_create_item(model=ErrorType, error_type_name=name)
-                self.logger.info('Error Type created: %s' % item.__repr__)
-            elif topic == 'process type':
-                item = self.get_or_create_item(model=ProcessType, process_type_name=name)
-                self.logger.info('Process Type created: %s' % item.__repr__)
-            elif topic == 'process status':
-                item = self.get_or_create_item(model=ProcessStatus, process_status_name=name)
-                self.logger.info('Process Status created: %s' % item.__repr__)
-            elif topic == 'source':
-                item = self.get_or_create_item(model=Source, source_name=name)
-                self.logger.info('Source created: %s' % item.__repr__)
-            elif topic == 'tool':
-                item = self.get_or_create_item(model=Tool, tool_name=name)
-                self.logger.info('Tool created: %s' % item.__repr__)
-            else:
+            try:
+                if topic == 'actor':
+                    item = self.get_or_create_item(model=Actor, actor_name=name)
+                    self.logger.info('Actor created: %s' % item.__repr__)
+                if topic == 'extract status':
+                    item = self.get_or_create_item(model=ExtractStatus, extract_status_name=name)
+                    self.logger.info('Extract Status created: %s' % item.__repr__)
+                if topic == 'error type':
+                    item = self.get_or_create_item(model=ErrorType, error_type_name=name)
+                    self.logger.info('Error Type created: %s' % item.__repr__)
+                if topic == 'process type':
+                    item = self.get_or_create_item(model=ProcessType, process_type_name=name)
+                    self.logger.info('Process Type created: %s' % item.__repr__)
+                if topic == 'process status':
+                    item = self.get_or_create_item(model=ProcessStatus, process_status_name=name)
+                    self.logger.info('Process Status created: %s' % item.__repr__)
+                if topic == 'source':
+                    item = self.get_or_create_item(model=Source, source_name=name)
+                    self.logger.info('Source created: %s' % item.__repr__)
+                if topic == 'tool':
+                    item = self.get_or_create_item(model=Tool, tool_name=name)
+                    self.logger.info('Tool created: %s' % item.__repr__)
+            finally:
                 ClickException('Invalid topic type.').show()
 
                 self.logger.error('Invalid topic type.')
