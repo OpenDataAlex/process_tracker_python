@@ -291,8 +291,9 @@ class DataStore:
             return True
         else:
             self.logger.info('Topic invalidated.  Please try again.')
-            return False
             self.logger.error('topic type is invalid.  Please use one of the following: %s' % valid_topics.keys())
+            return False
+
 
     def verify_and_connect_to_data_store(self):
         """
@@ -377,4 +378,3 @@ class DataStore:
             return data_store
         else:
             raise Exception('Invalid data store type provided.  Please use: ' + ", ".join(supported_data_stores))
-            exit()
