@@ -59,15 +59,18 @@ class TestCli(unittest.TestCase):
         Testing that when creating an error type record it is added.
         :return:
         """
-
+        print('starting the bloody test')
         result = self.runner.invoke(main, 'create -t "error type" -n "New Error Type"')
-
+        print('got the result')
         instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type').first()
+        print('got the instance')
         given_name = instance.error_type_name
-
+        print('invoking delete')
         self.runner.invoke(main, 'delete -t "error type" -n "New Error Type"')
-
+        print('delete invoked')
+        print('starting asserts')
         self.assertEqual('New Error Type', given_name)
+
         self.assertEqual(0, result.exit_code)
 
     def test_create_process_type(self):
