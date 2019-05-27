@@ -61,8 +61,13 @@ class TestCli(unittest.TestCase):
         """
         print('starting the bloody test')
         result = self.runner.invoke(main, 'create -t "error type" -n "New Error Type"')
+        print(str(result.output))
         print('got the result')
         instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type').first()
+        try:
+            print(str(instance.error_type_name))
+        except Exception as e:
+            print(e)
         print('got the instance')
         given_name = instance.error_type_name
         print('invoking delete')

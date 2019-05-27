@@ -4,17 +4,6 @@ create schema process_tracking;
 
 alter schema process_tracking owner to pt_admin;
 
-create schema process_tracking;
-
-alter schema process_tracking owner to pt_admin;
-
-create database process_tracking
-	with owner postgres;
-
-create schema process_tracking;
-
-alter schema process_tracking owner to pt_admin;
-
 create table error_type_lkup
 (
 	error_type_id serial not null
