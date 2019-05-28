@@ -8,6 +8,8 @@
 .idea/**/tasks.xml
 .idea/**/dictionaries
 .idea/**/shelf
+log/
+
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -168,3 +170,6 @@ venv.bak/
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+.idea/misc.xml
+.idea/modules.xml
+.idea/process_tracker_python.iml

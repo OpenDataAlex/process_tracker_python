@@ -4,8 +4,10 @@ import logging
 from click import ClickException
 
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists
+
+from process_tracker.logging import console
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import ExtractStatus
@@ -28,9 +30,9 @@ class DataStore:
         Need to initialize the data store connection when starting to access the data store.
         """
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(os.environ.get('log_level', 'DEBUG'))
 
         data_store = self.verify_and_connect_to_data_store()
+        self.engine = data_store['engine']
         self.session = data_store['session']
         self.meta = data_store['meta']
         self.data_store_type = data_store['data_store_type']
@@ -51,10 +53,10 @@ class DataStore:
         """
 
         instance = self.session.query(model).filter_by(**kwargs).first()
+
         if instance is None:
-            self.logger.info('instance not found create = '+ str(create)+'\n')
             if create:
-                self.logger.info('creating instance\n')
+                self.logger.info('creating instance')
                 instance = model(**kwargs)
                 try:
                     self.session.add(instance)
@@ -77,13 +79,18 @@ class DataStore:
         :param overwrite: Only use if data store needs to be wiped and recreated.  Default is False.
         :type overwrite: bool
         """
-
+        self.logger.info('Attempting to initialize Process Tracker data store.')
         if overwrite:
-            self.logger.info('ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST')
+            self.logger.warn('ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST')
             self.meta.reflect()
-            self.meta.drop_all()
+            self.meta.drop_all(bind=self.engine)
+            self.session.commit()
 
-        version = self.session.query(System).filter(System.session_key == 'version').first()
+            version = None
+        else:
+
+            self.logger.debug('Obtaining system version, if exists.')
+            version = self.session.query(System).filter(System.system_key == 'version').first()
 
         if version is None:
 
@@ -94,30 +101,38 @@ class DataStore:
 
             self.logger.info('Adding error types...')
             for error_type in preload_error_types:
+                self.logger.info('Adding %s' % error_type)
                 self.session.add(ErrorType(error_type_name=error_type))
             self.session.commit()
 
             self.logger.info('Adding extract status types...')
             for extract_status_type in preload_extract_status_types:
+                self.logger.info('Adding %s' % extract_status_type)
                 self.session.add(ExtractStatus(extract_status_name=extract_status_type))
             self.session.commit()
 
             self.logger.info('Adding process status types...')
             for process_status_type in preload_process_status_types:
+                self.logger.info('Adding %s' % process_status_type)
                 self.session.add(ProcessStatus(process_status_name=process_status_type))
             self.session.commit()
 
             self.logger.info('Adding process types...')
             for process_type in preload_process_types:
+                self.logger.info('Adding %s' % process_type)
                 self.session.add(ProcessType(process_type_name=process_type))
             self.session.commit()
 
             self.logger.info('Adding system keys...')
             for system_key, value in preload_system_keys:
+                self.logger.info('Adding %s' % system_key)
                 self.session.add(System(system_key=system_key, system_value=value))
             self.session.commit()
         else:
-            self.logger.info('It appears the system has already been initialized.')
+            self.logger.error('It appears the system has already been setup.')
+            ClickException('It appears the system has already been setup.').show()
+
+        self.logger.debug('Finished the initialization check.')
 
     def topic_creator(self, topic, name):
         """
@@ -176,6 +191,7 @@ class DataStore:
         self.logger.info('Attempting to delete %s item %s' % (topic, name))
 
         if self.topic_validator(topic=topic):
+
             if topic == 'actor':
                 item_delete = True
                 self.session.query(Actor).filter(Actor.actor_name == name).delete()
@@ -300,7 +316,6 @@ class DataStore:
             self.logger.error('topic type is invalid.  Please use one of the following: %s' % valid_topics.keys())
             return False
 
-
     def verify_and_connect_to_data_store(self):
         """
         Based on environment variables, create the data store connection engine.
@@ -372,6 +387,7 @@ class DataStore:
                 meta = ''
 
             data_store = dict()
+            data_store['engine'] = engine
             data_store['session'] = session
             data_store['meta'] = meta
             data_store['data_store_type'] = data_store_type

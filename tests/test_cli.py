@@ -1,9 +1,12 @@
-from click.testing import CliRunner
+import logging
+import os
 import unittest
-import time
+
+from click.testing import CliRunner
 
 from process_tracker.cli import main
 from process_tracker.data_store import DataStore
+from process_tracker.logging import console
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import ExtractStatus
@@ -14,16 +17,38 @@ from process_tracker.models.tool import Tool
 
 class TestCli(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger(__name__)
+        cls.logger.addHandler(console)
+
     def setUp(self):
         self.data_store = DataStore()
         self.session = self.data_store.session
         self.runner = CliRunner()
 
-    # def test_setup(self):
-    #
     # def test_setup_overwrite(self):
+    #     """
+    #     Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
+    #     :return:
+    #     """
+    #     self.runner.invoke(main, 'setup -o True')
     #
-    # def test_setup_already_exists(self):
+    #     instance = self.session.query(Actor).count()
+    #
+    #     self.assertEqual(0, instance)
+
+    def test_setup_already_exists(self):
+        """
+        Testing that if data store is already set up, do not attempt to initialize.
+        :return:
+        """
+
+        result = self.runner.invoke(main, ['setup'])
+
+        expected_result = 'It appears the system has already been setup.'
+
+        self.assertIn(expected_result, result.output)
 
     def test_create_actor(self):
         """
@@ -59,21 +84,16 @@ class TestCli(unittest.TestCase):
         Testing that when creating an error type record it is added.
         :return:
         """
-        print('starting the bloody test')
         result = self.runner.invoke(main, 'create -t "error type" -n "New Error Type"')
-        print(str(result.output))
-        print('got the result')
         instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type').first()
         try:
-            print(str(instance.error_type_name))
+            self.logger.debug(str(instance.error_type_name))
         except Exception as e:
-            print(e)
-        print('got the instance')
+            self.logger.debug(e)
         given_name = instance.error_type_name
-        print('invoking delete')
+
         self.runner.invoke(main, 'delete -t "error type" -n "New Error Type"')
-        print('delete invoked')
-        print('starting asserts')
+
         self.assertEqual('New Error Type', given_name)
 
         self.assertEqual(0, result.exit_code)
@@ -156,7 +176,7 @@ class TestCli(unittest.TestCase):
         result = self.runner.invoke(main, 'delete -t actor -n "Test Test"')
 
         instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
-        print(result.output)
+        self.logger.debug(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
 
