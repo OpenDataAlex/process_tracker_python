@@ -11,6 +11,7 @@ script:
 after_success:
 - coveralls
 before_script:
+- mkdir $HOME/.process_tracker
 - mv configs/${database_type}_config.ini $HOME/.process_tracker/process_tracker_config.ini
 - psql -f dbscripts/postgresql_account_create.sql -U postgres
 - psql -f dbscripts/postgresql_process_tracker.sql process_tracking -U postgres
