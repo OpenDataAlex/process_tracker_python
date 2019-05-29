@@ -6,13 +6,12 @@ import logging
 import os
 from os.path import join
 
-import boto3
 from sqlalchemy.orm import aliased
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.location_tracker import LocationTracker
-from process_tracker.logging import console
+from process_tracker.utilities.logging import console
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
@@ -23,7 +22,7 @@ from process_tracker.models.tool import Tool
 
 class ProcessTracker:
 
-    def __init__(self, process_name, process_type, actor_name, tool_name, sources, targets):
+    def __init__(self, process_name, process_type, actor_name, tool_name, sources, targets, config_location=None):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
@@ -31,12 +30,16 @@ class ProcessTracker:
         :param tool_name: Name of the tool used to run the process.
         :param sources: A single source name or list of source names for the given process.
         :type sources: list
+        :param targets: A single target name or list of target names for the given process.
+        :type targets: list
+        :param config_location: Location where Process Tracker configuration file is.
+        :type config_location: file path
         """
 
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(console)
 
-        self.data_store = DataStore()
+        self.data_store = DataStore(config_location=config_location)
         self.session = self.data_store.session
 
         self.actor = self.data_store.get_or_create_item(model=Actor, actor_name=actor_name)

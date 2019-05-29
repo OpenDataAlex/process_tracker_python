@@ -7,7 +7,8 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists
 
-from process_tracker.logging import console
+from process_tracker.utilities.logging import console
+from process_tracker.utilities.settings import SettingsManager
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import ExtractStatus
@@ -25,11 +26,15 @@ preload_system_keys = [{'key': 'version', 'value': '0.1.0'}]
 
 class DataStore:
 
-    def __init__(self):
+    def __init__(self, config_location=None):
         """
         Need to initialize the data store connection when starting to access the data store.
+        :param config_location: Location where Process Tracker configuration file is.
+        :type config_location: file path
         """
         self.logger = logging.getLogger(__name__)
+
+        self.config_location=config_location
 
         data_store = self.verify_and_connect_to_data_store()
         self.engine = data_store['engine']
@@ -83,8 +88,7 @@ class DataStore:
         if overwrite:
             self.logger.warn('ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST')
             self.meta.reflect()
-            self.meta.drop_all(bind=self.engine)
-            self.session.commit()
+            self.meta.drop_all()
 
             version = None
         else:
@@ -103,30 +107,27 @@ class DataStore:
             for error_type in preload_error_types:
                 self.logger.info('Adding %s' % error_type)
                 self.session.add(ErrorType(error_type_name=error_type))
-            self.session.commit()
 
             self.logger.info('Adding extract status types...')
             for extract_status_type in preload_extract_status_types:
                 self.logger.info('Adding %s' % extract_status_type)
                 self.session.add(ExtractStatus(extract_status_name=extract_status_type))
-            self.session.commit()
 
             self.logger.info('Adding process status types...')
             for process_status_type in preload_process_status_types:
                 self.logger.info('Adding %s' % process_status_type)
                 self.session.add(ProcessStatus(process_status_name=process_status_type))
-            self.session.commit()
 
             self.logger.info('Adding process types...')
             for process_type in preload_process_types:
                 self.logger.info('Adding %s' % process_type)
                 self.session.add(ProcessType(process_type_name=process_type))
-            self.session.commit()
 
             self.logger.info('Adding system keys...')
             for system_key, value in preload_system_keys:
                 self.logger.info('Adding %s' % system_key)
                 self.session.add(System(system_key=system_key, system_value=value))
+
             self.session.commit()
         else:
             self.logger.error('It appears the system has already been setup.')
@@ -322,31 +323,33 @@ class DataStore:
         :return:
         """
 
-        data_store_type = os.environ.get('process_tracking_data_store_type')
-        data_store_username = os.environ.get('process_tracking_data_store_username')
-        data_store_password = os.environ.get('process_tracking_data_store_password')
-        data_store_host = os.environ.get('process_tracking_data_store_host')
-        data_store_port = os.environ.get('process_tracking_data_store_port')
-        data_store_name = os.environ.get('process_tracking_data_store_name')
+        config = SettingsManager(config_location=self.config_location).config
+
+        data_store_type = config['DEFAULT']['data_store_type']
+        data_store_username = config['DEFAULT']['data_store_username']
+        data_store_password = config['DEFAULT']['data_store_password']
+        data_store_host = config['DEFAULT']['data_store_host']
+        data_store_port = config['DEFAULT']['data_store_port']
+        data_store_name = config['DEFAULT']['data_store_name']
 
         errors = []
 
-        if data_store_type is None:
+        if data_store_type is None or data_store_type == 'None':
             errors.append(Exception('Data store type is not set.'))
 
-        if data_store_username is None:
+        if data_store_username is None or data_store_username == 'None':
             errors.append(Exception('Data store username is not set.'))
 
-        if data_store_password is None:
+        if data_store_password is None or data_store_password == 'None':
             errors.append(Exception('Data store password is not set'))
 
-        if data_store_host is None:
+        if data_store_host is None or data_store_host == 'None':
             errors.append(Exception('Data store host is not set'))
 
-        if data_store_port is None:
+        if data_store_port is None or data_store_port == 'None':
             errors.append(Exception('Data store port is not set'))
 
-        if data_store_name is None:
+        if data_store_name is None or data_store_name == 'None':
             errors.append(Exception('Data store name is not set'))
 
         if errors:
@@ -374,9 +377,9 @@ class DataStore:
                 if database_exists(engine.url):
                     self.logger.info("Data store exists.  Continuing to work.")
 
-                Session = sessionmaker(bind=engine)
+                session = sessionmaker(bind=engine)
 
-                session = Session(expire_on_commit=False)
+                session = session(expire_on_commit=False)
                 session.execute("SET search_path TO %s" % data_store_name)
 
                 meta = MetaData(engine)

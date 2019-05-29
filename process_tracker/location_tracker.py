@@ -1,11 +1,10 @@
 # Location
 # For processes dealing with Extract Locations.
 import logging
-import os
 from os.path import basename, normpath
 
 from process_tracker.data_store import DataStore
-from process_tracker.logging import console
+from process_tracker.utilities.logging import console
 
 from process_tracker.models.extract import Location, LocationType
 

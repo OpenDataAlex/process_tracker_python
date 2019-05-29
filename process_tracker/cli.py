@@ -2,11 +2,10 @@
 # A set of tools to set up ProcessTracker and maintain lookup topics
 
 import click
-import os
 import logging
 
 from process_tracker.data_store import DataStore
-from process_tracker.logging import console
+from process_tracker.utilities.logging import console
 
 data_store = DataStore()
 logger = logging.getLogger('Process Tracker')
@@ -22,16 +21,16 @@ def main():
 
 
 @main.command()
-# @click.option('-o', '--overwrite', default=False, help='Wipe out the current data store and rebuild'
-#                                                        ', starting from fresh.')
-def setup():
+@click.option('-o', '--overwrite', default=False, help='Wipe out the current data store and rebuild'
+                                                       ', starting from fresh.')
+def setup(overwrite):
     """
     Initialize ProcessTracker's data store with user provided input.  If already in place, do nothing unless overwrite
     set to True.
     :return:
     """
     click.echo('Attempting to initialize data store...')
-    data_store.initialize_data_store()
+    data_store.initialize_data_store(overwrite=overwrite)
 
 
 # @main.command()
