@@ -26,16 +26,16 @@ class TestCli(unittest.TestCase):
         self.session = self.data_store.session
         self.runner = CliRunner()
 
-    def test_setup_overwrite(self):
-        """
-        Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
-        :return:
-        """
-        self.runner.invoke(main, 'setup -o True')
-
-        instance = self.session.query(Actor).count()
-
-        self.assertEqual(0, instance)
+    # def test_setup_overwrite(self):
+    #     """
+    #     Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
+    #     :return:
+    #     """
+    #     self.runner.invoke(main, 'setup -o True')
+    #
+    #     instance = self.session.query(Actor).count()
+    #
+    #     self.assertEqual(0, instance)
 
     def test_setup_already_exists(self):
         """
