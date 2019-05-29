@@ -11,13 +11,12 @@ script:
 after_success:
 - coveralls
 before_script:
+- mv configs/${database_type}_config.ini $HOME/.process_tracker/process_tracker_config.ini
 - psql -f dbscripts/postgresql_account_create.sql -U postgres
 - psql -f dbscripts/postgresql_process_tracker.sql process_tracking -U postgres
 - psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracking -U postgres
 env:
-- process_tracking_data_store_host=localhost process_tracking_data_store_port=5432
-  process_tracking_data_store_name=process_tracking process_tracking_data_store_type=postgresql
-  process_tracking_data_store_password=Testing1! process_tracking_data_store_username=pt_admin log_level=ERROR
+- database_type=postgresql
 deploy:
   - provider: releases
     api_key:
