@@ -5,10 +5,10 @@ import logging
 import os
 from os.path import join
 
-from sqlalchemy.orm import Session
 
 from process_tracker.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
+from process_tracker.utilities.settings import SettingsManager
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
 
 
@@ -31,8 +31,10 @@ class ExtractTracker:
         :param status: Optional if status does not need to be 'initializing', which is default.
         :type status: string
         """
+        config = SettingsManager().config
+
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(os.environ.get('log_level', 'DEBUG'))
+        self.logger.setLevel(config['DEFAULT']['log_level'])
 
         self.data_store = DataStore()
         self.session = self.data_store.session

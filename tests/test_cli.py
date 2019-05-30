@@ -36,18 +36,18 @@ class TestCli(unittest.TestCase):
     #     instance = self.session.query(Actor).count()
     #
     #     self.assertEqual(0, instance)
-
-    def test_setup_already_exists(self):
-        """
-        Testing that if data store is already set up, do not attempt to initialize.
-        :return:
-        """
-
-        result = self.runner.invoke(main, ['setup'])
-
-        expected_result = 'It appears the system has already been setup.'
-
-        self.assertIn(expected_result, result.output)
+    #
+    # def test_setup_already_exists(self):
+    #     """
+    #     Testing that if data store is already set up, do not attempt to initialize.
+    #     :return:
+    #     """
+    #
+    #     result = self.runner.invoke(main, ['setup'])
+    #
+    #     expected_result = 'It appears the system has already been setup.'
+    #
+    #     self.assertIn(expected_result, result.output)
 
     def test_create_actor(self):
         """

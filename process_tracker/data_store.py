@@ -1,4 +1,3 @@
-import os
 import logging
 
 from click import ClickException
@@ -7,9 +6,9 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists
 
-from process_tracker.utilities.logging import console
 from process_tracker.utilities.settings import SettingsManager
 
+from process_tracker.models.model_base import Base
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import ErrorType, ProcessType, ProcessStatus
@@ -32,14 +31,16 @@ class DataStore:
         :param config_location: Location where Process Tracker configuration file is.
         :type config_location: file path
         """
+        config = SettingsManager().config
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(config['DEFAULT']['log_level'])
 
-        self.config_location=config_location
+        self.config_location = config_location
 
         data_store = self.verify_and_connect_to_data_store()
         self.engine = data_store['engine']
-        self.session = data_store['session']
         self.meta = data_store['meta']
+        self.session = data_store['session']
         self.data_store_type = data_store['data_store_type']
         self.data_store_host = data_store['data_store_host']
         self.data_store_port = data_store['data_store_port']
@@ -87,8 +88,11 @@ class DataStore:
         self.logger.info('Attempting to initialize Process Tracker data store.')
         if overwrite:
             self.logger.warn('ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST')
-            self.meta.reflect()
-            self.meta.drop_all()
+
+            for table in Base.metadata.table_names():
+                self.logger.debug('Table will be deleted: %s' % table)
+
+            Base.metadata.drop_all(self.engine)
 
             version = None
         else:
@@ -99,7 +103,7 @@ class DataStore:
         if version is None:
 
             self.logger.info('Data store initialization beginning.  Creating data store.')
-            self.meta.create_all()
+            Base.metadata.create_all(self.engine)
 
             self.logger.info('Setting up application defaults.')
 
@@ -365,6 +369,9 @@ class DataStore:
         supported_data_stores = relational_stores + nonrelational_stores
 
         if data_store_type in supported_data_stores:
+            engine = ''
+            meta = ''
+            session = ''
 
             if data_store_type in relational_stores:
                 if data_store_type == 'postgresql':
@@ -376,23 +383,24 @@ class DataStore:
                                                                                         , data_store_port))
                 if database_exists(engine.url):
                     self.logger.info("Data store exists.  Continuing to work.")
+                else:
+                    self.logger.error('Data store does not exist.  Please create and try again.')
+                    raise Exception('Data store does not exist.  Please create and try again.')
 
                 session = sessionmaker(bind=engine)
 
                 session = session(expire_on_commit=False)
                 session.execute("SET search_path TO %s" % data_store_name)
 
-                meta = MetaData(engine)
+                meta = MetaData(schema='process_tracking')
 
             elif data_store_type in nonrelational_stores:
-                Session = ''
                 session = ''
-                meta = ''
 
             data_store = dict()
             data_store['engine'] = engine
-            data_store['session'] = session
             data_store['meta'] = meta
+            data_store['session'] = session
             data_store['data_store_type'] = data_store_type
             data_store['data_store_host'] = data_store_host
             data_store['data_store_port'] = data_store_port

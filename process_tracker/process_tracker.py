@@ -12,6 +12,7 @@ from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.logging import console
+from process_tracker.utilities.settings import SettingsManager
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
@@ -35,8 +36,10 @@ class ProcessTracker:
         :param config_location: Location where Process Tracker configuration file is.
         :type config_location: file path
         """
+        config = SettingsManager().config
 
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(config['DEFAULT']['log_level'])
         self.logger.addHandler(console)
 
         self.data_store = DataStore(config_location=config_location)
