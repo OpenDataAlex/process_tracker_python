@@ -153,13 +153,14 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
+        extract2.extract_registration_date_time = self.timestamp_converter(timestamp=datetime.now()) + timedelta(hours=1)
         session = Session.object_session(extract2.extract)
         session.commit()
 
         expected_result = ['/home/test/extract_dir/test_extract_filename3-1.csv'
                            , '/home/test/extract_dir/test_extract_filename3-2.csv']
 
-        given_result = sorted(self.process_tracker.find_ready_extracts_by_filename('test_extract_filename'))
+        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
 
         self.assertEqual(expected_result, given_result)
 
@@ -185,7 +186,7 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
-        extract2.extract_registration_date_time = self.timestamp_converter(timestamp=datetime.now())
+        extract2.extract_registration_date_time = self.timestamp_converter(timestamp=datetime.now()) + timedelta(hours=1)
         session = Session.object_session(extract2.extract)
         session.commit()
 
