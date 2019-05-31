@@ -1,3 +1,4 @@
+USE process_tracker;
 
 create table actor_lkup
 (
