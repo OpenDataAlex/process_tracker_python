@@ -22,6 +22,7 @@ setuptools.setup(
         'google-compute-engine >= 2.8.13',
         'sqlalchemy >= 1.3.3',
         'sqlalchemy-utils >= 0.33.11',
+        'pymysql >= 0.9.3',
         'python-dateutil >= 2.8.0',
         'psycopg2-binary >= 2.8.2'
     ],
