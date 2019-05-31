@@ -185,6 +185,7 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
+        extract2.extract_registration_date_time = self.timestamp_converter(timestamp=datetime.now())
         session = Session.object_session(extract2.extract)
         session.commit()
 
