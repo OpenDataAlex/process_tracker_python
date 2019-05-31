@@ -1,4 +1,3 @@
-create schema process_tracker;
 
 create table actor_lkup
 (
