@@ -134,8 +134,7 @@ class TestProcessTracker(unittest.TestCase):
 
     def test_find_ready_extracts_by_filename_partial(self):
         """
-        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.  Should return
-        them in ascending order by registration datetime.
+        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
@@ -162,7 +161,7 @@ class TestProcessTracker(unittest.TestCase):
 
         given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
 
-        self.assertEqual(expected_result, given_result)
+        self.assertListEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_filename_partial_not_descending(self):
         """
