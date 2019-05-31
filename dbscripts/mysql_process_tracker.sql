@@ -1,7 +1,4 @@
-USE process_tracker;
-
-
-create schema process_tracker collate utf8mb4_0900_ai_ci;
+create schema process_tracker;
 
 create table actor_lkup
 (
@@ -235,7 +232,7 @@ create table extract_process_tracking
 	extract_tracking_id int not null,
 	process_tracking_id int not null,
 	extract_process_status_id int null,
-	extract_process_event_date_time datetime not null,
+	extract_process_event_date_time datetime(6) not null,
 	primary key (extract_tracking_id, process_tracking_id),
 	constraint extract_process_tracking_ibfk_1
 		foreign key (extract_tracking_id) references extract_tracking (extract_id),
