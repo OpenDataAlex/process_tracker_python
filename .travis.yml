@@ -13,16 +13,16 @@ after_success:
 - coveralls
 before_script:
 - mkdir $HOME/.process_tracker
-- mv configs/${database_type}_config.ini $HOME/.process_tracker/process_tracker_config.ini
-- sh -c "if [ '$DB' == 'postgresq' ]; then psql -f dbscripts/postgresql_account_create.sql -U postgres; fi"
-- sh -c "if [ '$DB' == 'postgresq' ]; then psql -f dbscripts/postgresql_process_tracker.sql process_tracking -U postgres; fi"
-- sh -c "if [ '$DB' == 'postgresq' ]; then psql -f dbscripts/postgresqlpostgresql_process_tracker_defaults.sql_process_tracker_defaults.sql process_tracking -U postgres; fi"
+- mv configs/${DB}_config.ini $HOME/.process_tracker/process_tracker_config.ini
+- sh -c "if [ '$DB' == 'postgres' ]; then psql -f dbscripts/postgresql_account_create.sql -U postgres; fi"
+- sh -c "if [ '$DB' == 'postgres' ]; then psql -f dbscripts/postgresql_process_tracker.sql process_tracking -U postgres; fi"
+- sh -c "if [ '$DB' == 'postgres' ]; then psql -f dbscripts/postgresqlpostgresql_process_tracker_defaults.sql_process_tracker_defaults.sql process_tracking -U postgres; fi"
 - sh -c "if [ '$DB' == 'mysql' ]; then mysql -u root < dbscripts/mysql_account_create.sql; fi"
 - sh -c "if [ '$DB' == 'mysql' ]; then mysql -u root < dbscripts/mysql_process_tracker.sql; fi"
 - sh -c "if [ '$DB' == 'mysql' ]; then mysql -u root < dbscripts/mysql_process_tracker_defaults.sql; fi"
 env:
-- DB=postgres database_type=postgresql
-- DB=mysql database_type=mysql
+- DB=postgres
+- DB=mysql
 deploy:
   - provider: releases
     api_key:
