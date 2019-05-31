@@ -159,9 +159,9 @@ class TestProcessTracker(unittest.TestCase):
         expected_result = ['/home/test/extract_dir/test_extract_filename3-1.csv'
                            , '/home/test/extract_dir/test_extract_filename3-2.csv']
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+        given_result = sorted(self.process_tracker.find_ready_extracts_by_filename('test_extract_filename'))
 
-        self.assertListEqual(expected_result, given_result)
+        self.assertEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_filename_partial_not_descending(self):
         """
