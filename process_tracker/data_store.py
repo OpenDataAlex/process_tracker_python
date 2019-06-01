@@ -22,6 +22,11 @@ preload_process_status_types = ['running', 'completed', 'failed']
 preload_process_types = ['extract', 'load']
 preload_system_keys = [{'key': 'version', 'value': '0.1.0'}]
 
+relational_stores = ['postgresql', 'mysql', 'oracle', 'mssql', 'snowflake']
+nonrelational_stores = []
+
+supported_data_stores = relational_stores + nonrelational_stores
+
 
 class DataStore:
 
@@ -362,18 +367,15 @@ class DataStore:
 
             raise Exception(errors)
 
-        relational_stores = ['postgresql', 'mysql', 'snowflake']
-        nonrelational_stores = []
-
-        supported_data_stores = relational_stores + nonrelational_stores
-
         if data_store_type in supported_data_stores:
             engine = ''
             meta = ''
             session = ''
 
             if data_store_type in relational_stores:
-                if data_store_type == 'postgresql' or data_store_type == 'snowflake':
+                if data_store_type == 'postgresql' \
+                        or data_store_type == 'oracle'\
+                        or data_store_type == 'snowflake':
 
                     engine = create_engine(data_store_type + '://' + data_store_username + ':' + data_store_password
                                            + '@' + data_store_host + '/' + data_store_name)
@@ -381,6 +383,10 @@ class DataStore:
                 elif data_store_type == 'mysql':
 
                     engine = create_engine('mysql+pymysql://' + data_store_username + ':' + data_store_password + '@'
+                                           + data_store_host + '/' + data_store_name)
+                elif data_store_type == 'mssql':
+
+                    engine = create_engine('mssql+pymssql://' + data_store_username + ':' + data_store_password + '@'
                                            + data_store_host + '/' + data_store_name)
 
                 else:

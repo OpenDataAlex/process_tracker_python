@@ -19,6 +19,8 @@ psycopg2-binary="*"
 google-compute-engine = "*"
 snowflake-sqlalchemy = "*"
 pymysql = "*"
+cx-oracle = "*"
+pymssql = "*"
 
 [requires]
 python_version = "3.7"
