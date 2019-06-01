@@ -62,14 +62,21 @@ class DataStore:
         :param kwargs: The filter criteria required to find the specific entity instance.
         :return:
         """
-
+        self.logger.debug('Attempting to obtain record.')
         instance = self.session.query(model).filter_by(**kwargs).first()
 
         if instance is None:
+
+            self.logger.debug('Record did not exist.')
+
             if create:
-                self.logger.info('creating instance')
+
+                self.logger.info('Creating instance.')
+
                 instance = model(**kwargs)
+
                 try:
+                    self.logger.debug('Committing instance.')
                     self.session.add(instance)
                 except Exception as e:
                     self.logger.error(e)
@@ -95,7 +102,7 @@ class DataStore:
             self.logger.warn('ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST')
 
             for table in Base.metadata.table_names():
-                self.logger.debug('Table will be deleted: %s' % table)
+                self.logger.info('Table will be deleted: %s' % table)
                 table.drop(self.engine)
 
             version = None
@@ -330,7 +337,7 @@ class DataStore:
         Based on environment variables, create the data store connection engine.
         :return:
         """
-
+        self.logger.info('Obtaining application configuration.')
         config = SettingsManager(config_location=self.config_location).config
 
         data_store_type = config['DEFAULT']['data_store_type']
@@ -371,8 +378,13 @@ class DataStore:
             engine = ''
             meta = ''
             session = ''
+            self.logger.info('Data store is supported.')
 
             if data_store_type in relational_stores:
+
+                self.logger.info('Data store is relational.')
+                self.logger.info('Data store is %s' % data_store_type)
+
                 if data_store_type == 'postgresql' \
                         or data_store_type == 'oracle'\
                         or data_store_type == 'snowflake':
@@ -398,8 +410,11 @@ class DataStore:
                                                                                              , data_store_port))
 
                 if database_exists(engine.url):
+
                     self.logger.info("Data store exists.  Continuing to work.")
+
                 else:
+
                     self.logger.error('Data store does not exist.  Please create and try again.')
                     raise Exception('Data store does not exist.  Please create and try again.')
 
