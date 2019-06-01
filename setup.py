@@ -19,7 +19,7 @@ setuptools.setup(
     install_requires=[
         'boto3 >= 1.9.150',
         'Click >= 7.0',
-        'cs-oracle >= 7.1.3',
+        'cx-oracle >= 7.1.3',
         'google-compute-engine >= 2.8.13',
         'psycopg2-binary >= 2.8.2',
         'pymysql >= 0.9.3',
