@@ -25,7 +25,7 @@ setuptools.setup(
         'pymysql >= 0.9.3',
         'pymssql >= 2.1.4',
         'python-dateutil >= 2.8.0',
-        'snowflake-sqlalchemy >= 1.1.13'
+        'snowflake-sqlalchemy >= 1.1.13',
         'sqlalchemy >= 1.3.3',
         'sqlalchemy-utils >= 0.33.11',
     ],
@@ -33,7 +33,7 @@ setuptools.setup(
         'dev': [
             'coverage >= "4.0.3',
             'coveralls >= 1.7.0',
-            'moto >= 1.3.8'
+            'moto >= 1.3.8',
             'python-coveralls >= 2.9.1',
         ]
     },
