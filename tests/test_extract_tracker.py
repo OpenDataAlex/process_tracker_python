@@ -7,7 +7,7 @@ from process_tracker.models.process import Process, ProcessDependency, ProcessSo
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
-from process_tracker.process_tracker import ProcessTracker
+from process_tracker.process_tracker import ErrorTracking, ProcessTracker
 
 
 class TestExtractTracker(unittest.TestCase):
@@ -24,11 +24,14 @@ class TestExtractTracker(unittest.TestCase):
         cls.process_run = cls.process_tracker
 
         data_store = DataStore()
-        cls.session=data_store.session
+
+        cls.session = data_store.session
+        cls.data_store_type = data_store.data_store_type
 
     @classmethod
     def tearDownClass(cls):
-
+        cls.session.query(ErrorTracking).delete()
+        cls.session.query(ExtractProcess).delete()
         cls.session.query(ProcessTracking).delete()
         cls.session.query(ProcessSource).delete()
         cls.session.query(ProcessTarget).delete()

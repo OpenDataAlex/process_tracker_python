@@ -6,18 +6,23 @@ install:
 - make
 services:
 - postgresql
+- mysql
 script:
 - make test
 after_success:
 - coveralls
 before_script:
 - mkdir $HOME/.process_tracker
-- mv configs/${database_type}_config.ini $HOME/.process_tracker/process_tracker_config.ini
-- psql -f dbscripts/postgresql_account_create.sql -U postgres
-- psql -f dbscripts/postgresql_process_tracker.sql process_tracking -U postgres
-- psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracking -U postgres
+- mv configs/${DB}_config.ini $HOME/.process_tracker/process_tracker_config.ini
+- if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_account_create.sql -U postgres; fi
+- if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres; fi
+- if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres; fi
+- if [[ "$DB" == "mysql" ]]; then mysql -u root < dbscripts/mysql_account_create.sql; fi
+- if [[ "$DB" == "mysql" ]]; then mysql -u root < dbscripts/mysql_process_tracker.sql; fi
+- if [[ "$DB" == "mysql" ]]; then mysql -u root < dbscripts/mysql_process_tracker_defaults.sql; fi
 env:
-- database_type=postgresql
+- DB=postgres
+- DB=mysql
 deploy:
   - provider: releases
     api_key:

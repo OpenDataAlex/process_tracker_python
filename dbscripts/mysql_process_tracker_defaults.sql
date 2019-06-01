@@ -1,4 +1,4 @@
-SET search_path TO process_tracker;
+USE process_tracker;
 
 INSERT INTO process_tracker.extract_status_lkup (extract_status_id, extract_status_name) VALUES (default, 'initializing');
 INSERT INTO process_tracker.extract_status_lkup (extract_status_id, extract_status_name) VALUES (default, 'ready');

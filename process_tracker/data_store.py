@@ -22,6 +22,11 @@ preload_process_status_types = ['running', 'completed', 'failed']
 preload_process_types = ['extract', 'load']
 preload_system_keys = [{'key': 'version', 'value': '0.1.0'}]
 
+relational_stores = ['postgresql', 'mysql', 'oracle', 'mssql', 'snowflake']
+nonrelational_stores = []
+
+supported_data_stores = relational_stores + nonrelational_stores
+
 
 class DataStore:
 
@@ -91,8 +96,7 @@ class DataStore:
 
             for table in Base.metadata.table_names():
                 self.logger.debug('Table will be deleted: %s' % table)
-
-            Base.metadata.drop_all(self.engine)
+                table.drop(self.engine)
 
             version = None
         else:
@@ -363,24 +367,36 @@ class DataStore:
 
             raise Exception(errors)
 
-        relational_stores = ['postgresql']
-        nonrelational_stores = []
-
-        supported_data_stores = relational_stores + nonrelational_stores
-
         if data_store_type in supported_data_stores:
             engine = ''
             meta = ''
             session = ''
 
             if data_store_type in relational_stores:
-                if data_store_type == 'postgresql':
+                if data_store_type == 'postgresql' \
+                        or data_store_type == 'oracle'\
+                        or data_store_type == 'snowflake':
+
                     engine = create_engine(data_store_type + '://' + data_store_username + ':' + data_store_password
                                            + '@' + data_store_host + '/' + data_store_name)
 
-                    self.logger.info("Attempting to connect to data store %s, found at %s:%s" % (data_store_name
-                                                                                        , data_store_host
-                                                                                        , data_store_port))
+                elif data_store_type == 'mysql':
+
+                    engine = create_engine('mysql+pymysql://' + data_store_username + ':' + data_store_password + '@'
+                                           + data_store_host + '/' + data_store_name)
+                elif data_store_type == 'mssql':
+
+                    engine = create_engine('mssql+pymssql://' + data_store_username + ':' + data_store_password + '@'
+                                           + data_store_host + '/' + data_store_name)
+
+                else:
+                    self.logger.error("Data store type valid but not configured.")
+                    raise Exception('Data store type valid but not configured.')
+
+                self.logger.info("Attempting to connect to data store %s, found at %s:%s" % (data_store_name
+                                                                                             , data_store_host
+                                                                                             , data_store_port))
+
                 if database_exists(engine.url):
                     self.logger.info("Data store exists.  Continuing to work.")
                 else:
@@ -390,7 +406,11 @@ class DataStore:
                 session = sessionmaker(bind=engine)
 
                 session = session(expire_on_commit=False)
-                session.execute("SET search_path TO %s" % data_store_name)
+
+                if data_store_type == 'postgresql':
+                    session.execute("SET search_path TO %s" % data_store_name)
+                elif data_store_type == 'mysql':
+                    session.execute("USE %s" % data_store_name)
 
                 meta = MetaData(schema='process_tracking')
 

@@ -20,6 +20,7 @@ from process_tracker.process_tracker import ProcessTracker
 
 test_bucket = "test_bucket"
 
+
 #@mock_s3
 class TestProcessTracker(unittest.TestCase):
 
@@ -78,7 +79,11 @@ class TestProcessTracker(unittest.TestCase):
                                               , targets='Unittests')
 
         self.process_id = self.process_tracker.process.process_id
-        self.provided_end_date = datetime.now()
+
+        if self.data_store_type == 'mysql':
+            self.provided_end_date = datetime.now().replace(microsecond=0)
+        else:
+            self.provided_end_date = datetime.now()
 
     def tearDown(self):
         """
@@ -86,22 +91,25 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
         self.session.query(ExtractProcess).delete()
+        self.session.query(ErrorTracking).delete()
         self.session.query(ProcessTracking).delete()
         self.session.query(Extract).delete()
-        self.session.query(ErrorTracking).delete()
         self.session.query(ErrorType).delete()
         self.session.commit()
 
-    def test_verify_session_variables_postgresql(self):
+    def timestamp_converter(self, timestamp):
         """
-        Testing that variables for creating postgresql sqlalchemy session.
+        Helper function for when testing with data stores that have funky formats for stock dates with SQLAlchemy.
+        :param timestamp: The timestamp to be created.
         :return:
         """
 
-        given_result = self.data_store_type
-        expected_result = 'postgresql'
+        if self.data_store_type == 'mysql':
+            timestamp = timestamp.replace(microsecond=0)
+        else:
+            timestamp = timestamp
 
-        self.assertEqual(expected_result, given_result)
+        return timestamp
 
     def test_find_ready_extracts_by_filename_full(self):
         """
@@ -126,8 +134,8 @@ class TestProcessTracker(unittest.TestCase):
 
     def test_find_ready_extracts_by_filename_partial(self):
         """
-        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.  Should return
-        them in ascending order by registration datetime.
+        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state. Should return in
+        Ascending order.
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
@@ -699,8 +707,9 @@ class TestProcessTracker(unittest.TestCase):
         Testing that if low and high date are not set, the process_tracking_record low/high dates are set.
         :return:
         """
-        low_date = datetime.now() - timedelta(hours=1)
-        high_date = datetime.now()
+        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(hours=1)
+
+        high_date = self.timestamp_converter(timestamp=datetime.now())
 
         self.process_tracker.set_process_run_low_high_dates(low_date=low_date, high_date=high_date)
 
@@ -718,7 +727,7 @@ class TestProcessTracker(unittest.TestCase):
         low date.
         :return:
         """
-        low_date = datetime.now() - timedelta(hours=1)
+        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(hours=1)
         lower_low_date = low_date - timedelta(hours=1)
 
         self.process_tracker.set_process_run_low_high_dates(low_date=low_date)
@@ -739,7 +748,8 @@ class TestProcessTracker(unittest.TestCase):
         low date.
         :return:
         """
-        high_date = datetime.now()
+        high_date = self.timestamp_converter(timestamp=datetime.now())
+
         higher_high_date = high_date + timedelta(hours=1)
 
         self.process_tracker.set_process_run_low_high_dates(high_date=high_date)
