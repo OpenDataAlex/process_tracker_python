@@ -117,7 +117,8 @@ class ProcessTracker:
                                            .join(ExtractStatus)\
                                            .filter(Extract.extract_filename.like("%" + filename + "%"))\
                                            .filter(ExtractStatus.extract_status_name == 'ready') \
-                                           .order_by(Extract.extract_registration_date_time)
+                                           .order_by(Extract.extract_registration_date_time)\
+                                           .order_by(Extract.extract_id)
 
         for record in process_files:
             extract_files.append(join(record.location_path, record.extract_filename))

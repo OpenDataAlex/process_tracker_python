@@ -134,7 +134,8 @@ class TestProcessTracker(unittest.TestCase):
 
     def test_find_ready_extracts_by_filename_partial(self):
         """
-        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.
+        Testing that for the given partial filename, find the extracts, provided they are in 'ready' state. Should return in
+        Ascending order.
         :return:
         """
         extract = ExtractTracker(process_run=self.process_tracker
@@ -153,7 +154,6 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
-        extract2.extract_registration_date_time = self.timestamp_converter(timestamp=datetime.now()) + timedelta(hours=1)
         session = Session.object_session(extract2.extract)
         session.commit()
 
@@ -186,7 +186,6 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
-        extract2.extract_registration_date_time = self.timestamp_converter(timestamp=datetime.now()) + timedelta(hours=1)
         session = Session.object_session(extract2.extract)
         session.commit()
 
