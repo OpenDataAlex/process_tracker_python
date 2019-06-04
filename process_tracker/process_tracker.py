@@ -4,7 +4,6 @@
 from datetime import datetime
 import logging
 import os
-from os.path import join
 
 from sqlalchemy.orm import aliased
 
@@ -16,8 +15,7 @@ from process_tracker.utilities.settings import SettingsManager
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessDependency, ProcessTracking\
-    , ProcessStatus, ProcessSource, ProcessTarget, ProcessType
+from process_tracker.models.process import ErrorTracking, ErrorType, Process, ProcessDependency, ProcessTracking, ProcessStatus, ProcessSource, ProcessTarget, ProcessType
 from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
@@ -80,12 +78,9 @@ class ProcessTracker:
         :return:
         """
         if end_date is None:
-            self.logger.info('Eng date was not set.  Setting to current timestamp.')
             end_date = datetime.now()
 
         if self.process_status_types[new_status]:
-
-            self.logger.info('New status exists. Setting run to %s' % new_status)
 
             self.process_tracking_run.process_status_id = self.process_status_types[new_status]
 
@@ -104,7 +99,6 @@ class ProcessTracker:
             self.session.commit()
 
         else:
-            self.logger.error('%s is not a valid process status type.' % new_status)
             raise Exception('%s is not a valid process status type.  '
                             'Please add the status to process_status_type_lkup' % new_status)
 
@@ -115,23 +109,16 @@ class ProcessTracker:
         :param filename:
         :return:
         """
-        extract_files = []
 
-        self.logger.info('Searching for extracts with full/partial filename of %s' % filename)
-
-        process_files = self.session.query(Extract.extract_filename, Location.location_path)\
-                                           .join(Location)\
+        process_files = self.session.query(Extract)\
                                            .join(ExtractStatus)\
                                            .filter(Extract.extract_filename.like("%" + filename + "%"))\
                                            .filter(ExtractStatus.extract_status_name == 'ready') \
                                            .order_by(Extract.extract_registration_date_time)\
-                                           .order_by(Extract.extract_id)
+                                           .order_by(Extract.extract_id)\
+                                           .all()
 
-        for record in process_files:
-            extract_files.append(join(record.location_path, record.extract_filename))
-            self.logger.debug('Found file %s' % record.extract_filename)
-
-        return extract_files
+        return process_files
 
     def find_ready_extracts_by_location(self, location):
         """
@@ -139,33 +126,24 @@ class ProcessTracker:
         :param location:
         :return:
         """
-        extract_files = []
 
-        self.logger.info('Searching for extracts found at the location named %s' % location)
-
-        process_files = self.session.query(Extract.extract_filename, Location.location_path)\
+        process_files = self.session.query(Extract)\
                                .join(Location)\
                                .join(ExtractStatus)\
                                .filter(ExtractStatus.extract_status_name == 'ready')\
                                .filter(Location.location_name == location) \
-                               .order_by(Extract.extract_registration_date_time)
+                               .order_by(Extract.extract_registration_date_time)\
+                               .all()
 
-        for record in process_files:
-            extract_files.append(join(record.location_path, record.extract_filename))
-            self.logger.debug('Found file %s' % record.extract_filename)
-
-        return extract_files
+        return process_files
 
     def find_ready_extracts_by_process(self, extract_process_name):
         """
         For the given named process, find the extracts that are ready for processing.
         :return: List of OS specific filepaths with filenames.
         """
-        extract_files = []
 
-        self.logger.info('Searching for extracts related to process %s' % extract_process_name)
-
-        process_files = self.session.query(Extract.extract_filename, Location.location_path) \
+        process_files = self.session.query(Extract) \
             .join(ExtractStatus, Extract.extract_status_id == ExtractStatus.extract_status_id) \
             .join(Location, Extract.extract_location_id == Location.location_id) \
             .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
@@ -173,13 +151,12 @@ class ProcessTracker:
             .join(Process) \
             .filter(Process.process_name == extract_process_name
                     , ExtractStatus.extract_status_name == 'ready') \
-            .order_by(Extract.extract_registration_date_time)
+            .order_by(Extract.extract_registration_date_time)\
+            .all()
 
-        for record in process_files:
-            extract_files.append(join(record.location_path, record.extract_filename))
-            self.logger.debug('Found file %s' % record.extract_filename)
+        self.logger.info('Returning extract files by process.')
 
-        return extract_files
+        return process_files
 
     def get_latest_tracking_record(self, process):
         """
@@ -188,14 +165,13 @@ class ProcessTracker:
         :type process: integer
         :return:
         """
-        self.logger.info('Searching for latest process run for process %s' % process.process_name)
+
         instance = self.session.query(ProcessTracking)\
             .filter(ProcessTracking.process_id == process.process_id)\
             .order_by(ProcessTracking.process_run_id.desc())\
             .first()
 
         if instance is None:
-            self.logger.info('Process run not found.')
             return False
 
         return instance
@@ -207,12 +183,7 @@ class ProcessTracker:
         """
         status_types = {}
 
-        self.logger.info('Getting all process status types.')
-
         for record in self.session.query(ProcessStatus):
-
-            self.logger.debug('Found process status %s' % record.process_status_name)
-
             status_types[record.process_status_name] = record.process_status_id
 
         return status_types
@@ -229,21 +200,14 @@ class ProcessTracker:
         :type end_date: datetime
         :return:
         """
-        self.logger.info('Raising run error.')
-
         if end_date is None:
-            self.logger.info('Setting end date since one was not provided.')
             end_date = datetime.now()  # Need the date to match across all parts of the event in case the run is failed.
 
         if error_description is None:
-            self.logger.info('Setting default error description since one was not provided.')
             error_description = 'Unspecified error.'
-
-        self.logger.info('Getting error type.')
 
         error_type = self.data_store.get_or_create_item(model=ErrorType, create=False, error_type_name=error_type_name)
 
-        self.logger.info('Setting run error.')
         run_error = ErrorTracking(error_type_id=error_type.error_type_id
                                   , error_description=error_description
                                   , process_tracking_id=self.process_tracking_run.process_tracking_id
@@ -256,7 +220,6 @@ class ProcessTracker:
         if fail_run:
             self.change_run_status(new_status='failed', end_date=end_date)
             self.session.commit()
-            self.logger.error('Process halting.  An error triggered the process to fail.')
             raise Exception('Process halting.  An error triggered the process to fail.')
 
     def register_extracts_by_location(self, location_path, location_name=None):
@@ -266,7 +229,6 @@ class ProcessTracker:
         :param location_path: Path of the location
         :return:
         """
-        self.logger.info('Getting location info for %s' % location_path)
         location = LocationTracker(location_path=location_path, location_name=location_name)
 
         # if location.location_type.location_type_name == "s3":
@@ -286,7 +248,6 @@ class ProcessTracker:
         #                        , status='ready')
         # else:
         for file in os.listdir(location_path):
-            self.logger.debug('Registering file %s' % file)
             ExtractTracker(process_run=self
                            , filename=file
                            , location=location
@@ -300,15 +261,12 @@ class ProcessTracker:
         child_process = aliased(Process)
         parent_process = aliased(Process)
 
-        self.logger.info('Finding latest process run.')
-
         last_run = self.get_latest_tracking_record(process=self.process)
 
         new_run_flag = True
         new_run_id = 1
 
         # Need to check the status of any dependencies.  If dependencies are running or failed, halt this process.
-        self.logger.info('Checking process dependencies.')
 
         dependency_hold = self.session.query(ProcessDependency)\
                                       .join(parent_process, ProcessDependency.parent_process_id == parent_process.process_id)\
@@ -320,18 +278,15 @@ class ProcessTracker:
                                       .count()
 
         if dependency_hold > 0:
-            self.logger.error('Processes that this process is dependent on are running or failed.')
             raise Exception('Processes that this process is dependent on are running or failed.')
 
         if last_run:
             # Must validate that the process is not currently running.
-            self.logger.info('Process run found.  Verifying that the process is not running.')
 
             if last_run.process_status_id != self.process_status_running:
                 last_run.is_latest_run = False
                 new_run_flag = True
                 new_run_id = last_run.process_run_id + 1
-                self.logger.info('Previous process run not running.  Creating new run.')
             else:
                 new_run_flag = False
 
@@ -346,13 +301,12 @@ class ProcessTracker:
             self.session.add(new_run)
             self.session.commit()
 
-            self.logger.info('Process tracking record added for %s' % self.process_name)
-
             return new_run
 
+            self.logger.info('Process tracking record added for %s' % self.process_name)
+
         else:
-            self.logger.error('Process %s is currently running.' % self.process_name)
-            raise Exception('Process %s is currently running.' % self.process_name)
+            raise Exception('The process %s is currently running.' % self.process_name)
 
     def register_process_sources(self, sources):
         """
@@ -361,12 +315,10 @@ class ProcessTracker:
         :return: List of source objects.
         """
         if isinstance(sources, str):
-            self.logger.info('Only one source provided.  Turning into list for processing.')
             sources = [sources]
         source_list = []
 
         for source in sources:
-            self.logger.debug('Registering source %s' % source)
             source = self.data_store.get_or_create_item(model=Source, source_name=source)
 
             self.data_store.get_or_create_item(model=ProcessSource, source_id=source.source_id
@@ -382,12 +334,10 @@ class ProcessTracker:
         :return: List of source objects.
         """
         if isinstance(targets, str):
-            self.logger.info('Only one target provided.  Turning into list for processing.')
             targets = [targets]
         target_list = []
 
         for target in targets:
-            self.logger.debug('Registering target %s' % target)
             source = self.data_store.get_or_create_item(model=Source, source_name=target)
 
             self.data_store.get_or_create_item(model=ProcessTarget, target_source_id=source.source_id
@@ -410,11 +360,9 @@ class ProcessTracker:
         previous_high_date_time = self.process_tracking_run.process_run_low_date_time
 
         if low_date is not None and (previous_low_date_time is None or low_date < previous_low_date_time):
-            self.logger.info('Setting process run low date to %s' % low_date)
             self.process_tracking_run.process_run_low_date_time = low_date
 
         if high_date is not None and (previous_high_date_time is None or high_date > previous_high_date_time):
-            self.logger.info('Setting process run high date to %s' % high_date)
             self.process_tracking_run.process_run_high_date_time = high_date
 
         self.session.commit()
@@ -429,13 +377,10 @@ class ProcessTracker:
         process_run_records = self.process.total_record_count
 
         if process_run_records == 0:
-            self.logger.info('Adding %s records to total record count.' % num_records)
+
             self.process.total_record_count += num_records
         else:
-            new_records = num_records - process_run_records
-
-            self.logger.info('Adding %s records to total record count.' % new_records)
-            self.process.total_record_count = self.process.total_record_count + new_records
+            self.process.total_record_count = self.process.total_record_count + (num_records - process_run_records)
 
         self.process_tracking_run.process_run_record_count = num_records
         self.session.commit()

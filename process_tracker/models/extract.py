@@ -2,6 +2,7 @@
 # Models for Extract (Data) entities
 
 from datetime import datetime
+from os.path import join
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
@@ -18,6 +19,11 @@ class ExtractStatus(Base):
 
     extracts = relationship("ExtractProcess")
 
+    def __repr__(self):
+
+        return "<Extract Status id=%s, name=%s>" % (self.extract_status_id
+                                                    , self.extract_status_name)
+
 
 class Extract(Base):
 
@@ -32,6 +38,17 @@ class Extract(Base):
     extract_process = relationship("ExtractProcess", back_populates='process_extracts')
     locations = relationship("Location", foreign_keys=[extract_location_id])
 
+    def __repr__(self):
+
+        return "<Extract id=%s, filename=%s, location=%s, status=%s>" % (self.extract_id
+                                                                         , self.extract_filename
+                                                                         , self.extract_location_id
+                                                                         , self.extract_status_id)
+
+    def full_filepath(self):
+
+        return join(self.locations.location_path, self.extract_filename)
+
 
 class ExtractProcess(Base):
 
@@ -45,6 +62,12 @@ class ExtractProcess(Base):
     process_extracts = relationship('Extract', foreign_keys=[extract_tracking_id])
     extract_processes = relationship('ProcessTracking', foreign_keys=[process_tracking_id])
 
+    def __repr__(self):
+
+        return "<ExtractProcess extract=%s, process_run=%s, extract_status=%s>" % (self.extract_tracking_id
+                                                                                   , self.process_tracking_id
+                                                                                   , self.extract_process_status_id)
+
 
 class LocationType(Base):
 
@@ -54,7 +77,12 @@ class LocationType(Base):
     location_type_name = Column(String(25), unique=True, nullable=False)
 
     locations = relationship('Location', back_populates='location_types')
-    
+
+    def __repr__(self):
+
+        return "<LocationType id=%s, name=%s>" % (self.location_type_id
+                                                  , self.location_type_name)
+
 
 class Location(Base):
 
@@ -68,3 +96,9 @@ class Location(Base):
     extracts = relationship("Extract")
 
     location_types = relationship('LocationType', foreign_keys=[location_type])
+
+    def __repr__(self):
+
+        return "<Location id=%s, name=%s, type=%s>" % (self.location_id
+                                                       , self.location_name
+                                                       , self.location_path)
