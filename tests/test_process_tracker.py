@@ -129,8 +129,9 @@ class TestProcessTracker(unittest.TestCase):
         expected_result = ['/home/test/extract_dir/test_extract_filename2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename2.csv')
+        given_result = [record.full_filepath() for record in given_result]
 
-        self.assertEqual(expected_result, given_result)
+        self.assertCountEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_filename_partial(self):
         """
@@ -161,8 +162,9 @@ class TestProcessTracker(unittest.TestCase):
                            , '/home/test/extract_dir/test_extract_filename3-2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+        given_result = [record.full_filepath() for record in given_result]
 
-        self.assertEqual(expected_result, given_result)
+        self.assertCountEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_filename_partial_not_descending(self):
         """
@@ -193,6 +195,7 @@ class TestProcessTracker(unittest.TestCase):
                            , '/home/test/extract_dir/test_extract_filename3-1.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+        given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
@@ -225,8 +228,9 @@ class TestProcessTracker(unittest.TestCase):
                            , '/home/test/extract_dir/test_extract_filename4-2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
+        given_result = [record.full_filepath() for record in given_result]
 
-        self.assertEqual(expected_result, given_result)
+        self.assertCountEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_location_not_descending(self):
         """
@@ -257,6 +261,7 @@ class TestProcessTracker(unittest.TestCase):
                            , '/home/test/extract_dir/test_extract_filename4-1.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
+        given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
@@ -288,8 +293,9 @@ class TestProcessTracker(unittest.TestCase):
                            , '/home/test/extract_dir/test_extract_filename5-2.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
+        given_result = [record.full_filepath() for record in given_result]
 
-        self.assertEqual(sorted(expected_result), sorted(given_result))
+        self.assertCountEqual(expected_result, given_result)
 
     def test_find_ready_extracts_by_process_not_descending(self):
         """
@@ -323,6 +329,7 @@ class TestProcessTracker(unittest.TestCase):
             , '/home/test/extract_dir/test_extract_filename5-1.csv']
 
         given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
+        given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 

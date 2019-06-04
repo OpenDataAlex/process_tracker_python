@@ -4,7 +4,6 @@
 from datetime import datetime
 import logging
 import os
-from os.path import join
 
 from sqlalchemy.orm import aliased
 
@@ -110,20 +109,16 @@ class ProcessTracker:
         :param filename:
         :return:
         """
-        extract_files = []
 
-        process_files = self.session.query(Extract.extract_filename, Location.location_path)\
-                                           .join(Location)\
+        process_files = self.session.query(Extract)\
                                            .join(ExtractStatus)\
                                            .filter(Extract.extract_filename.like("%" + filename + "%"))\
                                            .filter(ExtractStatus.extract_status_name == 'ready') \
                                            .order_by(Extract.extract_registration_date_time)\
-                                           .order_by(Extract.extract_id)
+                                           .order_by(Extract.extract_id)\
+                                           .all()
 
-        for record in process_files:
-            extract_files.append(join(record.location_path, record.extract_filename))
-
-        return extract_files
+        return process_files
 
     def find_ready_extracts_by_location(self, location):
         """
@@ -131,28 +126,24 @@ class ProcessTracker:
         :param location:
         :return:
         """
-        extract_files = []
 
-        process_files = self.session.query(Extract.extract_filename, Location.location_path)\
+        process_files = self.session.query(Extract)\
                                .join(Location)\
                                .join(ExtractStatus)\
                                .filter(ExtractStatus.extract_status_name == 'ready')\
                                .filter(Location.location_name == location) \
-                               .order_by(Extract.extract_registration_date_time)
+                               .order_by(Extract.extract_registration_date_time)\
+                               .all()
 
-        for record in process_files:
-            extract_files.append(join(record.location_path, record.extract_filename))
-
-        return extract_files
+        return process_files
 
     def find_ready_extracts_by_process(self, extract_process_name):
         """
         For the given named process, find the extracts that are ready for processing.
         :return: List of OS specific filepaths with filenames.
         """
-        extract_files = []
 
-        process_files = self.session.query(Extract.extract_filename, Location.location_path) \
+        process_files = self.session.query(Extract) \
             .join(ExtractStatus, Extract.extract_status_id == ExtractStatus.extract_status_id) \
             .join(Location, Extract.extract_location_id == Location.location_id) \
             .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
@@ -160,12 +151,12 @@ class ProcessTracker:
             .join(Process) \
             .filter(Process.process_name == extract_process_name
                     , ExtractStatus.extract_status_name == 'ready') \
-            .order_by(Extract.extract_registration_date_time)
+            .order_by(Extract.extract_registration_date_time)\
+            .all()
 
-        for record in process_files:
-            extract_files.append(join(record.location_path, record.extract_filename))
+        self.logger.info('Returning extract files by process.')
 
-        return extract_files
+        return process_files
 
     def get_latest_tracking_record(self, process):
         """
