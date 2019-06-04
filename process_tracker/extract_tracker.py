@@ -43,19 +43,27 @@ class ExtractTracker:
         self.filename = filename
 
         if location is not None:
+            self.logger.info('Location object provided.')
             self.location = location
         elif location_path is not None:
+            self.logger.info('Location path provided.  Creating Location object.')
             self.location = LocationTracker(location_name=location_name, location_path=location_path)
         else:
             raise Exception('A location object or location_path must be provided.')
+
+        self.logger.info('Registering extract.')
 
         self.extract = self.data_store.get_or_create_item(model=Extract
                                                           , extract_filename=filename
                                                           , extract_location_id=self.location.location.location_id)
 
         if location_path is not None:
+            self.logger.info('Location path was provided so building file path from it.')
+
             self.full_filename = join(location_path, filename)
         else:
+            self.logger.info('Location provided so building file path from it.')
+
             self.full_filename = join(self.location.location_path, self.extract.extract_filename)
 
         # Getting all status types in the event there are custom status types added later.
@@ -74,8 +82,10 @@ class ExtractTracker:
         self.extract_process = self.retrieve_extract_process()
 
         if status is not None:
+            self.logger.info('Status was provided by user.')
             self.change_extract_status(new_status=status)
         else:
+            self.logger.info('Status was not provided.  Initializing.')
             self.extract.extract_status_id = self.extract_status_initializing
 
         self.session.commit()
@@ -85,7 +95,6 @@ class ExtractTracker:
         Change an extract record status.
         :return:
         """
-
         status_date = datetime.now()
         if new_status in self.extract_status_types:
             self.logger.info('Setting extract status to %s' % new_status)
@@ -100,6 +109,7 @@ class ExtractTracker:
             self.session.commit()
 
         else:
+            self.logger.error('%s is not a valid extract status type.' % new_status)
             raise Exception('%s is not a valid extract status type.  '
                             'Please add the status to extract_status_lkup' % new_status)
 
@@ -108,7 +118,9 @@ class ExtractTracker:
         Get list of process status types and return dictionary.
         :return:
         """
-        status_types = {}
+        self.logger.info('Obtaining extract status types.')
+
+        status_types = dict()
 
         for record in self.session.query(ExtractStatus):
             status_types[record.extract_status_name] = record.extract_status_id
@@ -121,6 +133,8 @@ class ExtractTracker:
         :return:
         """
 
+        self.logger.info('Associating extract to given process.')
+
         extract_process = self.data_store.get_or_create_item(model=ExtractProcess
                                                              , extract_tracking_id=self.extract.extract_id
                                                              , process_tracking_id=self.process_run.process_tracking_run
@@ -128,7 +142,7 @@ class ExtractTracker:
 
         # Only need to set to 'initializing' when it's the first time a process run is trying to work with files.
         if extract_process.extract_process_status_id is None:
-
+            self.logger.info('Extract process status must also be set.  Initializing.')
             extract_process.extract_process_status_id = self.extract_status_initializing
             self.session.commit()
 
