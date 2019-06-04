@@ -431,8 +431,8 @@ class TestProcessTracker(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             # Running registration a second time to mimic job being run twice
             self.process_tracker.register_new_process_run()
-
-        return self.assertTrue('Process Testing Process Tracking Initialization '
+        print(context.exception)
+        return self.assertTrue('The process Testing Process Tracking Initialization '
                                'is currently running.' in str(context.exception))
 
     def test_register_new_process_run_with_previous_run(self):
