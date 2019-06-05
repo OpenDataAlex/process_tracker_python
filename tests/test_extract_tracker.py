@@ -70,6 +70,60 @@ class TestExtractTracker(unittest.TestCase):
         self.session.query(Location).delete()
         self.session.commit()
 
+    def test_add_dependency_parent(self):
+        """
+        Testing that a parent extract dependency is created when adding dependency to extract.
+        :return:
+        """
+        dependent_extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Dependent File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+        self.extract.add_dependency(
+            dependency_type="parent", dependency=dependent_extract
+        )
+
+        given_result = (
+            self.session.query(ExtractDependency)
+            .filter(
+                ExtractDependency.child_extract_id == self.extract.extract.extract_id
+            )
+            .count()
+        )
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_add_dependency_child(self):
+        """
+        Testing that a child extract dependency is created when adding dependency to extract.
+        :return:
+        """
+        dependent_extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Dependent File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+        self.extract.add_dependency(
+            dependency_type="child", dependency=dependent_extract
+        )
+
+        given_result = (
+            self.session.query(ExtractDependency)
+            .filter(
+                ExtractDependency.parent_extract_id == self.extract.extract.extract_id
+            )
+            .count()
+        )
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
     def test_initialization_no_location_no_location_path(self):
         """
         Testing that if no location or location path is set, an error is thrown.

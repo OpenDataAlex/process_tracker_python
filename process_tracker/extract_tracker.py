@@ -110,6 +110,36 @@ class ExtractTracker:
 
         self.session.commit()
 
+    def add_dependency(self, dependency_type, dependency):
+        """
+        Add a parent or child dependency on the given extract file.
+        :param dependency_type: dependency type.  Valid values:  parent, child
+        :type dependency_type: string
+        :param dependency: dependent extract
+        :type dependency: SQLAlchemy Extract object
+        :return:
+        """
+
+        if dependency_type == "parent":
+            dependency = ExtractDependency(
+                child_extract_id=self.extract.extract_id,
+                parent_extract_id=dependency.extract.extract_id,
+            )
+
+        elif dependency_type == "child":
+            dependency = ExtractDependency(
+                child_extract_id=dependency.extract.extract_id,
+                parent_extract_id=self.extract.extract_id,
+            )
+        else:
+            self.logger.error("Invalid dependency type.")
+            raise Exception("Invalid extract dependency type.")
+
+        self.session.add(dependency)
+        self.session.commit()
+
+        self.logger.info("Extract %s dependency added." % dependency_type)
+
     def change_extract_status(self, new_status):
         """
         Change an extract record status.
