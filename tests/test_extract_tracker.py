@@ -12,7 +12,7 @@ from process_tracker.models.process import (
 )
 
 from process_tracker.data_store import DataStore
-from process_tracker.extract_tracker import ExtractTracker
+from process_tracker.extract_tracker import ExtractDependency, ExtractTracker
 from process_tracker.process_tracker import ErrorTracking, ProcessTracker
 
 
@@ -64,6 +64,7 @@ class TestExtractTracker(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
+        self.session.query(ExtractDependency).delete()
         self.session.query(ExtractProcess).delete()
         self.session.query(Extract).delete()
         self.session.query(Location).delete()
@@ -192,6 +193,26 @@ class TestExtractTracker(unittest.TestCase):
         is loaded.
         :return:
         """
+        dependent_extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Dependent File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+        dependency = ExtractDependency(
+            child_extract_id=dependent_extract.extract.extract_id,
+            parent_extract_id=self.extract.extract.extract_id,
+        )
+
+        self.session.add(dependency)
+        self.session.commit()
+        self.extract.change_extract_status("loaded")
+
+        given_result = dependent_extract.extract_dependency_check()
+
+        expected_result = False
+
+        self.assertEqual(expected_result, given_result)
 
     def test_extract_dependency_check_blocked(self):
         """
@@ -199,6 +220,29 @@ class TestExtractTracker(unittest.TestCase):
         error blocking the file from being processed.
         :return:
         """
+        dependent_extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Dependent File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+        dependency = ExtractDependency(
+            child_extract_id=dependent_extract.extract.extract_id,
+            parent_extract_id=self.extract.extract.extract_id,
+        )
+
+        self.session.add(dependency)
+        self.session.commit()
+
+        self.extract.change_extract_status("loading")
+
+        with self.assertRaises(Exception) as context:
+            dependent_extract.extract_dependency_check()
+
+        return self.assertTrue(
+            "Extract files that this extract file is dependent on have not been loaded, are being "
+            "created, or are in the process of loading." in str(context.exception)
+        )
 
     def test_location_name_provided(self):
         """

@@ -4,10 +4,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
 coverage="*"
+coveralls="*"
 moto="*"
 python-coveralls="*"
-coveralls="*"
 
 [packages]
 boto3="*"
@@ -21,7 +22,6 @@ snowflake-sqlalchemy = "*"
 pymysql = "*"
 cx-oracle = "*"
 pymssql = "*"
-black = "*"
 
 [requires]
 python_version = "3.7"

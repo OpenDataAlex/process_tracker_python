@@ -182,6 +182,9 @@ class ExtractTracker:
                 "created, or are in the process of loading."
             )
 
+        else:
+            return False
+
     def get_extract_status_types(self):
         """
         Get list of process status types and return dictionary.
