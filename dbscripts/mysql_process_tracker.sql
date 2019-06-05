@@ -76,6 +76,18 @@ create index extract_status_id
 create index location_type
 	on location_lkup (location_type);
 
+create table process_tracker.extract_dependency
+(
+	parent_extract_id int not null,
+	child_extract_id int not null,
+	primary key (parent_extract_id, child_extract_id),
+	constraint extract_dependency_fk01
+		foreign key (parent_extract_id) references process_tracker.extract_tracking (extract_id),
+	constraint extract_dependency_fk02
+		foreign key (child_extract_id) references process_tracker.extract_tracking (extract_id)
+)
+comment 'Table tracking interdependencies between extract files.';
+
 create table process_status_lkup
 (
 	process_status_id int auto_increment

@@ -258,6 +258,9 @@ comment on table location_type_lkup is 'Listing of location types';
 
 alter table location_type_lkup owner to pt_admin;
 
+create unique index location_type_lkup_udx01
+	on location_type_lkup (location_type_name);
+
 create table location_lkup
 (
 	location_id serial not null
@@ -332,9 +335,6 @@ comment on table extract_process_tracking is 'Showing which processes have impac
 
 alter table extract_process_tracking owner to pt_admin;
 
-create unique index location_type_lkup_udx01
-	on location_type_lkup (location_type_name);
-
 create table process_source
 (
 	source_id integer not null
@@ -382,3 +382,20 @@ alter table system_lkup owner to pt_admin;
 
 create unique index system_lkup_system_key_uindex
 	on system_lkup (system_key);
+
+create table extract_dependency
+(
+	parent_extract_id integer not null
+		constraint extract_dependency_fk01
+			references extract_tracking,
+	child_extract_id integer not null
+		constraint extract_dependency_fk02
+			references extract_tracking,
+	constraint extract_dependency_pk
+		primary key (parent_extract_id, child_extract_id)
+);
+
+comment on table extract_dependency is 'Table tracking interdependencies between extract files.';
+
+alter table extract_dependency owner to pt_admin;
+

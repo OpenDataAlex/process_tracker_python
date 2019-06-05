@@ -2,19 +2,31 @@
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
 import logging
-import os
 from os.path import join
 
+from sqlalchemy.orm import aliased
 
 from process_tracker.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.settings import SettingsManager
-from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
+from process_tracker.models.extract import (
+    Extract,
+    ExtractDependency,
+    ExtractProcess,
+    ExtractStatus,
+)
 
 
 class ExtractTracker:
-
-    def __init__(self, process_run, filename, location=None, location_name=None, location_path=None, status=None):
+    def __init__(
+        self,
+        process_run,
+        filename,
+        location=None,
+        location_name=None,
+        location_path=None,
+        status=None,
+    ):
         """
         ExtractTracker is the primary engine for tracking data extracts
         :param process_run: The process object working with extracts (either creating or consuming)
@@ -34,7 +46,7 @@ class ExtractTracker:
         config = SettingsManager().config
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config['DEFAULT']['log_level'])
+        self.logger.setLevel(config["DEFAULT"]["log_level"])
 
         self.data_store = DataStore()
         self.session = self.data_store.session
@@ -43,52 +55,92 @@ class ExtractTracker:
         self.filename = filename
 
         if location is not None:
-            self.logger.info('Location object provided.')
+            self.logger.info("Location object provided.")
             self.location = location
         elif location_path is not None:
-            self.logger.info('Location path provided.  Creating Location object.')
-            self.location = LocationTracker(location_name=location_name, location_path=location_path)
+            self.logger.info("Location path provided.  Creating Location object.")
+            self.location = LocationTracker(
+                location_name=location_name, location_path=location_path
+            )
         else:
-            raise Exception('A location object or location_path must be provided.')
+            raise Exception("A location object or location_path must be provided.")
 
-        self.logger.info('Registering extract.')
+        self.logger.info("Registering extract.")
 
-        self.extract = self.data_store.get_or_create_item(model=Extract
-                                                          , extract_filename=filename
-                                                          , extract_location_id=self.location.location.location_id)
+        self.extract = self.data_store.get_or_create_item(
+            model=Extract,
+            extract_filename=filename,
+            extract_location_id=self.location.location.location_id,
+        )
 
         if location_path is not None:
-            self.logger.info('Location path was provided so building file path from it.')
+            self.logger.info(
+                "Location path was provided so building file path from it."
+            )
 
             self.full_filename = join(location_path, filename)
         else:
-            self.logger.info('Location provided so building file path from it.')
+            self.logger.info("Location provided so building file path from it.")
 
-            self.full_filename = join(self.location.location_path, self.extract.extract_filename)
+            self.full_filename = join(
+                self.location.location_path, self.extract.extract_filename
+            )
 
         # Getting all status types in the event there are custom status types added later.
         self.extract_status_types = self.get_extract_status_types()
 
         # For specific status types, need to retrieve their ids to be used for those status types' logic.
 
-        self.extract_status_initializing = self.extract_status_types['initializing']
-        self.extract_status_ready = self.extract_status_types['ready']
-        self.extract_status_loading = self.extract_status_types['loading']
-        self.extract_status_loaded = self.extract_status_types['loaded']
-        self.extract_status_archived = self.extract_status_types['archived']
-        self.extract_status_deleted = self.extract_status_types['deleted']
-        self.extract_status_error = self.extract_status_types['error']
+        self.extract_status_initializing = self.extract_status_types["initializing"]
+        self.extract_status_ready = self.extract_status_types["ready"]
+        self.extract_status_loading = self.extract_status_types["loading"]
+        self.extract_status_loaded = self.extract_status_types["loaded"]
+        self.extract_status_archived = self.extract_status_types["archived"]
+        self.extract_status_deleted = self.extract_status_types["deleted"]
+        self.extract_status_error = self.extract_status_types["error"]
 
         self.extract_process = self.retrieve_extract_process()
 
         if status is not None:
-            self.logger.info('Status was provided by user.')
+            self.logger.info("Status was provided by user.")
             self.change_extract_status(new_status=status)
         else:
-            self.logger.info('Status was not provided.  Initializing.')
+            self.logger.info("Status was not provided.  Initializing.")
             self.extract.extract_status_id = self.extract_status_initializing
 
         self.session.commit()
+
+    def add_dependency(self, dependency_type, dependency):
+        """
+        Add a parent or child dependency on the given extract file.
+        :param dependency_type: dependency type.  Valid values:  parent, child
+        :type dependency_type: string
+        :param dependency: dependent extract
+        :type dependency: SQLAlchemy Extract object
+        :return:
+        """
+
+        if dependency_type == "parent":
+            dependency = ExtractDependency(
+                child_extract_id=self.extract.extract_id,
+                parent_extract_id=dependency.extract.extract_id,
+            )
+
+        elif dependency_type == "child":
+            dependency = ExtractDependency(
+                child_extract_id=dependency.extract.extract_id,
+                parent_extract_id=self.extract.extract_id,
+            )
+        else:
+            self.logger.error("Invalid extract dependency type.")
+            raise Exception(
+                "%s is an invalid extract dependency type." % dependency_type
+            )
+
+        self.session.add(dependency)
+        self.session.commit()
+
+        self.logger.info("Extract %s dependency added." % dependency_type)
 
     def change_extract_status(self, new_status):
         """
@@ -97,7 +149,12 @@ class ExtractTracker:
         """
         status_date = datetime.now()
         if new_status in self.extract_status_types:
-            self.logger.info('Setting extract status to %s' % new_status)
+
+            if new_status == "loading":
+
+                self.extract_dependency_check()
+
+            self.logger.info("Setting extract status to %s" % new_status)
 
             new_status = self.extract_status_types[new_status]
 
@@ -109,16 +166,63 @@ class ExtractTracker:
             self.session.commit()
 
         else:
-            self.logger.error('%s is not a valid extract status type.' % new_status)
-            raise Exception('%s is not a valid extract status type.  '
-                            'Please add the status to extract_status_lkup' % new_status)
+            self.logger.error("%s is not a valid extract status type." % new_status)
+            raise Exception(
+                "%s is not a valid extract status type.  "
+                "Please add the status to extract_status_lkup" % new_status
+            )
+
+    def extract_dependency_check(self):
+        """
+        Determine if the extract file has any unloaded dependencies before trying to load the file.
+        :return:
+        """
+        child_extract = aliased(Extract)
+        parent_extract = aliased(Extract)
+
+        dependency_hold = (
+            self.session.query(ExtractDependency)
+            .join(
+                parent_extract,
+                ExtractDependency.parent_extract_id == parent_extract.extract_id,
+            )
+            .join(
+                child_extract,
+                ExtractDependency.child_extract_id == child_extract.extract_id,
+            )
+            .join(Extract, Extract.extract_id == parent_extract.extract_id)
+            .join(
+                ExtractStatus,
+                ExtractStatus.extract_status_id == Extract.extract_status_id,
+            )
+            .filter(child_extract.extract_id == self.extract.extract_id)
+            .filter(
+                ExtractStatus.extract_status_name.in_(
+                    ("loading", "initializing", "ready")
+                )
+            )
+            .count()
+        )
+
+        if dependency_hold > 0:
+            self.logger.error(
+                "Extract files that this extract file is dependent on have not been loaded, are being "
+                "created, or are in the process of loading."
+            )
+            raise Exception(
+                "Extract files that this extract file is dependent on have not been loaded, are being "
+                "created, or are in the process of loading."
+            )
+
+        else:
+            return False
 
     def get_extract_status_types(self):
         """
         Get list of process status types and return dictionary.
         :return:
         """
-        self.logger.info('Obtaining extract status types.')
+        self.logger.info("Obtaining extract status types.")
 
         status_types = dict()
 
@@ -133,16 +237,17 @@ class ExtractTracker:
         :return:
         """
 
-        self.logger.info('Associating extract to given process.')
+        self.logger.info("Associating extract to given process.")
 
-        extract_process = self.data_store.get_or_create_item(model=ExtractProcess
-                                                             , extract_tracking_id=self.extract.extract_id
-                                                             , process_tracking_id=self.process_run.process_tracking_run
-                                                             .process_tracking_id)
+        extract_process = self.data_store.get_or_create_item(
+            model=ExtractProcess,
+            extract_tracking_id=self.extract.extract_id,
+            process_tracking_id=self.process_run.process_tracking_run.process_tracking_id,
+        )
 
         # Only need to set to 'initializing' when it's the first time a process run is trying to work with files.
         if extract_process.extract_process_status_id is None:
-            self.logger.info('Extract process status must also be set.  Initializing.')
+            self.logger.info("Extract process status must also be set.  Initializing.")
             extract_process.extract_process_status_id = self.extract_status_initializing
             self.session.commit()
 

@@ -16,20 +16,27 @@ from process_tracker.models.source import Source
 from process_tracker.models.system import System
 from process_tracker.models.tool import Tool
 
-preload_error_types = ['File Error', 'Data Error', 'Process Error']
-preload_extract_status_types = ['initializing', 'ready', 'loading', 'loaded', 'archived', 'deleted', 'error']
-preload_process_status_types = ['running', 'completed', 'failed']
-preload_process_types = ['extract', 'load']
-preload_system_keys = [{'key': 'version', 'value': '0.1.0'}]
+preload_error_types = ["File Error", "Data Error", "Process Error"]
+preload_extract_status_types = [
+    "initializing",
+    "ready",
+    "loading",
+    "loaded",
+    "archived",
+    "deleted",
+    "error",
+]
+preload_process_status_types = ["running", "completed", "failed"]
+preload_process_types = ["extract", "load"]
+preload_system_keys = [{"key": "version", "value": "0.1.0"}]
 
-relational_stores = ['postgresql', 'mysql', 'oracle', 'mssql', 'snowflake']
+relational_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
 nonrelational_stores = []
 
 supported_data_stores = relational_stores + nonrelational_stores
 
 
 class DataStore:
-
     def __init__(self, config_location=None):
         """
         Need to initialize the data store connection when starting to access the data store.
@@ -38,18 +45,18 @@ class DataStore:
         """
         config = SettingsManager().config
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config['DEFAULT']['log_level'])
+        self.logger.setLevel(config["DEFAULT"]["log_level"])
 
         self.config_location = config_location
 
         data_store = self.verify_and_connect_to_data_store()
-        self.engine = data_store['engine']
-        self.meta = data_store['meta']
-        self.session = data_store['session']
-        self.data_store_type = data_store['data_store_type']
-        self.data_store_host = data_store['data_store_host']
-        self.data_store_port = data_store['data_store_port']
-        self.data_store_name = data_store['data_store_name']
+        self.engine = data_store["engine"]
+        self.meta = data_store["meta"]
+        self.session = data_store["session"]
+        self.data_store_type = data_store["data_store_type"]
+        self.data_store_host = data_store["data_store_host"]
+        self.data_store_port = data_store["data_store_port"]
+        self.data_store_name = data_store["data_store_name"]
 
     def get_or_create_item(self, model, create=True, **kwargs):
         """
@@ -62,21 +69,21 @@ class DataStore:
         :param kwargs: The filter criteria required to find the specific entity instance.
         :return:
         """
-        self.logger.debug('Attempting to obtain record.')
+        self.logger.debug("Attempting to obtain record.")
         instance = self.session.query(model).filter_by(**kwargs).first()
 
         if instance is None:
 
-            self.logger.debug('Record did not exist.')
+            self.logger.debug("Record did not exist.")
 
             if create:
 
-                self.logger.info('Creating instance.')
+                self.logger.info("Creating instance.")
 
                 instance = model(**kwargs)
 
                 try:
-                    self.logger.debug('Committing instance.')
+                    self.logger.debug("Committing instance.")
                     self.session.add(instance)
                 except Exception as e:
                     self.logger.error(e)
@@ -85,9 +92,11 @@ class DataStore:
                 except Exception as e:
                     self.logger.error(e)
             else:
-                raise Exception('There is no record match in %s .' % model.__tablename__)
+                raise Exception(
+                    "There is no record match in %s ." % model.__tablename__
+                )
         else:
-            self.logger.info('The instance already exists in %s.' % model.__tablename__)
+            self.logger.info("The instance already exists in %s." % model.__tablename__)
 
         return instance
 
@@ -97,58 +106,66 @@ class DataStore:
         :param overwrite: Only use if data store needs to be wiped and recreated.  Default is False.
         :type overwrite: bool
         """
-        self.logger.info('Attempting to initialize Process Tracker data store.')
+        self.logger.info("Attempting to initialize Process Tracker data store.")
         if overwrite:
-            self.logger.warn('ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST')
+            self.logger.warn(
+                "ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST"
+            )
 
             for table in Base.metadata.table_names():
-                self.logger.info('Table will be deleted: %s' % table)
+                self.logger.info("Table will be deleted: %s" % table)
                 table.drop(self.engine)
 
             version = None
         else:
 
-            self.logger.debug('Obtaining system version, if exists.')
-            version = self.session.query(System).filter(System.system_key == 'version').first()
+            self.logger.debug("Obtaining system version, if exists.")
+            version = (
+                self.session.query(System)
+                .filter(System.system_key == "version")
+                .first()
+            )
 
         if version is None:
 
-            self.logger.info('Data store initialization beginning.  Creating data store.')
+            self.logger.info(
+                "Data store initialization beginning.  Creating data store."
+            )
             Base.metadata.create_all(self.engine)
 
-            self.logger.info('Setting up application defaults.')
+            self.logger.info("Setting up application defaults.")
 
-            self.logger.info('Adding error types...')
+            self.logger.info("Adding error types...")
             for error_type in preload_error_types:
-                self.logger.info('Adding %s' % error_type)
+                self.logger.info("Adding %s" % error_type)
                 self.session.add(ErrorType(error_type_name=error_type))
 
-            self.logger.info('Adding extract status types...')
+            self.logger.info("Adding extract status types...")
             for extract_status_type in preload_extract_status_types:
-                self.logger.info('Adding %s' % extract_status_type)
+                self.logger.info("Adding %s" % extract_status_type)
                 self.session.add(ExtractStatus(extract_status_name=extract_status_type))
 
-            self.logger.info('Adding process status types...')
+            self.logger.info("Adding process status types...")
             for process_status_type in preload_process_status_types:
-                self.logger.info('Adding %s' % process_status_type)
+                self.logger.info("Adding %s" % process_status_type)
                 self.session.add(ProcessStatus(process_status_name=process_status_type))
 
-            self.logger.info('Adding process types...')
+            self.logger.info("Adding process types...")
             for process_type in preload_process_types:
-                self.logger.info('Adding %s' % process_type)
+                self.logger.info("Adding %s" % process_type)
                 self.session.add(ProcessType(process_type_name=process_type))
 
-            self.logger.info('Adding system keys...')
+            self.logger.info("Adding system keys...")
             for system_key, value in preload_system_keys:
-                self.logger.info('Adding %s' % system_key)
+                self.logger.info("Adding %s" % system_key)
                 self.session.add(System(system_key=system_key, system_value=value))
 
             self.session.commit()
         else:
-            self.logger.error('It appears the system has already been setup.')
-            ClickException('It appears the system has already been setup.').show()
+            self.logger.error("It appears the system has already been setup.")
+            ClickException("It appears the system has already been setup.").show()
 
-        self.logger.debug('Finished the initialization check.')
+        self.logger.debug("Finished the initialization check.")
 
     def topic_creator(self, topic, name):
         """
@@ -157,39 +174,47 @@ class DataStore:
         :param name:
         :return:
         """
-        self.logger.info('Attempting to create %s item: %s' % (topic, name))
+        self.logger.info("Attempting to create %s item: %s" % (topic, name))
 
         if self.topic_validator(topic=topic):
             try:
-                if topic == 'actor':
+                if topic == "actor":
                     item = self.get_or_create_item(model=Actor, actor_name=name)
-                    self.logger.info('Actor created: %s' % item.__repr__)
-                if topic == 'extract status':
-                    item = self.get_or_create_item(model=ExtractStatus, extract_status_name=name)
-                    self.logger.info('Extract Status created: %s' % item.__repr__)
-                if topic == 'error type':
-                    item = self.get_or_create_item(model=ErrorType, error_type_name=name)
-                    self.logger.info('Error Type created: %s' % item.__repr__)
-                if topic == 'process type':
-                    item = self.get_or_create_item(model=ProcessType, process_type_name=name)
-                    self.logger.info('Process Type created: %s' % item.__repr__)
-                if topic == 'process status':
-                    item = self.get_or_create_item(model=ProcessStatus, process_status_name=name)
-                    self.logger.info('Process Status created: %s' % item.__repr__)
-                if topic == 'source':
+                    self.logger.info("Actor created: %s" % item.__repr__)
+                if topic == "extract status":
+                    item = self.get_or_create_item(
+                        model=ExtractStatus, extract_status_name=name
+                    )
+                    self.logger.info("Extract Status created: %s" % item.__repr__)
+                if topic == "error type":
+                    item = self.get_or_create_item(
+                        model=ErrorType, error_type_name=name
+                    )
+                    self.logger.info("Error Type created: %s" % item.__repr__)
+                if topic == "process type":
+                    item = self.get_or_create_item(
+                        model=ProcessType, process_type_name=name
+                    )
+                    self.logger.info("Process Type created: %s" % item.__repr__)
+                if topic == "process status":
+                    item = self.get_or_create_item(
+                        model=ProcessStatus, process_status_name=name
+                    )
+                    self.logger.info("Process Status created: %s" % item.__repr__)
+                if topic == "source":
                     item = self.get_or_create_item(model=Source, source_name=name)
-                    self.logger.info('Source created: %s' % item.__repr__)
-                if topic == 'tool':
+                    self.logger.info("Source created: %s" % item.__repr__)
+                if topic == "tool":
                     item = self.get_or_create_item(model=Tool, tool_name=name)
-                    self.logger.info('Tool created: %s' % item.__repr__)
+                    self.logger.info("Tool created: %s" % item.__repr__)
             finally:
-                ClickException('Invalid topic type.').show()
+                ClickException("Invalid topic type.").show()
 
-                self.logger.error('Invalid topic type.')
+                self.logger.error("Invalid topic type.")
         else:
-            ClickException('Invalid topic type.').show()
+            ClickException("Invalid topic type.").show()
 
-            self.logger.error('Invalid topic type.')
+            self.logger.error("Invalid topic type.")
 
         return item
 
@@ -204,51 +229,64 @@ class DataStore:
         """
         item_delete = False
 
-        self.logger.info('Attempting to delete %s item %s' % (topic, name))
+        self.logger.info("Attempting to delete %s item %s" % (topic, name))
 
         if self.topic_validator(topic=topic):
 
-            if topic == 'actor':
+            if topic == "actor":
                 item_delete = True
                 self.session.query(Actor).filter(Actor.actor_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.logger.info("%s %s deleted." % (topic, name))
 
-            elif topic == 'extract status' and name not in preload_extract_status_types:
+            elif topic == "extract status" and name not in preload_extract_status_types:
                 item_delete = True
-                self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.session.query(ExtractStatus).filter(
+                    ExtractStatus.extract_status_name == name
+                ).delete()
+                self.logger.info("%s %s deleted." % (topic, name))
 
-            elif topic == 'error type' and name not in preload_error_types:
+            elif topic == "error type" and name not in preload_error_types:
                 item_delete = True
-                self.session.query(ErrorType).filter(ErrorType.error_type_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.session.query(ErrorType).filter(
+                    ErrorType.error_type_name == name
+                ).delete()
+                self.logger.info("%s %s deleted." % (topic, name))
 
-            elif topic == 'process type' and name not in preload_process_types:
+            elif topic == "process type" and name not in preload_process_types:
                 item_delete = True
-                self.session.query(ProcessType).filter(ProcessType.process_type_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.session.query(ProcessType).filter(
+                    ProcessType.process_type_name == name
+                ).delete()
+                self.logger.info("%s %s deleted." % (topic, name))
 
-            elif topic == 'process status' and name not in preload_process_status_types:
+            elif topic == "process status" and name not in preload_process_status_types:
                 item_delete = True
-                self.session.query(ProcessStatus).filter(ProcessStatus.process_status_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.session.query(ProcessStatus).filter(
+                    ProcessStatus.process_status_name == name
+                ).delete()
+                self.logger.info("%s %s deleted." % (topic, name))
 
-            elif topic == 'source':
+            elif topic == "source":
                 item_delete = True
                 self.session.query(Source).filter(Source.source_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.logger.info("%s %s deleted." % (topic, name))
 
-            elif topic == 'tool':
+            elif topic == "tool":
                 item_delete = True
                 self.session.query(Tool).filter(Tool.tool_name == name).delete()
-                self.logger.info('%s %s deleted.' % (topic, name))
+                self.logger.info("%s %s deleted." % (topic, name))
 
             else:
-                ClickException('The item could not be deleted because it is a protected record.').show()
-                self.logger.error('%s %s could not be deleted because it is  a protected record.' % (topic, name))
+                ClickException(
+                    "The item could not be deleted because it is a protected record."
+                ).show()
+                self.logger.error(
+                    "%s %s could not be deleted because it is  a protected record."
+                    % (topic, name)
+                )
         else:
-            ClickException('Invalid topic.  Unable to delete instance.').show()
-            self.logger.error('%s is an invalid topic.  Unable to delete.' % topic)
+            self.logger.error("%s is an invalid topic.  Unable to delete." % topic)
+            raise ClickException("Invalid topic.  Unable to delete instance.")
 
         if item_delete:
             self.session.commit()
@@ -265,50 +303,75 @@ class DataStore:
         :return:
         """
         if self.topic_validator(topic=topic):
-            if topic == 'actor':
-                item = self.get_or_create_item(model=Actor, create=False, actor_name=initial_name)
+            if topic == "actor":
+                item = self.get_or_create_item(
+                    model=Actor, create=False, actor_name=initial_name
+                )
                 item.actor_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
-            elif topic == 'extract status' and initial_name not in preload_extract_status_types:
-                item = self.get_or_create_item(model=ExtractStatus, create=False, extract_status_name=initial_name)
+            elif (
+                topic == "extract status"
+                and initial_name not in preload_extract_status_types
+            ):
+                item = self.get_or_create_item(
+                    model=ExtractStatus, create=False, extract_status_name=initial_name
+                )
                 item.extract_status_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
-            elif topic == 'error type' and initial_name not in preload_error_types:
-                item = self.get_or_create_item(model=ErrorType, create=False, error_type_name=initial_name)
+            elif topic == "error type" and initial_name not in preload_error_types:
+                item = self.get_or_create_item(
+                    model=ErrorType, create=False, error_type_name=initial_name
+                )
                 item.error_type_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
-            elif topic == 'process type' and initial_name not in preload_process_types:
-                item = self.get_or_create_item(model=ProcessType, create=False, process_type_name=initial_name)
+            elif topic == "process type" and initial_name not in preload_process_types:
+                item = self.get_or_create_item(
+                    model=ProcessType, create=False, process_type_name=initial_name
+                )
                 item.process_type_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
-            elif topic == 'process status' and initial_name not in preload_process_status_types:
-                item = self.get_or_create_item(model=ProcessStatus, create=False, process_status_name=initial_name)
+            elif (
+                topic == "process status"
+                and initial_name not in preload_process_status_types
+            ):
+                item = self.get_or_create_item(
+                    model=ProcessStatus, create=False, process_status_name=initial_name
+                )
                 item.process_status_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
-            elif topic == 'source':
-                item = self.get_or_create_item(model=Source, create=False, source_name=initial_name)
+            elif topic == "source":
+                item = self.get_or_create_item(
+                    model=Source, create=False, source_name=initial_name
+                )
                 item.source_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
-            elif topic == 'tool':
-                item = self.get_or_create_item(model=Tool, create=False, tool_name=initial_name)
+            elif topic == "tool":
+                item = self.get_or_create_item(
+                    model=Tool, create=False, tool_name=initial_name
+                )
                 item.tool_name = name
-                self.logger.info('%s %s updated.' % (topic, name))
+                self.logger.info("%s %s updated." % (topic, name))
 
             else:
-                ClickException('The item could not be updated because it is a protected record.').show()
-                self.logger.error('%s %s could not be updated because it is  a protected record.' % (topic, name))
+                ClickException(
+                    "The item could not be updated because it is a protected record."
+                ).show()
+                self.logger.error(
+                    "%s %s could not be updated because it is  a protected record."
+                    % (topic, name)
+                )
 
             self.session.commit()
 
         else:
-            ClickException('Invalid topic.  Unable to update instance.').show()
-            self.logger.error('%s is an invalid topic.  Unable to update.' % topic)
+            ClickException("Invalid topic.  Unable to update instance.").show()
+            self.logger.error("%s is an invalid topic.  Unable to update." % topic)
 
     def topic_validator(self, topic):
         """
@@ -319,17 +382,28 @@ class DataStore:
 
         topic = topic.lower()
 
-        self.logger.info('Validating if %s can be managed via CLI...' % topic)
+        self.logger.info("Validating if %s can be managed via CLI..." % topic)
 
         # Only data store topics that should be allowed to be created from the command line tool.
-        valid_topics = ['actor', 'error type', 'extract status', 'process status', 'process type', 'source', 'tool']
+        valid_topics = [
+            "actor",
+            "error type",
+            "extract status",
+            "process status",
+            "process type",
+            "source",
+            "tool",
+        ]
 
         if topic in valid_topics:
-            self.logger.info('Topic validated.')
+            self.logger.info("Topic validated.")
             return True
         else:
-            self.logger.info('Topic invalidated.  Please try again.')
-            self.logger.error('topic type is invalid.  Please use one of the following: %s' % valid_topics.keys())
+            self.logger.info("Topic invalidated.  Please try again.")
+            self.logger.error(
+                "topic type is invalid.  Please use one of the following: %s"
+                % valid_topics.keys()
+            )
             return False
 
     def verify_and_connect_to_data_store(self):
@@ -337,77 +411,109 @@ class DataStore:
         Based on environment variables, create the data store connection engine.
         :return:
         """
-        self.logger.info('Obtaining application configuration.')
+        self.logger.info("Obtaining application configuration.")
         config = SettingsManager(config_location=self.config_location).config
 
-        data_store_type = config['DEFAULT']['data_store_type']
-        data_store_username = config['DEFAULT']['data_store_username']
-        data_store_password = config['DEFAULT']['data_store_password']
-        data_store_host = config['DEFAULT']['data_store_host']
-        data_store_port = config['DEFAULT']['data_store_port']
-        data_store_name = config['DEFAULT']['data_store_name']
+        data_store_type = config["DEFAULT"]["data_store_type"]
+        data_store_username = config["DEFAULT"]["data_store_username"]
+        data_store_password = config["DEFAULT"]["data_store_password"]
+        data_store_host = config["DEFAULT"]["data_store_host"]
+        data_store_port = config["DEFAULT"]["data_store_port"]
+        data_store_name = config["DEFAULT"]["data_store_name"]
 
         errors = []
 
-        if data_store_type is None or data_store_type == 'None':
-            errors.append(Exception('Data store type is not set.'))
+        if data_store_type is None or data_store_type == "None":
+            errors.append(Exception("Data store type is not set."))
 
-        if data_store_username is None or data_store_username == 'None':
-            errors.append(Exception('Data store username is not set.'))
+        if data_store_username is None or data_store_username == "None":
+            errors.append(Exception("Data store username is not set."))
 
-        if data_store_password is None or data_store_password == 'None':
-            errors.append(Exception('Data store password is not set'))
+        if data_store_password is None or data_store_password == "None":
+            errors.append(Exception("Data store password is not set"))
 
-        if data_store_host is None or data_store_host == 'None':
-            errors.append(Exception('Data store host is not set'))
+        if data_store_host is None or data_store_host == "None":
+            errors.append(Exception("Data store host is not set"))
 
-        if data_store_port is None or data_store_port == 'None':
-            errors.append(Exception('Data store port is not set'))
+        if data_store_port is None or data_store_port == "None":
+            errors.append(Exception("Data store port is not set"))
 
-        if data_store_name is None or data_store_name == 'None':
-            errors.append(Exception('Data store name is not set'))
+        if data_store_name is None or data_store_name == "None":
+            errors.append(Exception("Data store name is not set"))
 
         if errors:
 
-            errors.append(Exception('Data store has not been properly configured.  Please read how to set up the '
-                                    'Process Tracking data store by going to: <insert read the docs url here>'))
+            errors.append(
+                Exception(
+                    "Data store has not been properly configured.  Please read how to set up the "
+                    "Process Tracking data store by going to: https://process-tracker.readthedocs.io/en/latest/"
+                )
+            )
 
             raise Exception(errors)
 
         if data_store_type in supported_data_stores:
-            engine = ''
-            meta = ''
-            session = ''
-            self.logger.info('Data store is supported.')
+            engine = ""
+            meta = ""
+            session = ""
+            self.logger.info("Data store is supported.")
 
             if data_store_type in relational_stores:
 
-                self.logger.info('Data store is relational.')
-                self.logger.info('Data store is %s' % data_store_type)
+                self.logger.info("Data store is relational.")
+                self.logger.info("Data store is %s" % data_store_type)
 
-                if data_store_type == 'postgresql' \
-                        or data_store_type == 'oracle'\
-                        or data_store_type == 'snowflake':
+                if (
+                    data_store_type == "postgresql"
+                    or data_store_type == "oracle"
+                    or data_store_type == "snowflake"
+                ):
 
-                    engine = create_engine(data_store_type + '://' + data_store_username + ':' + data_store_password
-                                           + '@' + data_store_host + '/' + data_store_name)
+                    engine = create_engine(
+                        data_store_type
+                        + "://"
+                        + data_store_username
+                        + ":"
+                        + data_store_password
+                        + "@"
+                        + data_store_host
+                        + "/"
+                        + data_store_name
+                    )
 
-                elif data_store_type == 'mysql':
+                elif data_store_type == "mysql":
 
-                    engine = create_engine('mysql+pymysql://' + data_store_username + ':' + data_store_password + '@'
-                                           + data_store_host + '/' + data_store_name)
-                elif data_store_type == 'mssql':
+                    engine = create_engine(
+                        "mysql+pymysql://"
+                        + data_store_username
+                        + ":"
+                        + data_store_password
+                        + "@"
+                        + data_store_host
+                        + "/"
+                        + data_store_name
+                    )
+                elif data_store_type == "mssql":
 
-                    engine = create_engine('mssql+pymssql://' + data_store_username + ':' + data_store_password + '@'
-                                           + data_store_host + '/' + data_store_name)
+                    engine = create_engine(
+                        "mssql+pymssql://"
+                        + data_store_username
+                        + ":"
+                        + data_store_password
+                        + "@"
+                        + data_store_host
+                        + "/"
+                        + data_store_name
+                    )
 
                 else:
                     self.logger.error("Data store type valid but not configured.")
-                    raise Exception('Data store type valid but not configured.')
+                    raise Exception("Data store type valid but not configured.")
 
-                self.logger.info("Attempting to connect to data store %s, found at %s:%s" % (data_store_name
-                                                                                             , data_store_host
-                                                                                             , data_store_port))
+                self.logger.info(
+                    "Attempting to connect to data store %s, found at %s:%s"
+                    % (data_store_name, data_store_host, data_store_port)
+                )
 
                 if database_exists(engine.url):
 
@@ -415,34 +521,41 @@ class DataStore:
 
                 else:
 
-                    self.logger.error('Data store does not exist.  Please create and try again.')
-                    raise Exception('Data store does not exist.  Please create and try again.')
+                    self.logger.error(
+                        "Data store does not exist.  Please create and try again."
+                    )
+                    raise Exception(
+                        "Data store does not exist.  Please create and try again."
+                    )
 
                 session = sessionmaker(bind=engine)
 
                 session = session(expire_on_commit=False)
 
-                if data_store_type == 'postgresql':
+                if data_store_type == "postgresql":
                     session.execute("SET search_path TO %s" % data_store_name)
-                elif data_store_type == 'mysql':
+                elif data_store_type == "mysql":
                     session.execute("USE %s" % data_store_name)
 
-                meta = MetaData(schema='process_tracking')
+                meta = MetaData(schema="process_tracking")
 
             elif data_store_type in nonrelational_stores:
-                session = ''
+                session = ""
 
             data_store = dict()
-            data_store['engine'] = engine
-            data_store['meta'] = meta
-            data_store['session'] = session
-            data_store['data_store_type'] = data_store_type
-            data_store['data_store_host'] = data_store_host
-            data_store['data_store_port'] = data_store_port
-            data_store['data_store_name'] = data_store_name
-            data_store['data_store_username'] = data_store_username
-            data_store['data_store_password'] = data_store_password
+            data_store["engine"] = engine
+            data_store["meta"] = meta
+            data_store["session"] = session
+            data_store["data_store_type"] = data_store_type
+            data_store["data_store_host"] = data_store_host
+            data_store["data_store_port"] = data_store_port
+            data_store["data_store_name"] = data_store_name
+            data_store["data_store_username"] = data_store_username
+            data_store["data_store_password"] = data_store_password
 
             return data_store
         else:
-            raise Exception('Invalid data store type provided.  Please use: ' + ", ".join(supported_data_stores))
+            raise Exception(
+                "Invalid data store type provided.  Please use: "
+                + ", ".join(supported_data_stores)
+            )

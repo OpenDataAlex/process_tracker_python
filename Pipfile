@@ -5,9 +5,9 @@ verify_ssl = true
 
 [dev-packages]
 coverage="*"
+coveralls="*"
 moto="*"
 python-coveralls="*"
-coveralls="*"
 
 [packages]
 boto3="*"
