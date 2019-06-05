@@ -312,6 +312,22 @@ comment on column extract_tracking.extract_registration_date_time is 'The dateti
 
 alter table extract_tracking owner to pt_admin;
 
+create table process_tracking.extract_dependency
+(
+	parent_extract_id integer not null
+		constraint extract_dependency_fk01
+			references process_tracking.extract_tracking,
+	child_extract_id integer not null
+		constraint extract_dependency_fk02
+			references process_tracking.extract_tracking,
+	constraint extract_dependency_pk
+		primary key (parent_extract_id, child_extract_id)
+);
+
+comment on table process_tracking.extract_dependency is 'Table tracking interdependencies between extract files.';
+
+alter table process_tracking.extract_dependency owner to pt_admin;
+
 create table extract_process_tracking
 (
 	extract_tracking_id integer not null
