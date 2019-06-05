@@ -124,6 +124,20 @@ class TestExtractTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_add_dependency_invalid_type(self):
+        """
+        Ensuring that when a dependency is added, only 'parent' and 'child' are accepted.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+            self.extract.add_dependency(
+                dependency_type="blarg", dependency=self.extract.extract
+            )
+        return self.assertTrue(
+            "blarg is an invalid extract dependency type." in str(context.exception)
+        )
+
     def test_initialization_no_location_no_location_path(self):
         """
         Testing that if no location or location path is set, an error is thrown.

@@ -125,6 +125,17 @@ class TestProcessTracker(unittest.TestCase):
 
         return timestamp
 
+    def test_change_status_invalid_type(self):
+        """
+        Testing that if an invalid process status type is passed, it will trigger an exception.
+        :return:
+        """
+        with self.assertRaises(Exception) as context:
+            self.process_tracker.change_run_status(new_status="blarg")
+        return self.assertTrue(
+            "The provided status type blarg is invalid." in str(context.exception)
+        )
+
     def test_find_ready_extracts_by_filename_full(self):
         """
         Testing that for the given full filename, find the extract, provided it's in 'ready' state.
@@ -538,7 +549,7 @@ class TestProcessTracker(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             # Running registration a second time to mimic job being run twice
             self.process_tracker.register_new_process_run()
-        print(context.exception)
+
         return self.assertTrue(
             "The process Testing Process Tracking Initialization "
             "is currently running." in str(context.exception)

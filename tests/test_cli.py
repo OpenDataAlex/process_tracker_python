@@ -108,6 +108,18 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(0, result.exit_code)
 
+    # def test_create_invalid_type(self):
+    #     """
+    #     Testing that when an invalid type is passed to the create option, an exception occurs.
+    #     :return:
+    #     """
+    #     given_result = self.runner.invoke(main, 'create -t blarg -n "Argle Bargle"')
+    #     given_result = given_result.exception
+    #
+    #     expected_result = "Invalid topic type."
+    #
+    #     return self.assertEqual(expected_result, given_result)
+
     def test_create_process_type(self):
         """
         Testing that when creating an process type record it is added.
@@ -269,6 +281,18 @@ class TestCli(unittest.TestCase):
 
         self.assertIn(expected_result, result.output)
         self.assertEqual(0, result.exit_code)
+
+    # def test_delete_invalid_type(self):
+    #     """
+    #     Testing that when an invalid type is passed to the delete option, an exception occurs.
+    #     :return:
+    #     """
+    #     given_result = self.runner.invoke(main, 'delete -t blarg -n "Argle Bargle"')
+    #     given_result = given_result.exception
+    #
+    #     expected_result = "Invalid topic.  Unable to delete instance."
+    #
+    #     return self.assertEqual(expected_result, given_result)
 
     def test_delete_process_type(self):
         """
@@ -465,6 +489,20 @@ class TestCli(unittest.TestCase):
         )
 
         self.assertIn(expected_result, result.output)
+
+    # def test_update_invalid_type(self):
+    #     """
+    #     Testing that when an invalid type is passed to the update option, an exception occurs.
+    #     :return:
+    #     """
+    #     given_result = self.runner.invoke(
+    #         main, 'update -t blarg -i "Testing" -n "Argle Bargle"'
+    #     )
+    #     given_result = given_result.exception
+    #
+    #     expected_result = "Invalid topic.  Unable to delete instance."
+    #
+    #     return self.assertEqual(expected_result, given_result)
 
     def test_update_process_type(self):
         """

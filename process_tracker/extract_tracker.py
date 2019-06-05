@@ -132,8 +132,10 @@ class ExtractTracker:
                 parent_extract_id=self.extract.extract_id,
             )
         else:
-            self.logger.error("Invalid dependency type.")
-            raise Exception("Invalid extract dependency type.")
+            self.logger.error("Invalid extract dependency type.")
+            raise Exception(
+                "%s is an invalid extract dependency type." % dependency_type
+            )
 
         self.session.add(dependency)
         self.session.commit()
@@ -148,7 +150,7 @@ class ExtractTracker:
         status_date = datetime.now()
         if new_status in self.extract_status_types:
 
-            if new_status == self.extract_status_loading:
+            if new_status == "loading":
 
                 self.extract_dependency_check()
 

@@ -285,8 +285,8 @@ class DataStore:
                     % (topic, name)
                 )
         else:
-            ClickException("Invalid topic.  Unable to delete instance.").show()
             self.logger.error("%s is an invalid topic.  Unable to delete." % topic)
+            raise ClickException("Invalid topic.  Unable to delete instance.")
 
         if item_delete:
             self.session.commit()
@@ -446,7 +446,7 @@ class DataStore:
             errors.append(
                 Exception(
                     "Data store has not been properly configured.  Please read how to set up the "
-                    "Process Tracking data store by going to: <insert read the docs url here>"
+                    "Process Tracking data store by going to: https://process-tracker.readthedocs.io/en/latest/"
                 )
             )
 

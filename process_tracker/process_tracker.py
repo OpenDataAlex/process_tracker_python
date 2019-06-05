@@ -110,7 +110,7 @@ class ProcessTracker:
         if end_date is None:
             end_date = datetime.now()
 
-        if self.process_status_types[new_status]:
+        if new_status in self.process_status_types.keys():
 
             self.process_tracking_run.process_status_id = self.process_status_types[
                 new_status
@@ -134,10 +134,7 @@ class ProcessTracker:
             self.session.commit()
 
         else:
-            raise Exception(
-                "%s is not a valid process status type.  "
-                "Please add the status to process_status_type_lkup" % new_status
-            )
+            raise Exception("The provided status type %s is invalid." % new_status)
 
     def find_ready_extracts_by_filename(self, filename):
         """
