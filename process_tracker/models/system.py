@@ -10,7 +10,7 @@ class System(Base):
 
     __tablename__ = "system_lkup"
 
-    system_id = Column(Integer, Sequence('system_lkup_system_id_seq'), primary_key=True)
+    system_id = Column(Integer, Sequence("system_lkup_system_id_seq"), primary_key=True)
     system_key = Column(String(250), nullable=False, unique=True)
     system_value = Column(String(250), nullable=False)
 

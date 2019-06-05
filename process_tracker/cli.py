@@ -8,7 +8,7 @@ from process_tracker.data_store import DataStore
 from process_tracker.utilities.logging import console
 
 data_store = DataStore()
-logger = logging.getLogger('Process Tracker')
+logger = logging.getLogger("Process Tracker")
 logger.addHandler(console)
 
 
@@ -42,8 +42,8 @@ def main():
 
 
 @main.command()
-@click.option('-t', '--topic', help='The topic being created')
-@click.option('-n', '--name', help='The name for the topic.')
+@click.option("-t", "--topic", help="The topic being created")
+@click.option("-n", "--name", help="The name for the topic.")
 def create(topic, name):
     """
     Create an item that is within the valid topics list.
@@ -52,13 +52,13 @@ def create(topic, name):
     :param name: The name of the topic item to be added.
     :type name: string
     """
-    click.echo('Attempting to create %s with name %s' % (topic, name))
+    click.echo("Attempting to create %s with name %s" % (topic, name))
     data_store.topic_creator(topic=topic, name=name)
 
 
 @main.command()
-@click.option('-t', '--topic', help='The topic being created')
-@click.option('-n', '--name', help='The name for the topic.')
+@click.option("-t", "--topic", help="The topic being created")
+@click.option("-n", "--name", help="The name for the topic.")
 def delete(topic, name):
     """
     Delete an item that is within the valid topics list and not a pre-loaded item.
@@ -67,15 +67,17 @@ def delete(topic, name):
     :param name: The name of the topic item to be deleted.
     :type name: string
     """
-    click.echo('Attempting to delete %s with name %s' % (topic, name))
+    click.echo("Attempting to delete %s with name %s" % (topic, name))
     data_store.topic_deleter(topic=topic, name=name)
 
 
 @main.command()
-@click.option('-t', '--topic', help='The topic being created')
-@click.option('-i', '--initial-name', help='The name that needs to be changed.')
-@click.option('-n', '--name', help='The new name for the topic.')
+@click.option("-t", "--topic", help="The topic being created")
+@click.option("-i", "--initial-name", help="The name that needs to be changed.")
+@click.option("-n", "--name", help="The new name for the topic.")
 def update(topic, initial_name, name):
 
-    click.echo('Attempting to update %s with name %s to %s' % (topic, initial_name, name))
+    click.echo(
+        "Attempting to update %s with name %s to %s" % (topic, initial_name, name)
+    )
     data_store.topic_updater(topic=topic, initial_name=initial_name, name=name)

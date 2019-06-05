@@ -3,7 +3,13 @@
 import unittest
 
 from process_tracker.models.extract import Extract, ExtractProcess, Location
-from process_tracker.models.process import Process, ProcessDependency, ProcessSource, ProcessTarget, ProcessTracking
+from process_tracker.models.process import (
+    Process,
+    ProcessDependency,
+    ProcessSource,
+    ProcessTarget,
+    ProcessTracking,
+)
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -11,15 +17,16 @@ from process_tracker.process_tracker import ErrorTracking, ProcessTracker
 
 
 class TestExtractTracker(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.process_tracker = ProcessTracker(process_name='Testing Extract Tracking'
-                                             , process_type='Load'
-                                             , actor_name='UnitTesting'
-                                             , tool_name='Spark'
-                                             , sources='Unittests'
-                                             , targets='Unittests')
+        cls.process_tracker = ProcessTracker(
+            process_name="Testing Extract Tracking",
+            process_type="Load",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
 
         cls.process_run = cls.process_tracker
 
@@ -45,10 +52,12 @@ class TestExtractTracker(unittest.TestCase):
         :return:
         """
 
-        self.extract = ExtractTracker(process_run=self.process_run
-                                      , filename='test_extract_filename.csv'
-                                      , location_name='Test Location'
-                                      , location_path='/home/test/extract_dir')
+        self.extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="test_extract_filename.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
     def tearDown(self):
         """
@@ -68,10 +77,14 @@ class TestExtractTracker(unittest.TestCase):
 
         with self.assertRaises(Exception) as context:
             # Running registration a second time to mimic job being run twice
-            ExtractTracker(process_run=self.process_run
-                           , filename='test_extract_filename.csv')
+            ExtractTracker(
+                process_run=self.process_run, filename="test_extract_filename.csv"
+            )
 
-        return self.assertTrue('A location object or location_path must be provided.' in str(context.exception))
+        return self.assertTrue(
+            "A location object or location_path must be provided."
+            in str(context.exception)
+        )
 
     def test_change_extract_status(self):
         """
@@ -80,16 +93,24 @@ class TestExtractTracker(unittest.TestCase):
         :return:
         """
         extract_id = self.extract.extract.extract_id
-        self.extract.change_extract_status('ready')
+        self.extract.change_extract_status("ready")
 
-        extract_record = self.session.query(Extract).filter(Extract.extract_id == extract_id)
-        extract_process_record = self.session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
+        extract_record = self.session.query(Extract).filter(
+            Extract.extract_id == extract_id
+        )
+        extract_process_record = self.session.query(ExtractProcess).filter(
+            ExtractProcess.extract_tracking_id == extract_id
+        )
 
-        given_result = [extract_record[0].extract_status_id
-                        , extract_process_record[0].extract_process_status_id]
+        given_result = [
+            extract_record[0].extract_status_id,
+            extract_process_record[0].extract_process_status_id,
+        ]
 
-        expected_result = [self.extract.extract_status_ready
-                           , self.extract.extract_status_ready]
+        expected_result = [
+            self.extract.extract_status_ready,
+            self.extract.extract_status_ready,
+        ]
 
         self.assertEqual(expected_result, given_result)
 
@@ -101,10 +122,12 @@ class TestExtractTracker(unittest.TestCase):
 
         with self.assertRaises(Exception) as context:
             # Running registration a second time to mimic job being run twice
-            self.extract.change_extract_status(new_status='blarg')
+            self.extract.change_extract_status(new_status="blarg")
 
-        return self.assertTrue('blarg is not a valid extract status type.  '
-                               'Please add the status to extract_status_lkup' in str(context.exception))
+        return self.assertTrue(
+            "blarg is not a valid extract status type.  "
+            "Please add the status to extract_status_lkup" in str(context.exception)
+        )
 
     def test_change_extract_status_initialization(self):
         """
@@ -114,7 +137,9 @@ class TestExtractTracker(unittest.TestCase):
         extract_id = self.extract.extract.extract_id
         self.extract.retrieve_extract_process()
 
-        extract_process_record = self.session.query(ExtractProcess).filter(ExtractProcess.extract_tracking_id == extract_id)
+        extract_process_record = self.session.query(ExtractProcess).filter(
+            ExtractProcess.extract_tracking_id == extract_id
+        )
 
         given_result = extract_process_record[0].extract_process_status_id
         expected_result = self.extract.extract_status_initializing
@@ -126,14 +151,18 @@ class TestExtractTracker(unittest.TestCase):
         Testing that if a location name is not provided, one is created from the local path provided.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_run
-                                 , filename='test_extract_filename2.csv'
-                                 , location_path='/home/test/extract_dir2')
+        extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="test_extract_filename2.csv",
+            location_path="/home/test/extract_dir2",
+        )
 
-        location = self.session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
+        location = self.session.query(Location).filter(
+            Location.location_id == extract.extract.extract_location_id
+        )
 
         given_result = location[0].location_name
-        expected_result = 'extract_dir2'
+        expected_result = "extract_dir2"
 
         self.assertEqual(expected_result, given_result)
 
@@ -142,14 +171,18 @@ class TestExtractTracker(unittest.TestCase):
         Testing that if a location name is not provided, one is created from the s3 path provided.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_run
-                                 , filename='test_extract_filename2.csv'
-                                 , location_path='https://test-test.s3.amazonaws.com/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="test_extract_filename2.csv",
+            location_path="https://test-test.s3.amazonaws.com/test/extract_dir",
+        )
 
-        location = self.session.query(Location).filter(Location.location_id == extract.extract.extract_location_id)
+        location = self.session.query(Location).filter(
+            Location.location_id == extract.extract.extract_location_id
+        )
 
         given_result = location[0].location_name
-        expected_result = 's3 - extract_dir'
+        expected_result = "s3 - extract_dir"
 
         self.assertEqual(expected_result, given_result)
 
@@ -172,9 +205,11 @@ class TestExtractTracker(unittest.TestCase):
         Testing that if a location name is provided (like with default extract), one is not created.
         :return:
         """
-        location = self.session.query(Location).filter(Location.location_id == self.extract.extract.extract_location_id)
+        location = self.session.query(Location).filter(
+            Location.location_id == self.extract.extract.extract_location_id
+        )
 
         given_result = location[0].location_name
-        expected_result = 'Test Location'
+        expected_result = "Test Location"
 
         self.assertEqual(expected_result, given_result)

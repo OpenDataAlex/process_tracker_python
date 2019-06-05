@@ -11,8 +11,21 @@ import botocore
 import moto
 from sqlalchemy.orm import aliased, Session
 
-from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
-from process_tracker.models.process import ErrorType, ErrorTracking, Process, ProcessDependency, ProcessSource, ProcessTarget, ProcessTracking
+from process_tracker.models.extract import (
+    Extract,
+    ExtractProcess,
+    ExtractStatus,
+    Location,
+)
+from process_tracker.models.process import (
+    ErrorType,
+    ErrorTracking,
+    Process,
+    ProcessDependency,
+    ProcessSource,
+    ProcessTarget,
+    ProcessTracking,
+)
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -21,9 +34,8 @@ from process_tracker.process_tracker import ProcessTracker
 test_bucket = "test_bucket"
 
 
-#@mock_s3
+# @mock_s3
 class TestProcessTracker(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.data_store = DataStore()
@@ -71,16 +83,18 @@ class TestProcessTracker(unittest.TestCase):
         Creating an initial process tracking run record for testing.
         :return:
         """
-        self.process_tracker = ProcessTracker(process_name='Testing Process Tracking Initialization'
-                                              , process_type='Extract'
-                                              , actor_name='UnitTesting'
-                                              , tool_name='Spark'
-                                              , sources='Unittests'
-                                              , targets='Unittests')
+        self.process_tracker = ProcessTracker(
+            process_name="Testing Process Tracking Initialization",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
 
         self.process_id = self.process_tracker.process.process_id
 
-        if self.data_store_type == 'mysql':
+        if self.data_store_type == "mysql":
             self.provided_end_date = datetime.now().replace(microsecond=0)
         else:
             self.provided_end_date = datetime.now()
@@ -104,7 +118,7 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
 
-        if self.data_store_type == 'mysql':
+        if self.data_store_type == "mysql":
             timestamp = timestamp.replace(microsecond=0)
         else:
             timestamp = timestamp
@@ -116,19 +130,23 @@ class TestProcessTracker(unittest.TestCase):
         Testing that for the given full filename, find the extract, provided it's in 'ready' state.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                                 , filename='test_extract_filename2.csv'
-                                 , location_name='Test Location'
-                                 , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
         session = Session.object_session(extract.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename2.csv']
+        expected_result = ["/home/test/extract_dir/test_extract_filename2.csv"]
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename2.csv')
+        given_result = self.process_tracker.find_ready_extracts_by_filename(
+            "test_extract_filename2.csv"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
@@ -139,15 +157,19 @@ class TestProcessTracker(unittest.TestCase):
         Ascending order.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename3-1.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename3-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
-        extract2 = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename3-2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename3-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -158,10 +180,14 @@ class TestProcessTracker(unittest.TestCase):
         session = Session.object_session(extract2.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename3-1.csv'
-                           , '/home/test/extract_dir/test_extract_filename3-2.csv']
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename3-1.csv",
+            "/home/test/extract_dir/test_extract_filename3-2.csv",
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+        given_result = self.process_tracker.find_ready_extracts_by_filename(
+            "test_extract_filename"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
@@ -172,15 +198,19 @@ class TestProcessTracker(unittest.TestCase):
         that records are NOT returned in descending order.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename3-1.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename3-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
-        extract2 = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename3-2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename3-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -191,10 +221,14 @@ class TestProcessTracker(unittest.TestCase):
         session = Session.object_session(extract2.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename3-2.csv'
-                           , '/home/test/extract_dir/test_extract_filename3-1.csv']
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename3-2.csv",
+            "/home/test/extract_dir/test_extract_filename3-1.csv",
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename('test_extract_filename')
+        given_result = self.process_tracker.find_ready_extracts_by_filename(
+            "test_extract_filename"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
@@ -205,15 +239,19 @@ class TestProcessTracker(unittest.TestCase):
         them in ascending order by registration datettime.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename4-1.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
-        extract2 = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename4-2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -224,10 +262,14 @@ class TestProcessTracker(unittest.TestCase):
         session = Session.object_session(extract2.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename4-1.csv'
-                           , '/home/test/extract_dir/test_extract_filename4-2.csv']
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename4-1.csv",
+            "/home/test/extract_dir/test_extract_filename4-2.csv",
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
+        given_result = self.process_tracker.find_ready_extracts_by_location(
+            "Test Location"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
@@ -238,15 +280,19 @@ class TestProcessTracker(unittest.TestCase):
         records NOT returned in descending order.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename4-1.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
-        extract2 = ExtractTracker(process_run=self.process_tracker
-                       , filename='test_extract_filename4-2.csv'
-                       , location_name='Test Location'
-                       , location_path='/home/test/extract_dir')
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -257,10 +303,14 @@ class TestProcessTracker(unittest.TestCase):
         session = Session.object_session(extract2.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename4-2.csv'
-                           , '/home/test/extract_dir/test_extract_filename4-1.csv']
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename4-2.csv",
+            "/home/test/extract_dir/test_extract_filename4-1.csv",
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_location('Test Location')
+        given_result = self.process_tracker.find_ready_extracts_by_location(
+            "Test Location"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
@@ -270,15 +320,19 @@ class TestProcessTracker(unittest.TestCase):
         Testing that for the given process name, find the extracts, provided they are in 'ready' state.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                                 , filename='test_extract_filename5-1.csv'
-                                 , location_name='Test Location'
-                                 , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename5-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
-        extract2 = ExtractTracker(process_run=self.process_tracker
-                                  , filename='test_extract_filename5-2.csv'
-                                  , location_name='Test Location'
-                                  , location_path='/home/test/extract_dir')
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename5-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -289,10 +343,14 @@ class TestProcessTracker(unittest.TestCase):
         session = Session.object_session(extract2.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename5-1.csv'
-                           , '/home/test/extract_dir/test_extract_filename5-2.csv']
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename5-1.csv",
+            "/home/test/extract_dir/test_extract_filename5-2.csv",
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
+        given_result = self.process_tracker.find_ready_extracts_by_process(
+            "Testing Process Tracking Initialization"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
@@ -303,17 +361,21 @@ class TestProcessTracker(unittest.TestCase):
         records are NOT returned in Descending order.
         :return:
         """
-        extract = ExtractTracker(process_run=self.process_tracker
-                                 , filename='test_extract_filename5-1.csv'
-                                 , location_name='Test Location'
-                                 , location_path='/home/test/extract_dir')
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename5-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         time.sleep(3)
 
-        extract2 = ExtractTracker(process_run=self.process_tracker
-                                  , filename='test_extract_filename5-2.csv'
-                                  , location_name='Test Location'
-                                  , location_path='/home/test/extract_dir')
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename5-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
 
         # Need to manually change the status, because this would normally be done while the process was processing data
         extract.extract.extract_status_id = extract.extract_status_ready
@@ -321,14 +383,20 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         extract2.extract.extract_status_id = extract2.extract_status_ready
-        extract2.extract.extract_registration_date_time = datetime.now()  # Records were being committed too close together.
+        extract2.extract.extract_registration_date_time = (
+            datetime.now()
+        )  # Records were being committed too close together.
         session = Session.object_session(extract2.extract)
         session.commit()
 
-        expected_result = ['/home/test/extract_dir/test_extract_filename5-2.csv'
-            , '/home/test/extract_dir/test_extract_filename5-1.csv']
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename5-2.csv",
+            "/home/test/extract_dir/test_extract_filename5-1.csv",
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_process('Testing Process Tracking Initialization')
+        given_result = self.process_tracker.find_ready_extracts_by_process(
+            "Testing Process Tracking Initialization"
+        )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
@@ -339,7 +407,7 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
         given_result = self.process_tracker.actor.actor_name
-        expected_result = 'UnitTesting'
+        expected_result = "UnitTesting"
 
         self.assertEqual(expected_result, given_result)
 
@@ -353,22 +421,57 @@ class TestProcessTracker(unittest.TestCase):
         process_status = aliased(ExtractStatus)
         extract_status = aliased(ExtractStatus)
 
-        with patch('os.listdir') as mocked_os_listdir:
-            mocked_os_listdir.return_value = ['test_local_dir_1.csv', 'test_local_dir_2.csv']
+        with patch("os.listdir") as mocked_os_listdir:
+            mocked_os_listdir.return_value = [
+                "test_local_dir_1.csv",
+                "test_local_dir_2.csv",
+            ]
 
-            self.process_tracker.register_extracts_by_location(location_path='/test/local/dir/')
+            self.process_tracker.register_extracts_by_location(
+                location_path="/test/local/dir/"
+            )
 
-        extracts = self.session.query(Extract.extract_filename, extract_status.extract_status_name, process_status.extract_status_name)\
-                               .join(ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id) \
-                               .join(extract_status, Extract.extract_status_id == extract_status.extract_status_id) \
-                               .join(process_status, ExtractProcess.extract_process_status_id == process_status.extract_status_id) \
-                               .filter(ExtractProcess.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+        extracts = (
+            self.session.query(
+                Extract.extract_filename,
+                extract_status.extract_status_name,
+                process_status.extract_status_name,
+            )
+            .join(
+                ExtractProcess, Extract.extract_id == ExtractProcess.extract_tracking_id
+            )
+            .join(
+                extract_status,
+                Extract.extract_status_id == extract_status.extract_status_id,
+            )
+            .join(
+                process_status,
+                ExtractProcess.extract_process_status_id
+                == process_status.extract_status_id,
+            )
+            .filter(
+                ExtractProcess.process_tracking_id
+                == self.process_tracker.process_tracking_run.process_tracking_id
+            )
+        )
 
-        given_result = [[extracts[0].extract_filename, extracts[0].extract_status_name, extracts[0].extract_status_name]
-                        ,[extracts[1].extract_filename, extracts[1].extract_status_name, extracts[1].extract_status_name]]
+        given_result = [
+            [
+                extracts[0].extract_filename,
+                extracts[0].extract_status_name,
+                extracts[0].extract_status_name,
+            ],
+            [
+                extracts[1].extract_filename,
+                extracts[1].extract_status_name,
+                extracts[1].extract_status_name,
+            ],
+        ]
 
-        expected_result = [['test_local_dir_1.csv', 'ready', 'ready']
-                          ,['test_local_dir_2.csv', 'ready', 'ready']]
+        expected_result = [
+            ["test_local_dir_1.csv", "ready", "ready"],
+            ["test_local_dir_2.csv", "ready", "ready"],
+        ]
 
         self.assertEqual(expected_result, given_result)
 
@@ -416,7 +519,11 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
 
-        given_result = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id).count()
+        given_result = (
+            self.session.query(ProcessTracking)
+            .filter(ProcessTracking.process_id == self.process_id)
+            .count()
+        )
         expected_result = 1
 
         self.assertEqual(expected_result, given_result)
@@ -432,8 +539,10 @@ class TestProcessTracker(unittest.TestCase):
             # Running registration a second time to mimic job being run twice
             self.process_tracker.register_new_process_run()
         print(context.exception)
-        return self.assertTrue('The process Testing Process Tracking Initialization '
-                               'is currently running.' in str(context.exception))
+        return self.assertTrue(
+            "The process Testing Process Tracking Initialization "
+            "is currently running." in str(context.exception)
+        )
 
     def test_register_new_process_run_with_previous_run(self):
         """
@@ -442,12 +551,14 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
 
-        self.process_tracker.change_run_status(new_status='completed')
+        self.process_tracker.change_run_status(new_status="completed")
         self.process_tracker.register_new_process_run()
 
-        process_runs = self.session.query(ProcessTracking)\
-                              .filter(ProcessTracking.process_id == self.process_id)\
-                              .order_by(ProcessTracking.process_tracking_id)
+        process_runs = (
+            self.session.query(ProcessTracking)
+            .filter(ProcessTracking.process_id == self.process_id)
+            .order_by(ProcessTracking.process_tracking_id)
+        )
 
         given_result = process_runs[0].is_latest_run
         expected_result = False
@@ -459,24 +570,30 @@ class TestProcessTracker(unittest.TestCase):
         Testing that for a given process, if there are completed dependencies, then the process run is created.
         :return:
         """
-        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency'
-                                           , process_type='Extract'
-                                           , actor_name='UnitTesting'
-                                           , tool_name='Spark'
-                                           , sources='Unittests'
-                                           , targets='Unittests')
+        dependent_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
 
-        dependent_process.change_run_status(new_status='completed')
-        self.process_tracker.change_run_status(new_status='completed')
-        self.data_store.get_or_create_item(model=ProcessDependency
-                                           , parent_process_id=dependent_process.process_tracking_run.process_id
-                                           , child_process_id=self.process_id)
+        dependent_process.change_run_status(new_status="completed")
+        self.process_tracker.change_run_status(new_status="completed")
+        self.data_store.get_or_create_item(
+            model=ProcessDependency,
+            parent_process_id=dependent_process.process_tracking_run.process_id,
+            child_process_id=self.process_id,
+        )
 
         self.process_tracker.register_new_process_run()
 
-        given_count = self.session.query(ProcessTracking) \
-                                  .filter(ProcessTracking.process_id == self.process_id) \
-                                  .count()
+        given_count = (
+            self.session.query(ProcessTracking)
+            .filter(ProcessTracking.process_id == self.process_id)
+            .count()
+        )
 
         expected_count = 2
 
@@ -487,56 +604,72 @@ class TestProcessTracker(unittest.TestCase):
         Testing that for a given process, if there are running dependencies, then the process run is prevented from starting.
         :return:
         """
-        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency Running'
-                                           , process_type='Extract'
-                                           , actor_name='UnitTesting'
-                                           , tool_name='Spark'
-                                           , sources='Unittests'
-                                           , targets='Unittests')
+        dependent_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency Running",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
 
-        dependent_process.change_run_status(new_status='running')
-        self.process_tracker.change_run_status(new_status='completed')
-        self.data_store.get_or_create_item(model=ProcessDependency
-                                           , parent_process_id=dependent_process.process_tracking_run.process_id
-                                           , child_process_id=self.process_id)
+        dependent_process.change_run_status(new_status="running")
+        self.process_tracker.change_run_status(new_status="completed")
+        self.data_store.get_or_create_item(
+            model=ProcessDependency,
+            parent_process_id=dependent_process.process_tracking_run.process_id,
+            child_process_id=self.process_id,
+        )
 
         with self.assertRaises(Exception) as context:
             self.process_tracker.register_new_process_run()
 
-        return self.assertTrue('Processes that this process is dependent on are running or failed.' in str(context.exception))
+        return self.assertTrue(
+            "Processes that this process is dependent on are running or failed."
+            in str(context.exception)
+        )
 
     def test_register_new_process_run_dependencies_failed(self):
         """
         Testing that for a given process, if there are failed dependencies, then the process run is prevented from starting.
         :return:
         """
-        dependent_process = ProcessTracker(process_name='Testing Process Tracking Dependency Failed'
-                                           , process_type='Extract'
-                                           , actor_name='UnitTesting'
-                                           , tool_name='Spark'
-                                           , sources='Unittests'
-                                           , targets='Unittests')
+        dependent_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency Failed",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
 
-        dependent_process.change_run_status(new_status='failed')
-        self.process_tracker.change_run_status(new_status='completed')
-        self.data_store.get_or_create_item(model=ProcessDependency
-                                           , parent_process_id=dependent_process.process_tracking_run.process_id
-                                           , child_process_id=self.process_id)
+        dependent_process.change_run_status(new_status="failed")
+        self.process_tracker.change_run_status(new_status="completed")
+        self.data_store.get_or_create_item(
+            model=ProcessDependency,
+            parent_process_id=dependent_process.process_tracking_run.process_id,
+            child_process_id=self.process_id,
+        )
 
         with self.assertRaises(Exception) as context:
             self.process_tracker.register_new_process_run()
 
-        return self.assertTrue('Processes that this process is dependent on are running or failed.' in str(context.exception))
+        return self.assertTrue(
+            "Processes that this process is dependent on are running or failed."
+            in str(context.exception)
+        )
 
     def test_register_process_sources_one_source(self):
         """
         Testing that when a new process is registered, a source registered as well.
         :return:
         """
-        given_result = self.session.query(ProcessSource) \
-                                 .join(Process) \
-                                 .filter(Process.process_name == 'Testing Process Tracking Initialization') \
-                                 .count()
+        given_result = (
+            self.session.query(ProcessSource)
+            .join(Process)
+            .filter(Process.process_name == "Testing Process Tracking Initialization")
+            .count()
+        )
 
         expected_result = 1
 
@@ -547,17 +680,21 @@ class TestProcessTracker(unittest.TestCase):
         Testing that when a new process is registered, multiple sources can be registered as well.
         :return:
         """
-        ProcessTracker(process_name='Multiple Source, Target Test'
-                       , process_type='Extract'
-                       , actor_name='UnitTesting'
-                       , tool_name='Spark'
-                       , sources=['Unittests', 'Unittests2']
-                       , targets=['Unittests', 'Unittests2'])
+        ProcessTracker(
+            process_name="Multiple Source, Target Test",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources=["Unittests", "Unittests2"],
+            targets=["Unittests", "Unittests2"],
+        )
 
-        given_result = self.session.query(ProcessSource) \
-            .join(Process) \
-            .filter(Process.process_name == 'Multiple Source, Target Test') \
+        given_result = (
+            self.session.query(ProcessSource)
+            .join(Process)
+            .filter(Process.process_name == "Multiple Source, Target Test")
             .count()
+        )
 
         expected_result = 2
 
@@ -568,10 +705,12 @@ class TestProcessTracker(unittest.TestCase):
         Testing that when a new process is registered, a target registered as well.
         :return:
         """
-        given_result = self.session.query(ProcessTarget) \
-                                 .join(Process) \
-                                 .filter(Process.process_name == 'Testing Process Tracking Initialization') \
-                                 .count()
+        given_result = (
+            self.session.query(ProcessTarget)
+            .join(Process)
+            .filter(Process.process_name == "Testing Process Tracking Initialization")
+            .count()
+        )
 
         expected_result = 1
 
@@ -582,17 +721,21 @@ class TestProcessTracker(unittest.TestCase):
         Testing that when a new process is registered, multiple targets can be registered as well.
         :return:
         """
-        ProcessTracker(process_name='Multiple Source, Target Test'
-                       , process_type='Extract'
-                       , actor_name='UnitTesting'
-                       , tool_name='Spark'
-                       , sources=['Unittests', 'Unittests2']
-                       , targets=['Unittests', 'Unittests2'])
+        ProcessTracker(
+            process_name="Multiple Source, Target Test",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources=["Unittests", "Unittests2"],
+            targets=["Unittests", "Unittests2"],
+        )
 
-        given_result = self.session.query(ProcessTarget) \
-            .join(Process) \
-            .filter(Process.process_name == 'Multiple Source, Target Test') \
+        given_result = (
+            self.session.query(ProcessTarget)
+            .join(Process)
+            .filter(Process.process_name == "Multiple Source, Target Test")
             .count()
+        )
 
         expected_result = 2
 
@@ -603,9 +746,11 @@ class TestProcessTracker(unittest.TestCase):
         Testing that when changing the run status from 'running' to 'complete' the run record updates successfully.
         :return:
         """
-        self.process_tracker.change_run_status(new_status='completed')
+        self.process_tracker.change_run_status(new_status="completed")
 
-        run_record = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
+        run_record = self.session.query(ProcessTracking).filter(
+            ProcessTracking.process_id == self.process_id
+        )
 
         given_result = run_record[0].process_status_id
         expected_result = self.process_tracker.process_status_complete
@@ -617,9 +762,11 @@ class TestProcessTracker(unittest.TestCase):
         Testing that when changing the run status from 'running' to 'failed' the run record updates successfully.
         :return:
         """
-        self.process_tracker.change_run_status(new_status='failed')
+        self.process_tracker.change_run_status(new_status="failed")
 
-        run_record = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
+        run_record = self.session.query(ProcessTracking).filter(
+            ProcessTracking.process_id == self.process_id
+        )
 
         given_result = run_record[0].process_status_id
         expected_result = self.process_tracker.process_status_failed
@@ -632,9 +779,13 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
 
-        self.process_tracker.change_run_status(new_status='completed', end_date=self.provided_end_date)
+        self.process_tracker.change_run_status(
+            new_status="completed", end_date=self.provided_end_date
+        )
 
-        run_record = self.session.query(ProcessTracking).filter(ProcessTracking.process_id == self.process_id)
+        run_record = self.session.query(ProcessTracking).filter(
+            ProcessTracking.process_id == self.process_id
+        )
 
         given_result = run_record[0].process_run_end_date_time
         expected_result = self.provided_end_date
@@ -646,15 +797,17 @@ class TestProcessTracker(unittest.TestCase):
         Testing that if an error is triggered, it gets recorded in the data store, provided that the error type exists.
         :return:
         """
-        error_type = ErrorType(error_type_name='Does Exist')
+        error_type = ErrorType(error_type_name="Does Exist")
         self.session.add(error_type)
         self.session.commit()
 
-        self.process_tracker.raise_run_error(error_type_name='Does Exist')
+        self.process_tracker.raise_run_error(error_type_name="Does Exist")
 
-        given_result = self.session.query(ErrorTracking)\
-                              .filter(ErrorTracking.error_type_id == error_type.error_type_id)\
-                              .count()
+        given_result = (
+            self.session.query(ErrorTracking)
+            .filter(ErrorTracking.error_type_id == error_type.error_type_id)
+            .count()
+        )
 
         expected_result = 1
 
@@ -668,9 +821,11 @@ class TestProcessTracker(unittest.TestCase):
 
         with self.assertRaises(Exception) as context:
 
-            self.process_tracker.raise_run_error(error_type_name='Does Not Exist')
+            self.process_tracker.raise_run_error(error_type_name="Does Not Exist")
 
-        return self.assertTrue('There is no record match in error_type_lkup .' in str(context.exception))
+        return self.assertTrue(
+            "There is no record match in error_type_lkup ." in str(context.exception)
+        )
 
     def test_raise_run_error_with_fail(self):
         """
@@ -678,53 +833,78 @@ class TestProcessTracker(unittest.TestCase):
         for process is set.
         :return:
         """
-        error_type = ErrorType(error_type_name='Fail Check')
+        error_type = ErrorType(error_type_name="Fail Check")
         self.session.add(error_type)
         self.session.commit()
 
         with self.assertRaises(Exception) as context:
 
-            self.process_tracker.raise_run_error(error_type_name='Fail Check'
-                                                 , fail_run=True
-                                                 , end_date=self.provided_end_date)
+            self.process_tracker.raise_run_error(
+                error_type_name="Fail Check",
+                fail_run=True,
+                end_date=self.provided_end_date,
+            )
 
-        run_error = self.session.query(ErrorTracking)\
-                           .filter(ErrorTracking.error_type_id == error_type.error_type_id)
+        run_error = self.session.query(ErrorTracking).filter(
+            ErrorTracking.error_type_id == error_type.error_type_id
+        )
 
-        process_tracking_run = self.session.query(ProcessTracking)\
-                                      .filter(ProcessTracking.process_tracking_id == run_error[0].process_tracking_id)
+        process_tracking_run = self.session.query(ProcessTracking).filter(
+            ProcessTracking.process_tracking_id == run_error[0].process_tracking_id
+        )
 
-        process = self.session.query(Process).filter(Process.process_id == process_tracking_run[0].process_id)
+        process = self.session.query(Process).filter(
+            Process.process_id == process_tracking_run[0].process_id
+        )
 
-        given_result = [process_tracking_run[0].process_status_id
-                        , process_tracking_run[0].process_run_end_date_time
-                        , process[0].last_failed_run_date_time]
+        given_result = [
+            process_tracking_run[0].process_status_id,
+            process_tracking_run[0].process_run_end_date_time,
+            process[0].last_failed_run_date_time,
+        ]
 
-        expected_result = [self.process_tracker.process_status_failed
-                           , self.provided_end_date
-                           , self.provided_end_date]
+        expected_result = [
+            self.process_tracker.process_status_failed,
+            self.provided_end_date,
+            self.provided_end_date,
+        ]
 
         with self.subTest():
             self.assertEqual(expected_result, given_result)
         with self.subTest():
-            self.assertTrue('Process halting.  An error triggered the process to fail.' in str(context.exception))
+            self.assertTrue(
+                "Process halting.  An error triggered the process to fail."
+                in str(context.exception)
+            )
 
     def test_set_run_low_high_dates(self):
         """
         Testing that if low and high date are not set, the process_tracking_record low/high dates are set.
         :return:
         """
-        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(hours=1)
+        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(
+            hours=1
+        )
 
         high_date = self.timestamp_converter(timestamp=datetime.now())
 
-        self.process_tracker.set_process_run_low_high_dates(low_date=low_date, high_date=high_date)
+        self.process_tracker.set_process_run_low_high_dates(
+            low_date=low_date, high_date=high_date
+        )
 
-        given_dates = self.session.query(ProcessTracking.process_run_low_date_time, ProcessTracking.process_run_high_date_time)\
-                                  .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+        given_dates = self.session.query(
+            ProcessTracking.process_run_low_date_time,
+            ProcessTracking.process_run_high_date_time,
+        ).filter(
+            ProcessTracking.process_tracking_id
+            == self.process_tracker.process_tracking_run.process_tracking_id
+        )
 
         expected_result = [low_date, high_date]
-        given_result = [given_dates[0].process_run_low_date_time, given_dates[0].process_run_high_date_time]
+        given_result = [
+            given_dates[0].process_run_low_date_time,
+            given_dates[0].process_run_high_date_time,
+        ]
 
         self.assertEqual(expected_result, given_result)
 
@@ -734,15 +914,21 @@ class TestProcessTracker(unittest.TestCase):
         low date.
         :return:
         """
-        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(hours=1)
+        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(
+            hours=1
+        )
         lower_low_date = low_date - timedelta(hours=1)
 
         self.process_tracker.set_process_run_low_high_dates(low_date=low_date)
 
         self.process_tracker.set_process_run_low_high_dates(low_date=lower_low_date)
 
-        given_dates = self.session.query(ProcessTracking.process_run_low_date_time) \
-            .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+        given_dates = self.session.query(
+            ProcessTracking.process_run_low_date_time
+        ).filter(
+            ProcessTracking.process_tracking_id
+            == self.process_tracker.process_tracking_run.process_tracking_id
+        )
 
         expected_result = lower_low_date
         given_result = given_dates[0].process_run_low_date_time
@@ -763,8 +949,12 @@ class TestProcessTracker(unittest.TestCase):
 
         self.process_tracker.set_process_run_low_high_dates(high_date=higher_high_date)
 
-        given_dates = self.session.query(ProcessTracking.process_run_high_date_time) \
-            .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+        given_dates = self.session.query(
+            ProcessTracking.process_run_high_date_time
+        ).filter(
+            ProcessTracking.process_tracking_id
+            == self.process_tracker.process_tracking_run.process_tracking_id
+        )
 
         expected_result = higher_high_date
         given_result = given_dates[0].process_run_high_date_time
@@ -779,14 +969,26 @@ class TestProcessTracker(unittest.TestCase):
         """
         initial_record_count = 1000
 
-        self.process_tracker.set_process_run_record_count(num_records=initial_record_count)
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count
+        )
 
-        given_counts = self.session.query(ProcessTracking.process_run_record_count, Process.total_record_count) \
-                                   .join(Process)\
-                                   .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+        given_counts = (
+            self.session.query(
+                ProcessTracking.process_run_record_count, Process.total_record_count
+            )
+            .join(Process)
+            .filter(
+                ProcessTracking.process_tracking_id
+                == self.process_tracker.process_tracking_run.process_tracking_id
+            )
+        )
 
         expected_result = [initial_record_count, initial_record_count]
-        given_result = [given_counts[0].process_run_record_count, given_counts[0].total_record_count]
+        given_result = [
+            given_counts[0].process_run_record_count,
+            given_counts[0].total_record_count,
+        ]
 
         self.assertEqual(expected_result, given_result)
 
@@ -798,14 +1000,28 @@ class TestProcessTracker(unittest.TestCase):
         initial_record_count = 1000
         modified_record_count = 1500
 
-        self.process_tracker.set_process_run_record_count(num_records=initial_record_count)
-        self.process_tracker.set_process_run_record_count(num_records=modified_record_count)
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count
+        )
+        self.process_tracker.set_process_run_record_count(
+            num_records=modified_record_count
+        )
 
-        given_counts = self.session.query(ProcessTracking.process_run_record_count, Process.total_record_count) \
-                                  .join(Process)\
-                                  .filter(ProcessTracking.process_tracking_id == self.process_tracker.process_tracking_run.process_tracking_id)
+        given_counts = (
+            self.session.query(
+                ProcessTracking.process_run_record_count, Process.total_record_count
+            )
+            .join(Process)
+            .filter(
+                ProcessTracking.process_tracking_id
+                == self.process_tracker.process_tracking_run.process_tracking_id
+            )
+        )
 
         expected_result = [modified_record_count, modified_record_count]
-        given_result = [given_counts[0].process_run_record_count, given_counts[0].total_record_count]
+        given_result = [
+            given_counts[0].process_run_record_count,
+            given_counts[0].total_record_count,
+        ]
 
         self.assertEqual(expected_result, given_result)

@@ -15,7 +15,6 @@ from process_tracker.models.tool import Tool
 
 
 class TestCli(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger(__name__)
@@ -54,14 +53,16 @@ class TestCli(unittest.TestCase):
         Testing that when creating an actor record it is added.
         :return:
         """
-        result = self.runner.invoke(main, ['create',  '-t', 'actor', '-n', "Test Test"])
+        result = self.runner.invoke(main, ["create", "-t", "actor", "-n", "Test Test"])
 
-        instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
+        instance = (
+            self.session.query(Actor).filter(Actor.actor_name == "Test Test").first()
+        )
         given_name = instance.actor_name
 
-        self.runner.invoke(main, ['delete', '-t', 'actor', '-n', "Test Test"])
+        self.runner.invoke(main, ["delete", "-t", "actor", "-n", "Test Test"])
 
-        self.assertEqual('Test Test', given_name)
+        self.assertEqual("Test Test", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_create_extract_status(self):
@@ -69,13 +70,19 @@ class TestCli(unittest.TestCase):
         Testing that when creating an extract status record it is added.
         :return:
         """
-        result = self.runner.invoke(main, ['create', '-t', "extract status", '-n', "New Status"])
+        result = self.runner.invoke(
+            main, ["create", "-t", "extract status", "-n", "New Status"]
+        )
 
-        instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'New Status').first()
+        instance = (
+            self.session.query(ExtractStatus)
+            .filter(ExtractStatus.extract_status_name == "New Status")
+            .first()
+        )
         given_name = instance.extract_status_name
-        self.runner.invoke(main, ['delete', '-t', "extract status", '-n', "New Status"])
+        self.runner.invoke(main, ["delete", "-t", "extract status", "-n", "New Status"])
 
-        self.assertEqual('New Status', given_name)
+        self.assertEqual("New Status", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_create_error_type(self):
@@ -84,7 +91,11 @@ class TestCli(unittest.TestCase):
         :return:
         """
         result = self.runner.invoke(main, 'create -t "error type" -n "New Error Type"')
-        instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type').first()
+        instance = (
+            self.session.query(ErrorType)
+            .filter(ErrorType.error_type_name == "New Error Type")
+            .first()
+        )
         try:
             self.logger.debug(str(instance.error_type_name))
         except Exception as e:
@@ -93,7 +104,7 @@ class TestCli(unittest.TestCase):
 
         self.runner.invoke(main, 'delete -t "error type" -n "New Error Type"')
 
-        self.assertEqual('New Error Type', given_name)
+        self.assertEqual("New Error Type", given_name)
 
         self.assertEqual(0, result.exit_code)
 
@@ -102,14 +113,20 @@ class TestCli(unittest.TestCase):
         Testing that when creating an process type record it is added.
         :return:
         """
-        result = self.runner.invoke(main, 'create -t "process type" -n "New Process Type"')
+        result = self.runner.invoke(
+            main, 'create -t "process type" -n "New Process Type"'
+        )
 
-        instance = self.session.query(ProcessType).filter(ProcessType.process_type_name == 'New Process Type').first()
+        instance = (
+            self.session.query(ProcessType)
+            .filter(ProcessType.process_type_name == "New Process Type")
+            .first()
+        )
         given_name = instance.process_type_name
 
         self.runner.invoke(main, 'delete -t "process type" -n "New Process Type"')
 
-        self.assertEqual('New Process Type', given_name)
+        self.assertEqual("New Process Type", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_create_process_status(self):
@@ -117,14 +134,20 @@ class TestCli(unittest.TestCase):
         Testing that when creating an process status record it is added.
         :return:
         """
-        result = self.runner.invoke(main, 'create -t "process status" -n "New Status Type"')
+        result = self.runner.invoke(
+            main, 'create -t "process status" -n "New Status Type"'
+        )
 
-        instance = self.session.query(ProcessStatus).filter(ProcessStatus.process_status_name == 'New Status Type').first()
+        instance = (
+            self.session.query(ProcessStatus)
+            .filter(ProcessStatus.process_status_name == "New Status Type")
+            .first()
+        )
         given_name = instance.process_status_name
 
         self.runner.invoke(main, 'delete -t "process status" -n "New Status Type"')
 
-        self.assertEqual('New Status Type', given_name)
+        self.assertEqual("New Status Type", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_create_source(self):
@@ -134,12 +157,16 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(main, 'create -t source -n "New Source"')
 
-        instance = self.session.query(Source).filter(Source.source_name == 'New Source').first()
+        instance = (
+            self.session.query(Source)
+            .filter(Source.source_name == "New Source")
+            .first()
+        )
         given_name = instance.source_name
 
         self.runner.invoke(main, 'delete -t "source" -n "New Source"')
 
-        self.assertEqual('New Source', given_name)
+        self.assertEqual("New Source", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_create_tool(self):
@@ -149,12 +176,12 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(main, 'create -t tool -n "New Tool"')
 
-        instance = self.session.query(Tool).filter(Tool.tool_name == 'New Tool').first()
+        instance = self.session.query(Tool).filter(Tool.tool_name == "New Tool").first()
         given_name = instance.tool_name
 
         self.runner.invoke(main, 'delete -t "tool" -n "New Tool"')
 
-        self.assertEqual('New Tool', given_name)
+        self.assertEqual("New Tool", given_name)
         self.assertEqual(0, result.exit_code)
 
     # def test_create_process_dependency(self):
@@ -174,7 +201,9 @@ class TestCli(unittest.TestCase):
         self.runner.invoke(main, 'create -t actor -n "Test Test"')
         result = self.runner.invoke(main, 'delete -t actor -n "Test Test"')
 
-        instance = self.session.query(Actor).filter(Actor.actor_name == 'Test Test').first()
+        instance = (
+            self.session.query(Actor).filter(Actor.actor_name == "Test Test").first()
+        )
         self.logger.debug(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -187,7 +216,11 @@ class TestCli(unittest.TestCase):
         self.runner.invoke(main, 'create -t "extract status" -n "New Status"')
         result = self.runner.invoke(main, 'delete -t "extract status" -n "New Status"')
 
-        instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'New Status').first()
+        instance = (
+            self.session.query(ExtractStatus)
+            .filter(ExtractStatus.extract_status_name == "New Status")
+            .first()
+        )
 
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -197,9 +230,13 @@ class TestCli(unittest.TestCase):
         Testing that when deleting a protected extract status record it is not deleted.
         :return:
         """
-        result = self.runner.invoke(main, 'delete -t "extract status" -n "initializing"')
+        result = self.runner.invoke(
+            main, 'delete -t "extract status" -n "initializing"'
+        )
 
-        expected_result = 'The item could not be deleted because it is a protected record.'
+        expected_result = (
+            "The item could not be deleted because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
         self.assertEqual(0, result.exit_code)
@@ -211,7 +248,11 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(main, 'delete -t "error type" -n "New Error Type"')
 
-        instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'New Error Type').first()
+        instance = (
+            self.session.query(ErrorType)
+            .filter(ErrorType.error_type_name == "New Error Type")
+            .first()
+        )
 
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -222,7 +263,9 @@ class TestCli(unittest.TestCase):
         :return:
         """
         result = self.runner.invoke(main, 'delete -t "error type" -n "File Error"')
-        expected_result = 'The item could not be deleted because it is a protected record.'
+        expected_result = (
+            "The item could not be deleted because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
         self.assertEqual(0, result.exit_code)
@@ -234,9 +277,15 @@ class TestCli(unittest.TestCase):
         """
         self.runner.invoke(main, 'create -t "process type" -n "New Process Type"')
 
-        result = self.runner.invoke(main, 'delete -t "process type" -n "New Process Type"')
+        result = self.runner.invoke(
+            main, 'delete -t "process type" -n "New Process Type"'
+        )
 
-        instance = self.session.query(ProcessType).filter(ProcessType.process_type_name == 'New Process Type').first()
+        instance = (
+            self.session.query(ProcessType)
+            .filter(ProcessType.process_type_name == "New Process Type")
+            .first()
+        )
 
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -248,7 +297,9 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(main, 'delete -t "process type" -n "extract"')
 
-        expected_result = 'The item could not be deleted because it is a protected record.'
+        expected_result = (
+            "The item could not be deleted because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
         self.assertEqual(0, result.exit_code)
@@ -260,9 +311,15 @@ class TestCli(unittest.TestCase):
         """
         self.runner.invoke(main, 'create -t "process status" -n "New Status Type"')
 
-        result = self.runner.invoke(main, 'delete -t "process status" -n "New Status Type"')
+        result = self.runner.invoke(
+            main, 'delete -t "process status" -n "New Status Type"'
+        )
 
-        instance = self.session.query(ProcessStatus).filter(ProcessStatus.process_status_name == 'New Status Type').first()
+        instance = (
+            self.session.query(ProcessStatus)
+            .filter(ProcessStatus.process_status_name == "New Status Type")
+            .first()
+        )
 
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -274,7 +331,9 @@ class TestCli(unittest.TestCase):
         """
         result = self.runner.invoke(main, 'delete -t "process status" -n "running"')
 
-        expected_result = 'The item could not be deleted because it is a protected record.'
+        expected_result = (
+            "The item could not be deleted because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
         self.assertEqual(0, result.exit_code)
@@ -288,7 +347,11 @@ class TestCli(unittest.TestCase):
 
         result = self.runner.invoke(main, 'delete -t "source" -n "New Source"')
 
-        instance = self.session.query(Source).filter(Source.source_name == 'New Source').first()
+        instance = (
+            self.session.query(Source)
+            .filter(Source.source_name == "New Source")
+            .first()
+        )
 
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -302,7 +365,7 @@ class TestCli(unittest.TestCase):
 
         result = self.runner.invoke(main, 'delete -t "tool" -n "New Tool"')
 
-        instance = self.session.query(Tool).filter(Tool.tool_name == 'New Tool').first()
+        instance = self.session.query(Tool).filter(Tool.tool_name == "New Tool").first()
 
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -318,12 +381,14 @@ class TestCli(unittest.TestCase):
 
         result = self.runner.invoke(main, 'update -t actor -i "Update Me" -n "Updated"')
 
-        instance = self.session.query(Actor).filter(Actor.actor_name == 'Updated').first()
+        instance = (
+            self.session.query(Actor).filter(Actor.actor_name == "Updated").first()
+        )
         given_name = instance.actor_name
 
         self.runner.invoke(main, 'delete -t actor -n "Updated"')
 
-        self.assertEqual('Updated', given_name)
+        self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_update_extract_status(self):
@@ -333,14 +398,20 @@ class TestCli(unittest.TestCase):
         """
         self.runner.invoke(main, 'create -t "extract status" -n "Update Me"')
 
-        result = self.runner.invoke(main, 'update -t "extract status" -i "Update Me" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "extract status" -i "Update Me" -n "Updated"'
+        )
 
-        instance = self.session.query(ExtractStatus).filter(ExtractStatus.extract_status_name == 'Updated').first()
+        instance = (
+            self.session.query(ExtractStatus)
+            .filter(ExtractStatus.extract_status_name == "Updated")
+            .first()
+        )
         given_name = instance.extract_status_name
 
         self.runner.invoke(main, 'delete -t "extract status" -n "Updated"')
 
-        self.assertEqual('Updated', given_name)
+        self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_update_extract_status_protected(self):
@@ -348,9 +419,13 @@ class TestCli(unittest.TestCase):
         Testing that when updating a protected extract status record it is not updated.
         :return:
         """
-        result = self.runner.invoke(main, 'update -t "extract status" -i "initializing" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "extract status" -i "initializing" -n "Updated"'
+        )
 
-        expected_result = 'The item could not be updated because it is a protected record.'
+        expected_result = (
+            "The item could not be updated because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
 
@@ -361,9 +436,15 @@ class TestCli(unittest.TestCase):
         """
         self.runner.invoke(main, 'create -t "error type" -n "Update Me"')
 
-        result = self.runner.invoke(main, 'update -t "error type" -i "Update Me" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "error type" -i "Update Me" -n "Updated"'
+        )
 
-        instance = self.session.query(ErrorType).filter(ErrorType.error_type_name == 'Updated').first()
+        instance = (
+            self.session.query(ErrorType)
+            .filter(ErrorType.error_type_name == "Updated")
+            .first()
+        )
         given_name = instance.error_type_name
 
         self.runner.invoke(main, 'delete -t "error type" -n "Updated"')
@@ -376,8 +457,12 @@ class TestCli(unittest.TestCase):
         Testing that when updating a protected error type record it is not updated.
         :return:
         """
-        result = self.runner.invoke(main, 'update -t "error type" -i "File Error" -n "Updated"')
-        expected_result = 'The item could not be updated because it is a protected record.'
+        result = self.runner.invoke(
+            main, 'update -t "error type" -i "File Error" -n "Updated"'
+        )
+        expected_result = (
+            "The item could not be updated because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
 
@@ -388,9 +473,15 @@ class TestCli(unittest.TestCase):
          """
         self.runner.invoke(main, 'create -t "process type" -n "Update Me"')
 
-        result = self.runner.invoke(main, 'update -t "process type" -i "Update Me" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "process type" -i "Update Me" -n "Updated"'
+        )
 
-        instance = self.session.query(ProcessType).filter(ProcessType.process_type_name == 'Updated').first()
+        instance = (
+            self.session.query(ProcessType)
+            .filter(ProcessType.process_type_name == "Updated")
+            .first()
+        )
         given_name = instance.process_type_name
         self.runner.invoke(main, 'delete -t "process type" -n "Updated"')
 
@@ -402,9 +493,13 @@ class TestCli(unittest.TestCase):
         Testing that when updating a protected process type record it is not updated.
         :return:
         """
-        result = self.runner.invoke(main, 'update -t "process type" -i "extract" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "process type" -i "extract" -n "Updated"'
+        )
 
-        expected_result = 'The item could not be updated because it is a protected record.'
+        expected_result = (
+            "The item could not be updated because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
 
@@ -415,14 +510,19 @@ class TestCli(unittest.TestCase):
          """
         self.runner.invoke(main, 'create -t "process status" -n "Update Me"')
 
-        result = self.runner.invoke(main, 'update -t "process status" -i "Update Me" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "process status" -i "Update Me" -n "Updated"'
+        )
 
-        instance = self.session.query(ProcessStatus).filter(
-            ProcessStatus.process_status_name == 'Updated').first()
+        instance = (
+            self.session.query(ProcessStatus)
+            .filter(ProcessStatus.process_status_name == "Updated")
+            .first()
+        )
         given_name = instance.process_status_name
         self.runner.invoke(main, 'delete -t "process status" -n "Updated"')
 
-        self.assertEqual('Updated', given_name)
+        self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_update_process_status_protected(self):
@@ -430,9 +530,13 @@ class TestCli(unittest.TestCase):
         Testing that when updating a protected process status record it is not updated.
         :return:
         """
-        result = self.runner.invoke(main, 'update -t "process status" -i "running" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "process status" -i "running" -n "Updated"'
+        )
 
-        expected_result = 'The item could not be updated because it is a protected record.'
+        expected_result = (
+            "The item could not be updated because it is a protected record."
+        )
 
         self.assertIn(expected_result, result.output)
 
@@ -443,14 +547,18 @@ class TestCli(unittest.TestCase):
          """
         self.runner.invoke(main, 'create -t source -n "Update Me"')
 
-        result = self.runner.invoke(main, 'update -t "source" -i "Update Me" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "source" -i "Update Me" -n "Updated"'
+        )
 
-        instance = self.session.query(Source).filter(Source.source_name == 'Updated').first()
+        instance = (
+            self.session.query(Source).filter(Source.source_name == "Updated").first()
+        )
         given_name = instance.source_name
 
         self.runner.invoke(main, 'delete -t "source" -n "Updated"')
 
-        self.assertEqual('Updated', given_name)
+        self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
 
     def test_update_tool(self):
@@ -460,14 +568,16 @@ class TestCli(unittest.TestCase):
          """
         self.runner.invoke(main, 'create -t tool -n "Update Me"')
 
-        result = self.runner.invoke(main, 'update -t "tool" -i "Update Me" -n "Updated"')
+        result = self.runner.invoke(
+            main, 'update -t "tool" -i "Update Me" -n "Updated"'
+        )
 
-        instance = self.session.query(Tool).filter(Tool.tool_name == 'Updated').first()
+        instance = self.session.query(Tool).filter(Tool.tool_name == "Updated").first()
         given_name = instance.tool_name
 
         self.runner.invoke(main, 'delete -t "tool" -n "Updated"')
 
-        self.assertEqual('Updated', given_name)
+        self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
 
     # def test_update_process_dependency(self):
