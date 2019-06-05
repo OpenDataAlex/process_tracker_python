@@ -2,14 +2,14 @@
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
 import logging
-import os
 from os.path import join
 
+from sqlalchemy.orm import aliased
 
 from process_tracker.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.settings import SettingsManager
-from process_tracker.models.extract import Extract, ExtractProcess, ExtractStatus, Location
+from process_tracker.models.extract import Extract, ExtractDependency, ExtractProcess, ExtractStatus
 
 
 class ExtractTracker:
@@ -97,6 +97,11 @@ class ExtractTracker:
         """
         status_date = datetime.now()
         if new_status in self.extract_status_types:
+
+            if new_status == self.extract_status_loading:
+
+                self.extract_dependency_check()
+
             self.logger.info('Setting extract status to %s' % new_status)
 
             new_status = self.extract_status_types[new_status]
@@ -112,6 +117,29 @@ class ExtractTracker:
             self.logger.error('%s is not a valid extract status type.' % new_status)
             raise Exception('%s is not a valid extract status type.  '
                             'Please add the status to extract_status_lkup' % new_status)
+
+    def extract_dependency_check(self):
+        """
+        Determine if the extract file has any unloaded dependencies before trying to load the file.
+        :return:
+        """
+        child_extract = aliased(Extract)
+        parent_extract = aliased(Extract)
+
+        dependency_hold = self.session.query(ExtractDependency) \
+                                .join(parent_extract, ExtractDependency.parent_extract_id == parent_extract.extract_id) \
+                                .join(child_extract, ExtractDependency.child_extract_id == child_extract.extract_id) \
+                                .join(Extract, Extract.extract_id == parent_extract.extract_id) \
+                                .join(ExtractStatus, ExtractStatus.extract_status_id == Extract.extract_status_id) \
+                                .filter(child_extract.extract_id == self.extract.extract_id) \
+                                .filter(ExtractStatus.extract_status_name.in_(('loading', 'initializing', 'ready'))) \
+                                .count()
+
+        if dependency_hold > 0:
+            self.logger.error('Extract files that this extract file is dependent on have not been loaded, are being '
+                              'created, or are in the process of loading.')
+            raise Exception('Extract files that this extract file is dependent on have not been loaded, are being '
+                            'created, or are in the process of loading.')
 
     def get_extract_status_types(self):
         """

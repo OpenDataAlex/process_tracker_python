@@ -31,6 +31,7 @@ setuptools.setup(
     ],
     extras_requires={
         'dev': [
+            'black >= 19.3b0',
             'coverage >= "4.0.3',
             'coveralls >= 1.7.0',
             'moto >= 1.3.8',

@@ -153,6 +153,20 @@ class TestExtractTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_extract_dependency_check(self):
+        """
+        Testing that if no dependencies are in a state that doesn't stop an extract from being loaded, then the extract
+        is loaded.
+        :return:
+        """
+
+    def test_extract_dependency_check_blocked(self):
+        """
+        Testing that if a dependency is in a state that stops an extract from being loaded, then the extract triggers an
+        error blocking the file from being processed.
+        :return:
+        """
+
     def test_location_name_provided(self):
         """
         Testing that if a location name is provided (like with default extract), one is not created.

@@ -50,6 +50,22 @@ class Extract(Base):
         return join(self.locations.location_path, self.extract_filename)
 
 
+class ExtractDependency(Base):
+
+    __tablename__ = 'extract_dependency'
+
+    parent_extract_id = Column(Integer, ForeignKey('extract_tracking.extract_id'), primary_key=True)
+    child_extract_id = Column(Integer, ForeignKey('extract_tracking.extract_id'), primary_key=True)
+
+    child_extract = relationship('Extract', foreign_keys=[child_extract_id])
+    parent_extract = relationship('Extract', foreign_keys=[parent_extract_id])
+
+    def __repr__(self):
+
+        return "<ExtractDependency (parent_extract=%s, child_extract=%s)>" % (self.parent_extract_id
+                                                                              , self.child_extract_id)
+
+
 class ExtractProcess(Base):
 
     __tablename__ = "extract_process_tracking"
