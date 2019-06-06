@@ -231,7 +231,7 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertNotEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_location(self):
+    def test_find_ready_extracts_by_location_name(self):
         """
         Testing that for the given location name, find the extracts, provided they are in 'ready' state.  Should return
         them in ascending order by registration datettime.
@@ -266,7 +266,7 @@ class TestProcessTracker(unittest.TestCase):
         ]
 
         given_result = self.process_tracker.find_ready_extracts_by_location(
-            "Test Location"
+            location_name="Test Location"
         )
         given_result = [record.full_filepath() for record in given_result]
 
@@ -307,11 +307,66 @@ class TestProcessTracker(unittest.TestCase):
         ]
 
         given_result = self.process_tracker.find_ready_extracts_by_location(
-            "Test Location"
+            location_name="Test Location"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_location_path(self):
+        """
+        Testing that for the given location path, find the extracts, provided they are in 'ready' state.  Should return
+        them in ascending order by registration datettime.
+        :return:
+        """
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.extract.extract_status_id = extract.extract_status_ready
+        session = Session.object_session(extract.extract)
+        session.commit()
+
+        extract2.extract.extract_status_id = extract2.extract_status_ready
+        session = Session.object_session(extract2.extract)
+        session.commit()
+
+        expected_result = [
+            "/home/test/extract_dir/test_extract_filename4-1.csv",
+            "/home/test/extract_dir/test_extract_filename4-2.csv",
+        ]
+
+        given_result = self.process_tracker.find_ready_extracts_by_location(
+            location_path="/home/test/extract_dir"
+        )
+        given_result = [record.full_filepath() for record in given_result]
+
+        self.assertCountEqual(expected_result, given_result)
+
+    def test_find_ready_extracts_by_location_unset(self):
+        """
+        Testing that if both the location path and location name are not set, find_ready_extracts_by_location
+        will throw an exception.
+        :return:
+        """
+        with self.assertRaises(Exception) as context:
+            self.process_tracker.find_ready_extracts_by_location()
+
+        return self.assertTrue(
+            "A location name or path must be provided.  Please try again."
+            in str(context.exception)
+        )
 
     def test_find_ready_extracts_by_process(self):
         """
