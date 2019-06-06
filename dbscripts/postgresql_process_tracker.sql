@@ -1,8 +1,8 @@
 SET search_path TO process_tracker;
 
-create schema process_tracker;
+create schema process_tracking;
 
-alter schema process_tracker owner to pt_admin;
+alter schema process_tracking owner to pt_admin;
 
 create table error_type_lkup
 (
@@ -291,13 +291,13 @@ create table extract_tracking
 	extract_filename varchar(750) not null,
 	extract_location_id integer not null
 		constraint extract_tracking_fk01
-			references process_tracking.location_lkup,
+			references location_lkup,
 	extract_process_run_id integer
 		constraint extract_tracking_fk03
-			references process_tracking.process_tracking,
+			references process_tracking,
 	extract_status_id integer
 		constraint extract_tracking_fk02
-			references process_tracking.extract_status_lkup,
+			references extract_status_lkup,
 	extract_registration_date_time timestamp not null,
 	extract_write_low_date_time timestamp,
 	extract_write_high_date_time timestamp,
@@ -332,8 +332,6 @@ comment on column extract_tracking.extract_load_high_date_time is 'The highest d
 comment on column extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
 
 alter table extract_tracking owner to pt_admin;
-
-
 
 create table extract_process_tracking
 (
