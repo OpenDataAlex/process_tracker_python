@@ -12,6 +12,7 @@ from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.logging import console
 from process_tracker.utilities.settings import SettingsManager
+from process_tracker.utilities import utilities
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import (
@@ -446,14 +447,16 @@ class ProcessTracker:
         previous_low_date_time = self.process_tracking_run.process_run_low_date_time
         previous_high_date_time = self.process_tracking_run.process_run_low_date_time
 
-        if low_date is not None and (
-            previous_low_date_time is None or low_date < previous_low_date_time
+        if utilities.determine_low_high_date(
+            date=low_date, previous_date=previous_low_date_time, date_type="low"
         ):
+
             self.process_tracking_run.process_run_low_date_time = low_date
 
-        if high_date is not None and (
-            previous_high_date_time is None or high_date > previous_high_date_time
+        if utilities.determine_low_high_date(
+            date=high_date, previous_date=previous_high_date_time, date_type="high"
         ):
+
             self.process_tracking_run.process_run_high_date_time = high_date
 
         self.session.commit()

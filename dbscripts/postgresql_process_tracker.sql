@@ -298,7 +298,13 @@ create table extract_tracking
 	extract_status_id integer
 		constraint extract_tracking_fk02
 			references extract_status_lkup,
-	extract_registration_date_time timestamp not null
+	extract_registration_date_time timestamp not null,
+	extract_write_low_date_time timestamp,
+	extract_write_high_date_time timestamp,
+	extract_write_record_count integer,
+	extract_load_low_date_time timestamp,
+	extract_load_high_date_time timestamp,
+	extract_load_record_count integer
 );
 
 comment on table extract_tracking is 'Tracking table for all extract/staging data files.';
@@ -312,6 +318,18 @@ comment on column extract_tracking.extract_process_run_id is 'The process that r
 comment on column extract_tracking.extract_status_id is 'The status of the extract.';
 
 comment on column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
+
+comment on column extract_tracking.extract_write_low_date_time is 'The lowest datetime of the data set as noted when writing the data file.';
+
+comment on column extract_tracking.extract_write_high_date_time is 'The highest datetime of the data set as noted when writing the data file.';
+
+comment on column extract_tracking.extract_write_record_count is 'The record count of the data set as noted when writing the data file.';
+
+comment on column extract_tracking.extract_load_low_date_time is 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.';
+
+comment on column extract_tracking.extract_load_high_date_time is 'The highest datetime of the data set as noted when loading the data file.';
+
+comment on column extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
 
 alter table extract_tracking owner to pt_admin;
 

@@ -1,5 +1,5 @@
 # Tests for validating extract_tracking
-
+from datetime import datetime, timedelta
 import unittest
 
 from process_tracker.models.extract import Extract, ExtractProcess, Location
@@ -14,6 +14,7 @@ from process_tracker.models.process import (
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractDependency, ExtractTracker
 from process_tracker.process_tracker import ErrorTracking, ProcessTracker
+from process_tracker.utilities import utilities
 
 
 class TestExtractTracker(unittest.TestCase):
@@ -325,3 +326,130 @@ class TestExtractTracker(unittest.TestCase):
         expected_result = "Test Location"
 
         self.assertEqual(expected_result, given_result)
+
+    def test_set_extract_low_high_dates_write(self):
+        """
+        Testing that low and high dates are set for the write audit fields.
+        :return:
+        """
+        low_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        ) - timedelta(hours=1)
+
+        high_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        )
+
+        self.extract.set_extract_low_high_dates(
+            low_date=low_date, high_date=high_date, audit_type="write"
+        )
+
+        given_dates = self.session.query(
+            Extract.extract_write_low_date_time, Extract.extract_write_high_date_time
+        ).filter(Extract.extract_id == self.extract.extract.extract_id)
+
+        expected_result = [low_date, high_date]
+        given_result = [
+            given_dates[0].extract_write_low_date_time,
+            given_dates[0].extract_write_high_date_time,
+        ]
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_extract_low_high_dates_load(self):
+        """
+        Testing that low and high dates are set for the load audit fields.
+        :return:
+        """
+
+        low_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        ) - timedelta(hours=1)
+
+        high_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        )
+
+        self.extract.set_extract_low_high_dates(
+            low_date=low_date, high_date=high_date, audit_type="load"
+        )
+
+        given_dates = self.session.query(
+            Extract.extract_load_low_date_time, Extract.extract_load_high_date_time
+        ).filter(Extract.extract_id == self.extract.extract.extract_id)
+
+        expected_result = [low_date, high_date]
+        given_result = [
+            given_dates[0].extract_load_low_date_time,
+            given_dates[0].extract_load_high_date_time,
+        ]
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_extract_low_high_dates_invalid_type(self):
+        """
+        Testing that the set_extract_low_high_dates method does not allow invalid types.
+        :return:
+        """
+
+        low_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        ) - timedelta(hours=1)
+
+        high_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        )
+
+        with self.assertRaises(Exception) as context:
+            self.extract.set_extract_low_high_dates(
+                low_date=low_date, high_date=high_date, audit_type="blarg"
+            )
+
+        return self.assertTrue(
+            "blarg is not a valid audit_type." in str(context.exception)
+        )
+
+    def test_set_extract_record_count_write(self):
+        """
+        Testing that the record count is set for the write record count column.
+        :return:
+        """
+        records = 10000
+
+        self.extract.set_extract_record_count(num_records=records, audit_type="write")
+
+        given_result = self.session.query(Extract.extract_write_record_count).filter(
+            Extract.extract_id == self.extract.extract.extract_id
+        )
+
+        self.assertEqual(records, given_result[0].extract_write_record_count)
+
+    def test_set_extract_record_count_load(self):
+        """
+        Testing that the record count is set for the load record count column.
+        :return:
+        """
+        records = 10000
+
+        self.extract.set_extract_record_count(num_records=records, audit_type="load")
+
+        given_result = self.session.query(Extract.extract_load_record_count).filter(
+            Extract.extract_id == self.extract.extract.extract_id
+        )
+
+        self.assertEqual(records, given_result[0].extract_load_record_count)
+
+    def test_set_extract_record_count_invalid_type(self):
+        """
+        Testing that the set_extract_record_count method does not allow invalid types.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+            self.extract.set_extract_record_count(
+                num_records=100000, audit_type="blarg"
+            )
+
+        return self.assertTrue(
+            "blarg is not a valid audit_type." in str(context.exception)
+        )

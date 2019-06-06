@@ -23,8 +23,9 @@ class SettingsManager:
             )
 
         else:
-            self.config_path = os.path.join(
-                config_location, "process_tracker_config.ini"
+            self.config_path = config_location
+            self.config_file = os.path.join(
+                self.config_path, "process_tracker_config.ini"
             )
 
         exists = os.path.isfile(self.config_file)
