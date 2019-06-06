@@ -51,7 +51,7 @@ create table location_lkup
 		foreign key (location_type) references location_type_lkup (location_type_id)
 );
 
-create table extract_tracking
+create table process_tracker.extract_tracking
 (
 	extract_id int auto_increment
 		primary key,
@@ -59,22 +59,25 @@ create table extract_tracking
 	extract_location_id int null,
 	extract_status_id int null,
 	extract_registration_date_time datetime not null,
+	extract_write_low_date_time datetime null comment 'The lowest datetime of the data set as noted when writing the data file.',
+	extract_write_high_date_time datetime null comment 'The highest datetime of the data set as noted when writing the data file.',
+	extract_write_record_count int null comment 'The record count of the data set as noted when writing the data file.',
+	extract_load_low_date_time datetime null comment 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.',
+	extract_load_high_date_time datetime null comment 'The highest datetime of the data set as noted when loading the data file. Should match the extract_load_high_date_time.',
+	extract_load_record_count int null comment 'The record count of the data set when loading the data file.',
 	constraint extract_filename
 		unique (extract_filename),
 	constraint extract_tracking_ibfk_1
-		foreign key (extract_location_id) references location_lkup (location_id),
+		foreign key (extract_location_id) references process_tracker.location_lkup (location_id),
 	constraint extract_tracking_ibfk_2
-		foreign key (extract_status_id) references extract_status_lkup (extract_status_id)
+		foreign key (extract_status_id) references process_tracker.extract_status_lkup (extract_status_id)
 );
 
 create index extract_location_id
-	on extract_tracking (extract_location_id);
+	on process_tracker.extract_tracking (extract_location_id);
 
 create index extract_status_id
-	on extract_tracking (extract_status_id);
-
-create index location_type
-	on location_lkup (location_type);
+	on process_tracker.extract_tracking (extract_status_id);
 
 create table process_tracker.extract_dependency
 (

@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 from process_tracker.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.settings import SettingsManager
+from process_tracker.utilities import utilities
 from process_tracker.models.extract import (
     Extract,
     ExtractDependency,
@@ -252,3 +253,75 @@ class ExtractTracker:
             self.session.commit()
 
         return extract_process
+
+    def set_extract_low_high_dates(self, low_date, high_date, audit_type="load"):
+        """
+        For the given extract, find the low and high date_times while writing or loading.
+        :param low_date: The low date of the data set.
+        :type low_date: Datetime/timestamp
+        :param high_date: The high date of the data set.
+        :type high_date: Datetime/timestamp.
+        :param audit_type: The type of audit fields being populated.  Valid types:  write, load
+        :type audittype: String
+        :return:
+        """
+
+        if audit_type == "write":
+
+            previous_low_date_time = self.extract.extract_write_low_date_time
+            previous_high_date_time = self.extract.extract_write_high_date_time
+
+            if utilities.determine_low_high_date(
+                date=low_date, previous_date=previous_low_date_time, date_type="low"
+            ):
+                self.extract.extract_write_low_date_time = low_date
+
+            if utilities.determine_low_high_date(
+                date=high_date, previous_date=previous_high_date_time, date_type="high"
+            ):
+                self.extract.extract_write_high_date_time = high_date
+
+        elif audit_type == "load":
+
+            previous_low_date_time = self.extract.extract_load_low_date_time
+            previous_high_date_time = self.extract.extract_load_high_date_time
+
+            if utilities.determine_low_high_date(
+                date=low_date, previous_date=previous_low_date_time, date_type="low"
+            ):
+                self.extract.extract_load_low_date_time = low_date
+
+            if utilities.determine_low_high_date(
+                date=high_date, previous_date=previous_high_date_time, date_type="high"
+            ):
+                self.extract.extract_load_high_date_time = high_date
+
+        else:
+            self.logger.error("%s is not a valid audit_type." % audit_type)
+            raise Exception("%s is not a valid audit_type." % audit_type)
+
+        self.session.commit()
+
+    def set_extract_record_count(self, num_records, audit_type="load"):
+        """
+        For the given audit type, set the number of records for the given extract.
+        :param num_records: Number of records tracked in extract
+        :type num_records: int
+        :param audit_type: The type of audit being populated.  Valid types:  write, load.
+        :type audit_type: str
+        :return:
+        """
+
+        if audit_type == "write":
+
+            self.extract.extract_write_record_count = num_records
+
+        elif audit_type == "load":
+
+            self.extract.extract_load_record_count = num_records
+
+        else:
+            self.logger.error("%s is not a valid audit_type." % audit_type)
+            raise Exception("%s is not a valid audit_type." % audit_type)
+
+        self.session.commit()

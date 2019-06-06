@@ -283,7 +283,7 @@ create unique index location_lkup_udx01
 create unique index location_lkup_udx02
 	on location_lkup (location_path);
 
-create table extract_tracking
+create table process_tracking.extract_tracking
 (
 	extract_id serial not null
 		constraint extract_tracking_pk
@@ -291,29 +291,49 @@ create table extract_tracking
 	extract_filename varchar(750) not null,
 	extract_location_id integer not null
 		constraint extract_tracking_fk01
-			references location_lkup,
+			references process_tracking.location_lkup,
 	extract_process_run_id integer
 		constraint extract_tracking_fk03
-			references process_tracking,
+			references process_tracking.process_tracking,
 	extract_status_id integer
 		constraint extract_tracking_fk02
-			references extract_status_lkup,
-	extract_registration_date_time timestamp not null
+			references process_tracking.extract_status_lkup,
+	extract_registration_date_time timestamp not null,
+	extract_write_low_date_time timestamp,
+	extract_write_high_date_time timestamp,
+	extract_write_record_count integer,
+	extract_load_low_date_time timestamp,
+	extract_load_high_date_time timestamp,
+	extract_load_record_count integer
 );
 
-comment on table extract_tracking is 'Tracking table for all extract/staging data files.';
+comment on table process_tracking.extract_tracking is 'Tracking table for all extract/staging data files.';
 
-comment on column extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
+comment on column process_tracking.extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
 
-comment on column extract_tracking.extract_location_id is 'The location where the given extract can be found.';
+comment on column process_tracking.extract_tracking.extract_location_id is 'The location where the given extract can be found.';
 
-comment on column extract_tracking.extract_process_run_id is 'The process that registered or created the extract file.';
+comment on column process_tracking.extract_tracking.extract_process_run_id is 'The process that registered or created the extract file.';
 
-comment on column extract_tracking.extract_status_id is 'The status of the extract.';
+comment on column process_tracking.extract_tracking.extract_status_id is 'The status of the extract.';
 
-comment on column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
+comment on column process_tracking.extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
 
-alter table extract_tracking owner to pt_admin;
+comment on column process_tracking.extract_tracking.extract_write_low_date_time is 'The lowest datetime of the data set as noted when writing the data file.';
+
+comment on column process_tracking.extract_tracking.extract_write_high_date_time is 'The highest datetime of the data set as noted when writing the data file.';
+
+comment on column process_tracking.extract_tracking.extract_write_record_count is 'The record count of the data set as noted when writing the data file.';
+
+comment on column process_tracking.extract_tracking.extract_load_low_date_time is 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.';
+
+comment on column process_tracking.extract_tracking.extract_load_high_date_time is 'The highest datetime of the data set as noted when loading the data file.';
+
+comment on column process_tracking.extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
+
+alter table process_tracking.extract_tracking owner to pt_admin;
+
+
 
 create table extract_process_tracking
 (

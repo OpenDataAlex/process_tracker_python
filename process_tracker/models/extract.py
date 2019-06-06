@@ -44,6 +44,12 @@ class Extract(Base):
     extract_registration_date_time = Column(
         DateTime, nullable=False, default=datetime.now()
     )
+    extract_write_low_date_time = Column(DateTime, nullable=True)
+    extract_write_high_date_time = Column(DateTime, nullable=True)
+    extract_write_record_count = Column(Integer, nullable=True)
+    extract_load_low_date_time = Column(DateTime, nullable=True)
+    extract_load_high_date_time = Column(DateTime, nullable=True)
+    extract_load_record_count = Column(Integer, nullable=True)
 
     extract_process = relationship("ExtractProcess", back_populates="process_extracts")
     locations = relationship("Location", foreign_keys=[extract_location_id])

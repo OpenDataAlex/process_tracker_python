@@ -30,6 +30,7 @@ from process_tracker.models.process import (
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
+from process_tracker.utilities import utilities
 
 test_bucket = "test_bucket"
 
@@ -110,20 +111,6 @@ class TestProcessTracker(unittest.TestCase):
         self.session.query(Extract).delete()
         self.session.query(ErrorType).delete()
         self.session.commit()
-
-    def timestamp_converter(self, timestamp):
-        """
-        Helper function for when testing with data stores that have funky formats for stock dates with SQLAlchemy.
-        :param timestamp: The timestamp to be created.
-        :return:
-        """
-
-        if self.data_store_type == "mysql":
-            timestamp = timestamp.replace(microsecond=0)
-        else:
-            timestamp = timestamp
-
-        return timestamp
 
     def test_change_status_invalid_type(self):
         """
@@ -893,11 +880,13 @@ class TestProcessTracker(unittest.TestCase):
         Testing that if low and high date are not set, the process_tracking_record low/high dates are set.
         :return:
         """
-        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(
-            hours=1
-        )
+        low_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        ) - timedelta(hours=1)
 
-        high_date = self.timestamp_converter(timestamp=datetime.now())
+        high_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        )
 
         self.process_tracker.set_process_run_low_high_dates(
             low_date=low_date, high_date=high_date
@@ -925,9 +914,9 @@ class TestProcessTracker(unittest.TestCase):
         low date.
         :return:
         """
-        low_date = self.timestamp_converter(timestamp=datetime.now()) - timedelta(
-            hours=1
-        )
+        low_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        ) - timedelta(hours=1)
         lower_low_date = low_date - timedelta(hours=1)
 
         self.process_tracker.set_process_run_low_high_dates(low_date=low_date)
@@ -952,7 +941,9 @@ class TestProcessTracker(unittest.TestCase):
         low date.
         :return:
         """
-        high_date = self.timestamp_converter(timestamp=datetime.now())
+        high_date = utilities.timestamp_converter(
+            data_store_type=self.data_store_type, timestamp=datetime.now()
+        )
 
         higher_high_date = high_date + timedelta(hours=1)
 
