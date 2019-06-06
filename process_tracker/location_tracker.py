@@ -86,7 +86,7 @@ class LocationTracker:
             )
 
             location_type = self.data_store.get_or_create_item(
-                model=LocationType, location_type_name="local directory"
+                model=LocationType, location_type_name="local filesystem"
             )
 
         return location_type
