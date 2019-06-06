@@ -157,22 +157,43 @@ class ProcessTracker:
 
         return process_files
 
-    def find_ready_extracts_by_location(self, location):
+    def find_ready_extracts_by_location(self, location_name=None, location_path=None):
         """
-        For the given location name, find all matching extracts that are ready for processing
-        :param location:
-        :return:
+        For the given location path or location name, find all matching extracts that are ready for processing
+        :param location_name: The name of the location
+        :type location_name: str
+        :param location_path: The path of the location
+        :type location_path: str
+        :return: List of extract files that are in 'ready' state'.
         """
 
-        process_files = (
-            self.session.query(Extract)
-            .join(Location)
-            .join(ExtractStatus)
-            .filter(ExtractStatus.extract_status_name == "ready")
-            .filter(Location.location_name == location)
-            .order_by(Extract.extract_registration_date_time)
-            .all()
-        )
+        if location_path is not None:
+            process_files = (
+                self.session.query(Extract)
+                .join(Location)
+                .join(ExtractStatus)
+                .filter(ExtractStatus.extract_status_name == "ready")
+                .filter(Location.location_path == location_path)
+                .order_by(Extract.extract_registration_date_time)
+                .all()
+            )
+        elif location_name is not None:
+            process_files = (
+                self.session.query(Extract)
+                .join(Location)
+                .join(ExtractStatus)
+                .filter(ExtractStatus.extract_status_name == "ready")
+                .filter(Location.location_name == location_name)
+                .order_by(Extract.extract_registration_date_time)
+                .all()
+            )
+        else:
+            self.logger.error(
+                "A location name or path must be provided.  Please try again."
+            )
+            raise Exception(
+                "A location name or path must be provided.  Please try again."
+            )
 
         return process_files
 
