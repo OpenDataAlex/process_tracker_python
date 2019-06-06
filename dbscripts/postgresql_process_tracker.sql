@@ -1,8 +1,8 @@
 SET search_path TO process_tracker;
 
-create schema process_tracking;
+create schema process_tracker;
 
-alter schema process_tracking owner to pt_admin;
+alter schema process_tracker owner to pt_admin;
 
 create table error_type_lkup
 (
