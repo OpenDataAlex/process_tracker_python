@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 import os
 
+import boto3
 from sqlalchemy.orm import aliased
 
 from process_tracker.data_store import DataStore
@@ -333,26 +334,29 @@ class ProcessTracker:
             location_path=location_path, location_name=location_name
         )
 
-        # if location.location_type.location_type_name == "s3":
-        #     s3 = boto3.resource("s3")
-        #
-        #     path = location.location_path
-        #
-        #     if path.startswith("s3://"):
-        #         path = path[len("s3://")]
-        #
-        #     bucket = s3.Bucket(path)
-        #
-        #     for file in bucket.objects.all():
-        #         ExtractTracker(process_run=self
-        #                        , filename=file
-        #                        , location=location
-        #                        , status='ready')
-        # else:
-        for file in os.listdir(location_path):
-            ExtractTracker(
-                process_run=self, filename=file, location=location, status="ready"
-            )
+        if location.location_type.location_type_name == "s3":
+            s3 = boto3.resource("s3")
+
+            path = location.location_path
+
+            path = path[path.startswith("s3://") and len("s3://") :]
+
+            self.logger.debug("Path is now %s" % path)
+
+            bucket = s3.Bucket(path)
+
+            for file in bucket.objects.all():
+                ExtractTracker(
+                    process_run=self,
+                    filename=file.key,
+                    location=location,
+                    status="ready",
+                )
+        else:
+            for file in os.listdir(location_path):
+                ExtractTracker(
+                    process_run=self, filename=file, location=location, status="ready"
+                )
 
     def register_new_process_run(self):
         """
