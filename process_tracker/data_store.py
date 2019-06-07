@@ -115,16 +115,13 @@ class DataStore:
             self.logger.warn(
                 "ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST"
             )
-            self.session.commit()
-            Base.metadata.drop_all(self.engine)
 
-        self.session.commit()
+            for table in reversed(Base.metadata.sorted_tables):
+                self.logger.info("Table will be deleted: %s" % table)
+                table.drop(self.engine)
+
         self.logger.info("Data store initialization beginning.  Creating data store.")
         Base.metadata.create_all(self.engine)
-
-        # for table in Base.metadata.sorted_tables:
-        #     self.logger.info("Table will be created: %s" % table)
-        #     table.create(self.engine)
 
         self.logger.info("Setting up application defaults.")
 
