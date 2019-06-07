@@ -34,7 +34,7 @@ preload_extract_status_types = [
 ]
 preload_process_status_types = ["running", "completed", "failed"]
 preload_process_types = ["extract", "load"]
-preload_system_keys = [{"key": "version", "value": "0.2.0"}]
+preload_system_keys = [{"version", "0.2.0"}]
 
 supported_data_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
 
@@ -110,63 +110,54 @@ class DataStore:
         :type overwrite: bool
         """
         self.logger.info("Attempting to initialize Process Tracker data store.")
+
         if overwrite:
             self.logger.warn(
                 "ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST"
             )
-
-            for table in Base.metadata.table_names():
-                self.logger.info("Table will be deleted: %s" % table)
-                table.drop(self.engine)
-
-            version = None
-        else:
-
-            self.logger.debug("Obtaining system version, if exists.")
-            version = (
-                self.session.query(System)
-                .filter(System.system_key == "version")
-                .first()
-            )
-
-        if version is None:
-
-            self.logger.info(
-                "Data store initialization beginning.  Creating data store."
-            )
-            Base.metadata.create_all(self.engine)
-
-            self.logger.info("Setting up application defaults.")
-
-            self.logger.info("Adding error types...")
-            for error_type in preload_error_types:
-                self.logger.info("Adding %s" % error_type)
-                self.session.add(ErrorType(error_type_name=error_type))
-
-            self.logger.info("Adding extract status types...")
-            for extract_status_type in preload_extract_status_types:
-                self.logger.info("Adding %s" % extract_status_type)
-                self.session.add(ExtractStatus(extract_status_name=extract_status_type))
-
-            self.logger.info("Adding process status types...")
-            for process_status_type in preload_process_status_types:
-                self.logger.info("Adding %s" % process_status_type)
-                self.session.add(ProcessStatus(process_status_name=process_status_type))
-
-            self.logger.info("Adding process types...")
-            for process_type in preload_process_types:
-                self.logger.info("Adding %s" % process_type)
-                self.session.add(ProcessType(process_type_name=process_type))
-
-            self.logger.info("Adding system keys...")
-            for system_key, value in preload_system_keys:
-                self.logger.info("Adding %s" % system_key)
-                self.session.add(System(system_key=system_key, system_value=value))
-
             self.session.commit()
-        else:
-            self.logger.error("It appears the system has already been setup.")
-            ClickException("It appears the system has already been setup.").show()
+            Base.metadata.drop_all(self.engine)
+
+        self.session.commit()
+        self.logger.info("Data store initialization beginning.  Creating data store.")
+        Base.metadata.create_all(self.engine)
+
+        # for table in Base.metadata.sorted_tables:
+        #     self.logger.info("Table will be created: %s" % table)
+        #     table.create(self.engine)
+
+        self.logger.info("Setting up application defaults.")
+
+        self.logger.info("Adding error types...")
+        for error_type in preload_error_types:
+            self.logger.info("Adding %s" % error_type)
+            self.get_or_create_item(model=ErrorType, error_type_name=error_type)
+
+        self.logger.info("Adding extract status types...")
+        for extract_status_type in preload_extract_status_types:
+            self.logger.info("Adding %s" % extract_status_type)
+            self.get_or_create_item(
+                ExtractStatus, extract_status_name=extract_status_type
+            )
+
+        self.logger.info("Adding process status types...")
+        for process_status_type in preload_process_status_types:
+            self.logger.info("Adding %s" % process_status_type)
+            self.get_or_create_item(
+                model=ProcessStatus, process_status_name=process_status_type
+            )
+
+        self.logger.info("Adding process types...")
+        for process_type in preload_process_types:
+            self.logger.info("Adding %s" % process_type)
+            self.get_or_create_item(model=ProcessType, process_type_name=process_type)
+
+        self.logger.info("Adding system keys...")
+        for key, value in preload_system_keys:
+            self.logger.info("Adding %s" % key)
+            self.get_or_create_item(model=System, system_key=key, system_value=value)
+
+        self.session.commit()
 
         self.logger.debug("Finished the initialization check.")
 

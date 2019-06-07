@@ -11,9 +11,12 @@ from process_tracker.models.model_base import default_date, Base
 class ErrorType(Base):
 
     __tablename__ = "error_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
     error_type_id = Column(
-        Integer, Sequence("error_type_lkup_error_type_id_seq"), primary_key=True
+        Integer,
+        Sequence("error_type_lkup_error_type_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     error_type_name = Column(String(250), unique=True, nullable=False)
 
@@ -27,15 +30,20 @@ class ErrorType(Base):
 class ErrorTracking(Base):
 
     __tablename__ = "error_tracking"
+    __table_args__ = {"schema": "process_tracker"}
 
     error_tracking_id = Column(
-        Integer, Sequence("error_tracking_error_tracking_id_seq"), primary_key=True
+        Integer,
+        Sequence("error_tracking_error_tracking_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
-    error_type_id = Column(Integer, ForeignKey("error_type_lkup.error_type_id"))
+    error_type_id = Column(
+        Integer, ForeignKey("process_tracker.error_type_lkup.error_type_id")
+    )
     error_description = Column(String(750))
     error_occurrence_date_time = Column(DateTime, nullable=False)
     process_tracking_id = Column(
-        Integer, ForeignKey("process_tracking.process_tracking_id")
+        Integer, ForeignKey("process_tracker.process_tracking.process_tracking_id")
     )
 
     error_tracking = relationship("ProcessTracking")
@@ -57,9 +65,12 @@ class ErrorTracking(Base):
 class ProcessStatus(Base):
 
     __tablename__ = "process_status_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
     process_status_id = Column(
-        Integer, Sequence("process_status_lkup_process_status_id_seq"), primary_key=True
+        Integer,
+        Sequence("process_status_lkup_process_status_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     process_status_name = Column(String(75), nullable=False, unique=True)
 
@@ -74,9 +85,12 @@ class ProcessStatus(Base):
 class ProcessType(Base):
 
     __tablename__ = "process_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
     process_type_id = Column(
-        Integer, Sequence("process_type_lkup_process_type_id_seq"), primary_key=True
+        Integer,
+        Sequence("process_type_lkup_process_type_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     process_type_name = Column(String(250), nullable=False)
 
@@ -93,12 +107,19 @@ class ProcessType(Base):
 class Process(Base):
 
     __tablename__ = "process"
+    __table_args__ = {"schema": "process_tracker"}
 
-    process_id = Column(Integer, Sequence("process_process_id_seq"), primary_key=True)
+    process_id = Column(
+        Integer,
+        Sequence("process_process_id_seq", schema="process_tracker"),
+        primary_key=True,
+    )
     process_name = Column(String(250), nullable=False, unique=True)
     total_record_count = Column(Integer, nullable=False, default=0)
-    process_type_id = Column(Integer, ForeignKey("process_type_lkup.process_type_id"))
-    process_tool_id = Column(Integer, ForeignKey("tool_lkup.tool_id"))
+    process_type_id = Column(
+        Integer, ForeignKey("process_tracker.process_type_lkup.process_type_id")
+    )
+    process_tool_id = Column(Integer, ForeignKey("process_tracker.tool_lkup.tool_id"))
     last_failed_run_date_time = Column(
         DateTime(timezone=True), nullable=False, default=default_date
     )
@@ -121,9 +142,14 @@ class Process(Base):
 class ProcessSource(Base):
 
     __tablename__ = "process_source"
+    __table_args__ = {"schema": "process_tracker"}
 
-    source_id = Column(Integer, ForeignKey("source_lkup.source_id"), primary_key=True)
-    process_id = Column(Integer, ForeignKey("process.process_id"), primary_key=True)
+    source_id = Column(
+        Integer, ForeignKey("process_tracker.source_lkup.source_id"), primary_key=True
+    )
+    process_id = Column(
+        Integer, ForeignKey("process_tracker.process.process_id"), primary_key=True
+    )
 
     sources = relationship("Source")
     processes = relationship("Process")
@@ -138,11 +164,14 @@ class ProcessSource(Base):
 
 class ProcessTarget(Base):
     __tablename__ = "process_target"
+    __table_args__ = {"schema": "process_tracker"}
 
     target_source_id = Column(
-        Integer, ForeignKey("source_lkup.source_id"), primary_key=True
+        Integer, ForeignKey("process_tracker.source_lkup.source_id"), primary_key=True
     )
-    process_id = Column(Integer, ForeignKey("process.process_id"), primary_key=True)
+    process_id = Column(
+        Integer, ForeignKey("process_tracker.process.process_id"), primary_key=True
+    )
 
     targets = relationship("Source")
     processes = relationship("Process")
@@ -157,12 +186,13 @@ class ProcessTarget(Base):
 class ProcessDependency(Base):
 
     __tablename__ = "process_dependency"
+    __table_args__ = {"schema": "process_tracker"}
 
     parent_process_id = Column(
-        Integer, ForeignKey("process.process_id"), primary_key=True
+        Integer, ForeignKey("process_tracker.process.process_id"), primary_key=True
     )
     child_process_id = Column(
-        Integer, ForeignKey("process.process_id"), primary_key=True
+        Integer, ForeignKey("process_tracker.process.process_id"), primary_key=True
     )
 
     child_process = relationship("Process", foreign_keys=[child_process_id])
@@ -179,13 +209,16 @@ class ProcessDependency(Base):
 class ProcessTracking(Base):
 
     __tablename__ = "process_tracking"
+    __table_args__ = {"schema": "process_tracker"}
 
     process_tracking_id = Column(
-        Integer, Sequence("process_tracking_process_tracking_id_seq"), primary_key=True
+        Integer,
+        Sequence("process_tracking_process_tracking_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
-    process_id = Column(Integer, ForeignKey("process.process_id"))
+    process_id = Column(Integer, ForeignKey("process_tracker.process.process_id"))
     process_status_id = Column(
-        Integer, ForeignKey("process_status_lkup.process_status_id")
+        Integer, ForeignKey("process_tracker.process_status_lkup.process_status_id")
     )
     process_run_id = Column(Integer, nullable=False)
     process_run_low_date_time = Column(DateTime, nullable=True)
@@ -193,7 +226,9 @@ class ProcessTracking(Base):
     process_run_start_date_time = Column(DateTime, nullable=False)
     process_run_end_date_time = Column(DateTime, nullable=True)
     process_run_record_count = Column(Integer, nullable=False, default=0)
-    process_run_actor_id = Column(Integer, ForeignKey("actor_lkup.actor_id"))
+    process_run_actor_id = Column(
+        Integer, ForeignKey("process_tracker.actor_lkup.actor_id")
+    )
     is_latest_run = Column(Boolean, nullable=False, default=False)
 
     errors = relationship("ErrorTracking", back_populates="error_tracking")

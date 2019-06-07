@@ -1,4 +1,5 @@
 import logging
+import time
 import unittest
 
 from click.testing import CliRunner
@@ -31,28 +32,31 @@ class TestCli(unittest.TestCase):
         self.session = self.data_store.session
         self.runner = CliRunner()
 
-    # def test_setup_overwrite(self):
-    #     """
-    #     Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
-    #     :return:
-    #     """
-    #     self.runner.invoke(main, 'setup -o True')
-    #
-    #     instance = self.session.query(Actor).count()
-    #
-    #     self.assertEqual(0, instance)
-    #
-    # def test_setup_already_exists(self):
-    #     """
-    #     Testing that if data store is already set up, do not attempt to initialize.
-    #     :return:
-    #     """
-    #
-    #     result = self.runner.invoke(main, ['setup'])
-    #
-    #     expected_result = 'It appears the system has already been setup.'
-    #
-    #     self.assertIn(expected_result, result.output)
+    def test_setup_overwrite(self):
+        """
+        Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
+        :return:
+        """
+        self.data_store.get_or_create_item(model=Actor, actor_name="Testing Testor")
+        pre_delete = self.session.query(Actor).count()
+        time.sleep(1)
+        self.runner.invoke(main, "setup -o True")
+
+        instance = self.session.query(Actor).count()
+
+        self.assertEqual(0, instance)
+        self.assertNotEqual(0, pre_delete)
+
+    def test_setup_initialize(self):
+        """
+        Testing that if data store is not already set up, create the data store and initialize required data.
+        :return:
+        """
+        result = self.runner.invoke(main, "setup")
+
+        instance = self.session.query(ProcessStatus).count()
+
+        self.assertEqual(3, instance)
 
     def test_create_actor(self):
         """

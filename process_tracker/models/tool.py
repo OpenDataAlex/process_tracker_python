@@ -9,8 +9,13 @@ from process_tracker.models.model_base import Base
 class Tool(Base):
 
     __tablename__ = "tool_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
-    tool_id = Column(Integer, Sequence("tool_lkup_tool_id_seq"), primary_key=True)
+    tool_id = Column(
+        Integer,
+        Sequence("tool_lkup_tool_id_seq", schema="process_tracker"),
+        primary_key=True,
+    )
     tool_name = Column(String(250), nullable=False, unique=True)
 
     def __repr__(self):
