@@ -8,6 +8,7 @@ Data integration process management made easy!
 [![PyPI version](https://badge.fury.io/py/processtracker.svg)](https://badge.fury.io/py/processtracker)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Documentation Status](https://readthedocs.org/projects/process-tracker/badge/?version=latest)](https://process-tracker.readthedocs.io/en/latest/?badge=latest)
 
 This is the Python implementation of the ProcessTracker framework.  ProcessTracker builds a standard framework that is
 tool agnostic.  If you are working with data integration/cleansing processes within Python (i.e. using PySpark, Pandas, etc.)

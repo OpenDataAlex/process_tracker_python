@@ -44,31 +44,51 @@ def main():
 @main.command()
 @click.option("-t", "--topic", help="The topic being created")
 @click.option("-n", "--name", help="The name for the topic.")
-def create(topic, name):
+@click.option(
+    "-p", "--parent", help="The parent process' name, if creating a process dependency"
+)
+@click.option(
+    "-c", "--child", help="The child process' name, if creating a process dependency"
+)
+def create(topic, name, parent=None, child=None):
     """
     Create an item that is within the valid topics list.
     :param topic: The name of the topic.
     :type topic: string
     :param name: The name of the topic item to be added.
     :type name: string
+    :param parent: The parent process' name, if creating a process dependency
+    :type parent: string
+    :param child: The child process' name, if creating a process dependency
+    :type child: string
     """
     click.echo("Attempting to create %s with name %s" % (topic, name))
-    data_store.topic_creator(topic=topic, name=name)
+    data_store.topic_creator(topic=topic, name=name, parent=parent, child=child)
 
 
 @main.command()
 @click.option("-t", "--topic", help="The topic being created")
 @click.option("-n", "--name", help="The name for the topic.")
-def delete(topic, name):
+@click.option(
+    "-p", "--parent", help="The parent process' name, if deleting a process dependency"
+)
+@click.option(
+    "-c", "--child", help="The child process' name, if deleting a process dependency"
+)
+def delete(topic, name, parent=None, child=None):
     """
     Delete an item that is within the valid topics list and not a pre-loaded item.
     :param topic: The name of the topic.
     :type topic: string
     :param name: The name of the topic item to be deleted.
     :type name: string
+    :param parent: The parent process' name, if deleting a process dependency
+    :type parent: string
+    :param child: The child process' name, if deleting a process dependency
+    :type child: string
     """
     click.echo("Attempting to delete %s with name %s" % (topic, name))
-    data_store.topic_deleter(topic=topic, name=name)
+    data_store.topic_deleter(topic=topic, name=name, parent=parent, child=child)
 
 
 @main.command()
