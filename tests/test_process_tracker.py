@@ -663,7 +663,7 @@ class TestProcessTracker(unittest.TestCase):
             ["test_bucket/test_local_dir_2.csv", "ready", "ready"],
         ]
 
-        self.assertEqual(expected_result, given_result)
+        self.assertCountEqual(expected_result, given_result)
 
     def test_register_new_process_run(self):
         """
