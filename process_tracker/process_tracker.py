@@ -175,6 +175,7 @@ class ProcessTracker:
                 .filter(ExtractStatus.extract_status_name == "ready")
                 .filter(Location.location_path == location_path)
                 .order_by(Extract.extract_registration_date_time)
+                .order_by(Extract.extract_id)
                 .all()
             )
         elif location_name is not None:
@@ -185,6 +186,7 @@ class ProcessTracker:
                 .filter(ExtractStatus.extract_status_name == "ready")
                 .filter(Location.location_name == location_name)
                 .order_by(Extract.extract_registration_date_time)
+                .order_by(Extract.extract_id)
                 .all()
             )
         else:
