@@ -5,11 +5,17 @@ from click.testing import CliRunner
 
 from process_tracker.cli import main
 from process_tracker.data_store import DataStore
+from process_tracker.process_tracker import ProcessTracker
 from process_tracker.utilities.logging import console
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import ExtractStatus
-from process_tracker.models.process import ErrorType, ProcessStatus, ProcessType
+from process_tracker.models.process import (
+    ErrorType,
+    ProcessDependency,
+    ProcessStatus,
+    ProcessType,
+)
 from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
@@ -119,6 +125,58 @@ class TestCli(unittest.TestCase):
     #     expected_result = "Invalid topic type."
     #
     #     return self.assertEqual(expected_result, given_result)
+    def test_create_process_dependency(self):
+        """
+        Testing that when creating a process dependency record, it is created.
+        :return:
+        """
+        parent_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency Parent",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
+
+        parent_process.change_run_status("completed")
+
+        child_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency Child",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
+
+        child_process.change_run_status("completed")
+
+        result = self.runner.invoke(
+            main,
+            'create -t "process dependency" -p "%s" -c "%s"'
+            % (parent_process.process_name, child_process.process_name),
+        )
+
+        instance = (
+            self.session.query(ProcessDependency)
+            .filter(
+                ProcessDependency.parent_process_id == parent_process.process.process_id
+            )
+            .filter(
+                ProcessDependency.child_process_id == child_process.process.process_id
+            )
+            .first()
+        )
+
+        given_result = [instance.parent_process_id, instance.child_process_id]
+        expected_result = [
+            parent_process.process.process_id,
+            child_process.process.process_id,
+        ]
+
+        self.assertEqual(expected_result, given_result)
+        self.assertEqual(0, result.exit_code)
 
     def test_create_process_type(self):
         """
@@ -293,6 +351,59 @@ class TestCli(unittest.TestCase):
     #     expected_result = "Invalid topic.  Unable to delete instance."
     #
     #     return self.assertEqual(expected_result, given_result)
+
+    def test_delete_process_dependency(self):
+        """
+        Testing that when deleting a process dependency record, it is deleted.
+        :return:
+        """
+        parent_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency Parent",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
+
+        parent_process.change_run_status("completed")
+
+        child_process = ProcessTracker(
+            process_name="Testing Process Tracking Dependency Child",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+        )
+
+        child_process.change_run_status("completed")
+
+        self.runner.invoke(
+            main,
+            'create -t "process dependency" -p "%s" -c "%s"'
+            % (parent_process.process_name, child_process.process_name),
+        )
+
+        result = self.runner.invoke(
+            main,
+            'delete -t "process dependency" -p "%s" -c "%s"'
+            % (parent_process.process_name, child_process.process_name),
+        )
+
+        instance = (
+            self.session.query(ProcessDependency)
+            .filter(
+                ProcessDependency.parent_process_id == parent_process.process.process_id
+            )
+            .filter(
+                ProcessDependency.child_process_id == child_process.process.process_id
+            )
+            .first()
+        )
+
+        self.assertEqual(None, instance)
+        self.assertEqual(0, result.exit_code)
 
     def test_delete_process_type(self):
         """

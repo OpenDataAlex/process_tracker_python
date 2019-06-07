@@ -3,7 +3,7 @@ import logging
 from click import ClickException
 
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import aliased, sessionmaker
 from sqlalchemy_utils import database_exists
 
 from process_tracker.utilities.settings import SettingsManager
@@ -11,7 +11,13 @@ from process_tracker.utilities.settings import SettingsManager
 from process_tracker.models.model_base import Base
 from process_tracker.models.actor import Actor
 from process_tracker.models.extract import ExtractStatus
-from process_tracker.models.process import ErrorType, ProcessType, ProcessStatus
+from process_tracker.models.process import (
+    ErrorType,
+    Process,
+    ProcessDependency,
+    ProcessType,
+    ProcessStatus,
+)
 from process_tracker.models.source import Source
 from process_tracker.models.system import System
 from process_tracker.models.tool import Tool
@@ -30,10 +36,7 @@ preload_process_status_types = ["running", "completed", "failed"]
 preload_process_types = ["extract", "load"]
 preload_system_keys = [{"key": "version", "value": "0.2.0"}]
 
-relational_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
-nonrelational_stores = []
-
-supported_data_stores = relational_stores + nonrelational_stores
+supported_data_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
 
 
 class DataStore:
@@ -167,47 +170,74 @@ class DataStore:
 
         self.logger.debug("Finished the initialization check.")
 
-    def topic_creator(self, topic, name):
+    def topic_creator(self, topic, name, parent=None, child=None):
         """
         For the command line tool, validate the topic and create the new instance.
-        :param topic:
-        :param name:
+        :param topic: The name of the topic.
+        :type topic: string
+        :param name: The name of the topic item to be added.
+        :type name: string
+        :param parent: The parent process' name, if creating a process dependency
+        :type parent: string
+        :param child: The child process' name, if creating a process dependency
+        :type child: string
         :return:
         """
         self.logger.info("Attempting to create %s item: %s" % (topic, name))
 
         if self.topic_validator(topic=topic):
-            try:
-                if topic == "actor":
-                    item = self.get_or_create_item(model=Actor, actor_name=name)
-                    self.logger.info("Actor created: %s" % item.__repr__)
-                if topic == "extract status":
-                    item = self.get_or_create_item(
-                        model=ExtractStatus, extract_status_name=name
-                    )
-                    self.logger.info("Extract Status created: %s" % item.__repr__)
-                if topic == "error type":
-                    item = self.get_or_create_item(
-                        model=ErrorType, error_type_name=name
-                    )
-                    self.logger.info("Error Type created: %s" % item.__repr__)
-                if topic == "process type":
-                    item = self.get_or_create_item(
-                        model=ProcessType, process_type_name=name
-                    )
-                    self.logger.info("Process Type created: %s" % item.__repr__)
-                if topic == "process status":
-                    item = self.get_or_create_item(
-                        model=ProcessStatus, process_status_name=name
-                    )
-                    self.logger.info("Process Status created: %s" % item.__repr__)
-                if topic == "source":
-                    item = self.get_or_create_item(model=Source, source_name=name)
-                    self.logger.info("Source created: %s" % item.__repr__)
-                if topic == "tool":
-                    item = self.get_or_create_item(model=Tool, tool_name=name)
-                    self.logger.info("Tool created: %s" % item.__repr__)
-            finally:
+
+            if topic == "actor":
+                item = self.get_or_create_item(model=Actor, actor_name=name)
+                self.logger.info("Actor created: %s" % item.__repr__)
+
+            elif topic == "extract status":
+                item = self.get_or_create_item(
+                    model=ExtractStatus, extract_status_name=name
+                )
+                self.logger.info("Extract Status created: %s" % item.__repr__)
+
+            elif topic == "error type":
+                item = self.get_or_create_item(model=ErrorType, error_type_name=name)
+                self.logger.info("Error Type created: %s" % item.__repr__)
+
+            elif topic == "process dependency":
+                parent_process = self.get_or_create_item(
+                    model=Process, process_name=parent, create=False
+                )
+                child_process = self.get_or_create_item(
+                    model=Process, process_name=child, create=False
+                )
+
+                item = self.get_or_create_item(
+                    model=ProcessDependency,
+                    parent_process_id=parent_process.process_id,
+                    child_process_id=child_process.process_id,
+                )
+
+                self.logger.info("Process Dependency created: %s" % item.__repr__)
+
+            elif topic == "process type":
+                item = self.get_or_create_item(
+                    model=ProcessType, process_type_name=name
+                )
+                self.logger.info("Process Type created: %s" % item.__repr__)
+
+            elif topic == "process status":
+                item = self.get_or_create_item(
+                    model=ProcessStatus, process_status_name=name
+                )
+                self.logger.info("Process Status created: %s" % item.__repr__)
+
+            elif topic == "source":
+                item = self.get_or_create_item(model=Source, source_name=name)
+                self.logger.info("Source created: %s" % item.__repr__)
+
+            elif topic == "tool":
+                item = self.get_or_create_item(model=Tool, tool_name=name)
+                self.logger.info("Tool created: %s" % item.__repr__)
+
+            else:
                 ClickException("Invalid topic type.").show()
 
                 self.logger.error("Invalid topic type.")
@@ -218,13 +248,17 @@ class DataStore:
 
         return item
 
-    def topic_deleter(self, topic, name):
+    def topic_deleter(self, topic, name, parent=None, child=None):
         """
         For the command line tool, validate that the topic name is not a default value and if not, delete it.
         :param topic: The SQLAlchemy object type
         :type topic: SQLAlchemy object
         :param name: Name of the item to be deleted.
         :type name: string
+        :param parent: The parent process' name, if deleting a process dependency
+        :type parent: string
+        :param child: The child process' name, if deleting a process dependency
+        :type child: string
         :return:
         """
         item_delete = False
@@ -251,6 +285,26 @@ class DataStore:
                     ErrorType.error_type_name == name
                 ).delete()
                 self.logger.info("%s %s deleted." % (topic, name))
+            elif topic == "process dependency":
+                item_delete = True
+
+                parent_process = self.get_or_create_item(
+                    model=Process, process_name=parent, create=False
+                )
+
+                child_process = self.get_or_create_item(
+                    model=Process, process_name=child, create=False
+                )
+
+                item = self.get_or_create_item(
+                    model=ProcessDependency,
+                    parent_process_id=parent_process.process_id,
+                    child_process_id=child_process.process_id,
+                )
+
+                self.session.delete(item)
+
+                self.logger.info("%s %s - %s deleted." % (topic, parent, child))
 
             elif topic == "process type" and name not in preload_process_types:
                 item_delete = True
@@ -290,6 +344,8 @@ class DataStore:
 
         if item_delete:
             self.session.commit()
+
+        return "blarg"
 
     def topic_updater(self, topic, initial_name, name):
         """
@@ -389,6 +445,7 @@ class DataStore:
             "actor",
             "error type",
             "extract status",
+            "process dependency",
             "process status",
             "process type",
             "source",
@@ -453,94 +510,85 @@ class DataStore:
             raise Exception(errors)
 
         if data_store_type in supported_data_stores:
-            engine = ""
-            meta = ""
-            session = ""
+
             self.logger.info("Data store is supported.")
+            self.logger.info("Data store is %s" % data_store_type)
 
-            if data_store_type in relational_stores:
+            if (
+                data_store_type == "postgresql"
+                or data_store_type == "oracle"
+                or data_store_type == "snowflake"
+            ):
 
-                self.logger.info("Data store is relational.")
-                self.logger.info("Data store is %s" % data_store_type)
-
-                if (
-                    data_store_type == "postgresql"
-                    or data_store_type == "oracle"
-                    or data_store_type == "snowflake"
-                ):
-
-                    engine = create_engine(
-                        data_store_type
-                        + "://"
-                        + data_store_username
-                        + ":"
-                        + data_store_password
-                        + "@"
-                        + data_store_host
-                        + "/"
-                        + data_store_name
-                    )
-
-                elif data_store_type == "mysql":
-
-                    engine = create_engine(
-                        "mysql+pymysql://"
-                        + data_store_username
-                        + ":"
-                        + data_store_password
-                        + "@"
-                        + data_store_host
-                        + "/"
-                        + data_store_name
-                    )
-                elif data_store_type == "mssql":
-
-                    engine = create_engine(
-                        "mssql+pymssql://"
-                        + data_store_username
-                        + ":"
-                        + data_store_password
-                        + "@"
-                        + data_store_host
-                        + "/"
-                        + data_store_name
-                    )
-
-                else:
-                    self.logger.error("Data store type valid but not configured.")
-                    raise Exception("Data store type valid but not configured.")
-
-                self.logger.info(
-                    "Attempting to connect to data store %s, found at %s:%s"
-                    % (data_store_name, data_store_host, data_store_port)
+                engine = create_engine(
+                    data_store_type
+                    + "://"
+                    + data_store_username
+                    + ":"
+                    + data_store_password
+                    + "@"
+                    + data_store_host
+                    + "/"
+                    + data_store_name
                 )
 
-                if database_exists(engine.url):
+            elif data_store_type == "mysql":
 
-                    self.logger.info("Data store exists.  Continuing to work.")
+                engine = create_engine(
+                    "mysql+pymysql://"
+                    + data_store_username
+                    + ":"
+                    + data_store_password
+                    + "@"
+                    + data_store_host
+                    + "/"
+                    + data_store_name
+                )
+            elif data_store_type == "mssql":
 
-                else:
+                engine = create_engine(
+                    "mssql+pymssql://"
+                    + data_store_username
+                    + ":"
+                    + data_store_password
+                    + "@"
+                    + data_store_host
+                    + "/"
+                    + data_store_name
+                )
 
-                    self.logger.error(
-                        "Data store does not exist.  Please create and try again."
-                    )
-                    raise Exception(
-                        "Data store does not exist.  Please create and try again."
-                    )
+            else:
+                self.logger.error("Data store type valid but not configured.")
+                raise Exception("Data store type valid but not configured.")
 
-                session = sessionmaker(bind=engine)
+            self.logger.info(
+                "Attempting to connect to data store %s, found at %s:%s"
+                % (data_store_name, data_store_host, data_store_port)
+            )
 
-                session = session(expire_on_commit=False)
+            if database_exists(engine.url):
 
-                if data_store_type == "postgresql":
-                    session.execute("SET search_path TO %s" % data_store_name)
-                elif data_store_type == "mysql":
-                    session.execute("USE %s" % data_store_name)
+                self.logger.info("Data store exists.  Continuing to work.")
 
-                meta = MetaData(schema="process_tracking")
+            else:
 
-            elif data_store_type in nonrelational_stores:
-                session = ""
+                self.logger.error(
+                    "Data store does not exist.  Please create and try again."
+                )
+                raise Exception(
+                    "Data store does not exist.  Please create and try again."
+                )
+
+            session = sessionmaker(bind=engine)
+
+            session = session(expire_on_commit=False)
+
+            if data_store_type == "postgresql":
+                session.execute("SET search_path TO %s" % data_store_name)
+            elif data_store_type == "mysql":
+                session.execute("USE %s" % data_store_name)
+
+            meta = MetaData(schema="process_tracking")
 
             data_store = dict()
             data_store["engine"] = engine
