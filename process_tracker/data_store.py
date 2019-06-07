@@ -28,7 +28,7 @@ preload_extract_status_types = [
 ]
 preload_process_status_types = ["running", "completed", "failed"]
 preload_process_types = ["extract", "load"]
-preload_system_keys = [{"key": "version", "value": "0.1.0"}]
+preload_system_keys = [{"key": "version", "value": "0.2.0"}]
 
 relational_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
 nonrelational_stores = []
