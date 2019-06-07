@@ -98,6 +98,20 @@ class ProcessTracker:
 
         self.process_tracking_run = self.register_new_process_run()
 
+    @staticmethod
+    def bulk_change_extract_status(extracts, extract_status):
+        """
+        Given a set of extract objects, update the extract process record to reflect the association and updated status
+        as well as the extract record's' status.
+        :param extracts: List of Extract SQLAlchemy objects to be bulk updated.
+        :param extract_status: The status to change the extract files to.
+        :type extract_status: str
+        :return:
+        """
+
+        for extract in extracts:
+            extract.change_extract_status(new_status=extract_status)
+
     def change_run_status(self, new_status, end_date=None):
         """
         Change a process tracking run record from 'running' to another status.
@@ -155,6 +169,8 @@ class ProcessTracker:
             .all()
         )
 
+        self.logger.info("Returning extract files by filename.")
+
         return process_files
 
     def find_ready_extracts_by_location(self, location_name=None, location_path=None):
@@ -195,6 +211,7 @@ class ProcessTracker:
                 "A location name or path must be provided.  Please try again."
             )
 
+        self.logger.info("Returning extract files by location.")
         return process_files
 
     def find_ready_extracts_by_process(self, extract_process_name):

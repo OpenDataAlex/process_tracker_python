@@ -112,6 +112,46 @@ class TestProcessTracker(unittest.TestCase):
         self.session.query(ErrorType).delete()
         self.session.commit()
 
+    def test_bulk_change_extract_status(self):
+        """
+        Testing that bulk change occurs when extracts provided.
+        :return:
+        """
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename3.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        extracts = [extract, extract2]
+
+        self.process_tracker.bulk_change_extract_status(
+            extracts=extracts, extract_status="loading"
+        )
+
+        given_result = (
+            self.session.query(ExtractProcess)
+            .join(ExtractStatus)
+            .filter(
+                ExtractProcess.process_tracking_id
+                == self.process_tracker.process_tracking_run.process_tracking_id
+            )
+            .filter(ExtractStatus.extract_status_name == "loading")
+            .count()
+        )
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
+
     def test_change_status_invalid_type(self):
         """
         Testing that if an invalid process status type is passed, it will trigger an exception.
