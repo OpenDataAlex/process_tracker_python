@@ -20,25 +20,31 @@ def main():
     """
 
 
-# @main.command()
-# @click.option('-o', '--overwrite', default=False, help='Wipe out the current data store and rebuild'
-#                                                        ', starting from fresh.')
-# def setup(overwrite):
-#     """
-#     Initialize ProcessTracker's data store with user provided input.  If already in place, do nothing unless overwrite
-#     set to True.
-#     :return:
-#     """
-#     click.echo('Attempting to initialize data store...')
-#     data_store.initialize_data_store(overwrite=overwrite)
+@main.command()
+@click.option(
+    "-o",
+    "--overwrite",
+    default=False,
+    help="Wipe out the current data store and rebuild" ", starting from fresh.",
+)
+def setup(overwrite=False):
+    """
+    Initialize ProcessTracker's data store with user provided input.  If already in place, do nothing unless overwrite
+    set to True.
+    :return:
+    """
+    click.echo("Attempting to initialize data store...")
+    data_store.initialize_data_store(overwrite=overwrite)
 
 
-# @main.command()
-# def upgrade():
-#     """
-#     Upgrade ProcessTracker if data store on previous version.
-#     :return:
-#     """
+@main.command()
+def upgrade():
+    """
+    Upgrade ProcessTracker if data store on previous version.
+    :return:
+    """
+    click.echo("Verifying version installed on data store vs package...")
+    data_store.determine_versions()
 
 
 @main.command()

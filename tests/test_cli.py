@@ -1,7 +1,10 @@
 import logging
+import os
+import time
 import unittest
 
 from click.testing import CliRunner
+import sqlalchemy
 
 from process_tracker.cli import main
 from process_tracker.data_store import DataStore
@@ -20,7 +23,7 @@ from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
 
-class TestCli(unittest.TestCase):
+class TestCliDataStore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger(__name__)
@@ -31,28 +34,57 @@ class TestCli(unittest.TestCase):
         self.session = self.data_store.session
         self.runner = CliRunner()
 
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
+    def test_setup_delete(self):
+        """
+        Testing that data store is deleted if delete is triggered.
+        :return:
+        """
+        self.data_store.delete_data_store()
+        table_names = sqlalchemy.inspect(self.data_store.engine).get_table_names()
+        is_empty = table_names == []
+
+        self.assertTrue(True, is_empty)
+
     # def test_setup_overwrite(self):
     #     """
     #     Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
     #     :return:
     #     """
-    #     self.runner.invoke(main, 'setup -o True')
+    #     self.runner.invoke(main, "setup -o True")
     #
     #     instance = self.session.query(Actor).count()
     #
     #     self.assertEqual(0, instance)
-    #
-    # def test_setup_already_exists(self):
-    #     """
-    #     Testing that if data store is already set up, do not attempt to initialize.
-    #     :return:
-    #     """
-    #
-    #     result = self.runner.invoke(main, ['setup'])
-    #
-    #     expected_result = 'It appears the system has already been setup.'
-    #
-    #     self.assertIn(expected_result, result.output)
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
+    def test_setup_initialize(self):
+        """
+        Testing that if data store is not already set up, create the data store and initialize required data.
+        :return:
+        """
+        result = self.runner.invoke(main, "setup")
+
+        instance = self.session.query(ProcessStatus).count()
+
+        self.assertEqual(3, instance)
+
+
+class TestCli(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger(__name__)
+        cls.logger.addHandler(console)
+
+    def setUp(self):
+        self.data_store = DataStore()
+        self.session = self.data_store.session
+        self.runner = CliRunner()
 
     def test_create_actor(self):
         """

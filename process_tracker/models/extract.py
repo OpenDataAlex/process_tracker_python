@@ -13,9 +13,12 @@ from process_tracker.models.model_base import Base
 class ExtractStatus(Base):
 
     __tablename__ = "extract_status_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
     extract_status_id = Column(
-        Integer, Sequence("extract_status_lkup_extract_status_id_seq"), primary_key=True
+        Integer,
+        Sequence("extract_status_lkup_extract_status_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     extract_status_name = Column(String(75), nullable=False, unique=True)
 
@@ -32,14 +35,19 @@ class ExtractStatus(Base):
 class Extract(Base):
 
     __tablename__ = "extract_tracking"
+    __table_args__ = {"schema": "process_tracker"}
 
     extract_id = Column(
-        Integer, Sequence("extract_tracking_extract_id_seq"), primary_key=True
+        Integer,
+        Sequence("extract_tracking_extract_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     extract_filename = Column(String(750), nullable=False, unique=True)
-    extract_location_id = Column(Integer, ForeignKey("location_lkup.location_id"))
+    extract_location_id = Column(
+        Integer, ForeignKey("process_tracker.location_lkup.location_id")
+    )
     extract_status_id = Column(
-        Integer, ForeignKey("extract_status_lkup.extract_status_id")
+        Integer, ForeignKey("process_tracker.extract_status_lkup.extract_status_id")
     )
     extract_registration_date_time = Column(
         DateTime, nullable=False, default=datetime.now()
@@ -71,12 +79,17 @@ class Extract(Base):
 class ExtractDependency(Base):
 
     __tablename__ = "extract_dependency"
+    __table_args__ = {"schema": "process_tracker"}
 
     parent_extract_id = Column(
-        Integer, ForeignKey("extract_tracking.extract_id"), primary_key=True
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
     )
     child_extract_id = Column(
-        Integer, ForeignKey("extract_tracking.extract_id"), primary_key=True
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
     )
 
     child_extract = relationship("Extract", foreign_keys=[child_extract_id])
@@ -93,15 +106,20 @@ class ExtractDependency(Base):
 class ExtractProcess(Base):
 
     __tablename__ = "extract_process_tracking"
+    __table_args__ = {"schema": "process_tracker"}
 
     extract_tracking_id = Column(
-        Integer, ForeignKey("extract_tracking.extract_id"), primary_key=True
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
     )
     process_tracking_id = Column(
-        Integer, ForeignKey("process_tracking.process_tracking_id"), primary_key=True
+        Integer,
+        ForeignKey("process_tracker.process_tracking.process_tracking_id"),
+        primary_key=True,
     )
     extract_process_status_id = Column(
-        Integer, ForeignKey("extract_status_lkup.extract_status_id")
+        Integer, ForeignKey("process_tracker.extract_status_lkup.extract_status_id")
     )
     extract_process_event_date_time = Column(
         DateTime, nullable=False, default=datetime.now()
@@ -124,9 +142,12 @@ class ExtractProcess(Base):
 class LocationType(Base):
 
     __tablename__ = "location_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
     location_type_id = Column(
-        Integer, Sequence("location_type_lkup_location_type_id_seq"), primary_key=True
+        Integer,
+        Sequence("location_type_lkup_location_type_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     location_type_name = Column(String(25), unique=True, nullable=False)
 
@@ -143,13 +164,18 @@ class LocationType(Base):
 class Location(Base):
 
     __tablename__ = "location_lkup"
+    __table_args__ = {"schema": "process_tracker"}
 
     location_id = Column(
-        Integer, Sequence("location_lkup_location_id_seq"), primary_key=True
+        Integer,
+        Sequence("location_lkup_location_id_seq", schema="process_tracker"),
+        primary_key=True,
     )
     location_name = Column(String(750), nullable=False, unique=True)
     location_path = Column(String(750), nullable=False, unique=True)
-    location_type = Column(Integer, ForeignKey("location_type_lkup.location_type_id"))
+    location_type = Column(
+        Integer, ForeignKey("process_tracker.location_type_lkup.location_type_id")
+    )
 
     extracts = relationship("Extract")
 
