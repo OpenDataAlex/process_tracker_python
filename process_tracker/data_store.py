@@ -78,6 +78,14 @@ class DataStore:
                     "Table %s unable to be deleted.  Does it exist?" % table
                 )
 
+    def determine_versions(self):
+        """
+        Find the data store version and the package version and return them.
+        :return:
+        """
+
+        self.session.query(System.system_value).filter(System.system_key == "version")
+
     def get_or_create_item(self, model, create=True, **kwargs):
         """
         Testing if an entity instance exists or not.  If does, return entity key.  If not, create entity instance

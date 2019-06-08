@@ -37,12 +37,14 @@ def setup(overwrite=False):
     data_store.initialize_data_store(overwrite=overwrite)
 
 
-# @main.command()
-# def upgrade():
-#     """
-#     Upgrade ProcessTracker if data store on previous version.
-#     :return:
-#     """
+@main.command()
+def upgrade():
+    """
+    Upgrade ProcessTracker if data store on previous version.
+    :return:
+    """
+    click.echo("Verifying version installed on data store vs package...")
+    data_store.determine_versions()
 
 
 @main.command()

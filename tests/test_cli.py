@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 import unittest
 
@@ -33,6 +34,10 @@ class TestCliDataStore(unittest.TestCase):
         self.session = self.data_store.session
         self.runner = CliRunner()
 
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
     def test_setup_delete(self):
         """
         Testing that data store is deleted if delete is triggered.
@@ -54,7 +59,10 @@ class TestCliDataStore(unittest.TestCase):
     #     instance = self.session.query(Actor).count()
     #
     #     self.assertEqual(0, instance)
-
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
     def test_setup_initialize(self):
         """
         Testing that if data store is not already set up, create the data store and initialize required data.
