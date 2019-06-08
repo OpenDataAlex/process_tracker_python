@@ -3,6 +3,7 @@ import time
 import unittest
 
 from click.testing import CliRunner
+import sqlalchemy
 
 from process_tracker.cli import main
 from process_tracker.data_store import DataStore
@@ -32,20 +33,27 @@ class TestCli(unittest.TestCase):
         self.session = self.data_store.session
         self.runner = CliRunner()
 
+    def test_setup_delete(self):
+        """
+        Testing that data store is deleted if delete is triggered.
+        :return:
+        """
+        self.data_store.delete_data_store()
+        table_names = sqlalchemy.inspect(self.data_store.engine).get_table_names()
+        is_empty = table_names == []
+
+        self.assertTrue(True, is_empty)
+
     def test_setup_overwrite(self):
         """
         Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
         :return:
         """
-        self.data_store.get_or_create_item(model=Actor, actor_name="Testing Testor")
-        pre_delete = self.session.query(Actor).count()
-        time.sleep(1)
         self.runner.invoke(main, "setup -o True")
 
         instance = self.session.query(Actor).count()
 
         self.assertEqual(0, instance)
-        self.assertNotEqual(0, pre_delete)
 
     def test_setup_initialize(self):
         """

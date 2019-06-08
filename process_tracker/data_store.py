@@ -61,6 +61,23 @@ class DataStore:
         self.data_store_port = data_store["data_store_port"]
         self.data_store_name = data_store["data_store_name"]
 
+    def delete_data_store(self):
+        """
+        Initializes data store deletion, including wiping of all data within.
+        :return:
+        """
+
+        self.logger.warn("ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST")
+
+        for table in reversed(Base.metadata.sorted_tables):
+            try:
+                self.logger.info("Table will be deleted: %s" % table)
+                table.drop(self.engine)
+            except Exception:
+                self.logger.error(
+                    "Table %s unable to be deleted.  Does it exist?" % table
+                )
+
     def get_or_create_item(self, model, create=True, **kwargs):
         """
         Testing if an entity instance exists or not.  If does, return entity key.  If not, create entity instance
@@ -112,16 +129,12 @@ class DataStore:
         self.logger.info("Attempting to initialize Process Tracker data store.")
 
         if overwrite:
-            self.logger.warn(
-                "ALERT - DATA STORE TO BE OVERWRITTEN - ALL DATA WILL BE LOST"
-            )
-
-            for table in reversed(Base.metadata.sorted_tables):
-                self.logger.info("Table will be deleted: %s" % table)
-                table.drop(self.engine)
+            self.delete_data_store()
 
         self.logger.info("Data store initialization beginning.  Creating data store.")
-        Base.metadata.create_all(self.engine)
+        for table in Base.metadata.sorted_tables:
+            self.logger.info("Table will be created: %s" % table)
+            table.create(self.engine)
 
         self.logger.info("Setting up application defaults.")
 
