@@ -133,8 +133,11 @@ class DataStore:
 
         self.logger.info("Data store initialization beginning.  Creating data store.")
         for table in Base.metadata.sorted_tables:
-            self.logger.info("Table will be created: %s" % table)
-            table.create(self.engine)
+            try:
+                self.logger.info("Table will be created: %s" % table)
+                table.create(self.engine)
+            except Exception:
+                self.logger.error("Object %s already exists?" % table)
 
         self.logger.info("Setting up application defaults.")
 

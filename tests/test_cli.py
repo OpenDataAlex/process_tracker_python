@@ -22,7 +22,7 @@ from process_tracker.models.source import Source
 from process_tracker.models.tool import Tool
 
 
-class TestCli(unittest.TestCase):
+class TestCliDataStore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger(__name__)
@@ -44,16 +44,16 @@ class TestCli(unittest.TestCase):
 
         self.assertTrue(True, is_empty)
 
-    def test_setup_overwrite(self):
-        """
-        Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
-        :return:
-        """
-        self.runner.invoke(main, "setup -o True")
-
-        instance = self.session.query(Actor).count()
-
-        self.assertEqual(0, instance)
+    # def test_setup_overwrite(self):
+    #     """
+    #     Testing that if data store is already set up and overwrite is set to True, wipe and recreate the data store.
+    #     :return:
+    #     """
+    #     self.runner.invoke(main, "setup -o True")
+    #
+    #     instance = self.session.query(Actor).count()
+    #
+    #     self.assertEqual(0, instance)
 
     def test_setup_initialize(self):
         """
@@ -65,6 +65,18 @@ class TestCli(unittest.TestCase):
         instance = self.session.query(ProcessStatus).count()
 
         self.assertEqual(3, instance)
+
+
+class TestCli(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger(__name__)
+        cls.logger.addHandler(console)
+
+    def setUp(self):
+        self.data_store = DataStore()
+        self.session = self.data_store.session
+        self.runner = CliRunner()
 
     def test_create_actor(self):
         """
