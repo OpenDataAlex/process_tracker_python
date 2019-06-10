@@ -13,7 +13,7 @@ after_success:
 - coveralls
 before_script:
 - mkdir $HOME/.process_tracker
-- mv configs/${DB}_config.ini $HOME/.process_tracker/process_tracker_config.ini
+- if [[ -z "$DB" ]]; then mv configs/${DB}_config.ini $HOME/.process_tracker/process_tracker_config.ini; fi
 - if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_account_create.sql -U postgres; fi
 - if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres; fi
 - if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres; fi
@@ -26,8 +26,7 @@ env:
 jobs:
   include:
     - stage: deploy
-      env:
-        - DB=postgres
+      script: skip
       deploy:
         - provider: releases
           api_key:
