@@ -27,6 +27,8 @@ jobs:
   include:
     - stage: deploy
       script: skip
+      env:
+        - TRAVIS="true"
       deploy:
         - provider: releases
           api_key:
