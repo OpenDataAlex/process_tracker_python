@@ -20,13 +20,14 @@ before_script:
 - if [[ "$DB" == "mysql" ]]; then mysql -u root < dbscripts/mysql_account_create.sql; fi
 - if [[ "$DB" == "mysql" ]]; then mysql -u root < dbscripts/mysql_process_tracker.sql; fi
 - if [[ "$DB" == "mysql" ]]; then mysql -u root < dbscripts/mysql_process_tracker_defaults.sql; fi
+env:
+  - DB=postgres TRAVIS="true"
+  - DB=mysql TRAVIS="true"
 jobs:
   include:
-    - stage: test
-      env:
-        - DB=postgres TRAVIS="true"
-        - DB=mysql TRAVIS="true"
     - stage: deploy
+      env:
+        - DB=postgres
       deploy:
         - provider: releases
           api_key:
