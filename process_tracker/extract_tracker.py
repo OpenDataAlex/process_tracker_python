@@ -143,9 +143,12 @@ class ExtractTracker:
 
         self.logger.info("Extract %s dependency added." % dependency_type)
 
-    def change_extract_status(self, new_status):
+    def change_extract_status(self, new_status, extracts=None):
         """
         Change an extract record status.
+        :param new_status: The name of the status the extract is to be updated to.
+        :type new_status: str
+        :param extracts: List of Extract SQLAlchemy objects. Used for dependency check.
         :return:
         """
         status_date = datetime.now()
@@ -153,7 +156,7 @@ class ExtractTracker:
 
             if new_status == "loading":
 
-                self.extract_dependency_check()
+                self.extract_dependency_check(extracts=extracts)
 
             self.logger.info("Setting extract status to %s" % new_status)
 
@@ -173,46 +176,86 @@ class ExtractTracker:
                 "Please add the status to extract_status_lkup" % new_status
             )
 
-    def extract_dependency_check(self):
+    def extract_dependency_check(self, extracts=None):
         """
         Determine if the extract file has any unloaded dependencies before trying to load the file.
+        :param extracts: List of ExtractTracking SQLAlchemy objects, provided if bulk updating status.
         :return:
         """
-        child_extract = aliased(Extract)
-        parent_extract = aliased(Extract)
+        child = aliased(Extract)
+        parent = aliased(Extract)
+        dependency_hold = 0
 
-        dependency_hold = (
-            self.session.query(ExtractDependency)
-            .join(
-                parent_extract,
-                ExtractDependency.parent_extract_id == parent_extract.extract_id,
-            )
-            .join(
-                child_extract,
-                ExtractDependency.child_extract_id == child_extract.extract_id,
-            )
-            .join(Extract, Extract.extract_id == parent_extract.extract_id)
-            .join(
-                ExtractStatus,
-                ExtractStatus.extract_status_id == Extract.extract_status_id,
-            )
-            .filter(child_extract.extract_id == self.extract.extract_id)
-            .filter(
-                ExtractStatus.extract_status_name.in_(
-                    ("loading", "initializing", "ready")
+        if extracts is not None:
+
+            parent_files_hold = (
+                self.session.query(parent)
+                .join(parent, ExtractDependency.parent_extract)
+                .join(child, ExtractDependency.child_extract)
+                .join(Extract, Extract.extract_id == parent.extract_id)
+                .join(
+                    ExtractStatus,
+                    ExtractStatus.extract_status_id == Extract.extract_status_id,
+                )
+                .filter(child.extract_id == self.extract.extract_id)
+                .filter(
+                    ExtractStatus.extract_status_name.in_(
+                        ("loading", "initializing", "ready")
+                    )
                 )
             )
-            .count()
-        )
+            extract_names = list()
+            for extract in extracts:
+                self.logger.debug(
+                    "Extracts being compared to %s" % extract.extract.full_filepath()
+                )
+                extract_names.append(extract.extract.full_filepath())
+
+            for extract in parent_files_hold:
+
+                self.logger.debug("Testing if %s is in extracts." % extract)
+
+                if extract.full_filepath() not in extract_names:
+                    self.logger.debug("Extract not found.")
+                    dependency_hold += 1
+
+            self.logger.debug(
+                "We found %s dependencies that will block using this extract."
+                % dependency_hold
+            )
+        else:
+            dependency_hold = (
+                self.session.query(ExtractDependency)
+                .join(parent, ExtractDependency.parent_extract)
+                .join(child, ExtractDependency.child_extract)
+                .join(Extract, Extract.extract_id == parent.extract_id)
+                .join(
+                    ExtractStatus,
+                    ExtractStatus.extract_status_id == Extract.extract_status_id,
+                )
+                .filter(child.extract_id == self.extract.extract_id)
+                .filter(
+                    ExtractStatus.extract_status_name.in_(
+                        ("loading", "initializing", "ready")
+                    )
+                )
+            ).count()
+
+            self.logger.debug(
+                "We found %s dependencies that will block using this extract."
+                % dependency_hold
+            )
+
+        self.logger.debug("Dependency hold is %s" % dependency_hold)
 
         if dependency_hold > 0:
             self.logger.error(
-                "Extract files that this extract file is dependent on have not been loaded, are being "
-                "created, or are in the process of loading."
+                "Extract files that extract %s is dependent on have not been loaded, are being "
+                "created, or are in the process of loading." % self.full_filename
             )
             raise Exception(
-                "Extract files that this extract file is dependent on have not been loaded, are being "
-                "created, or are in the process of loading."
+                "Extract files that extract %s is dependent on have not been loaded, are being "
+                "created, or are in the process of loading." % self.full_filename
             )
 
         else:

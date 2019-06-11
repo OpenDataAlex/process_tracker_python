@@ -64,11 +64,10 @@ class Extract(Base):
 
     def __repr__(self):
 
-        return "<Extract id=%s, filename=%s, location=%s, status=%s>" % (
+        return "<Extract id=%s, filename=%s, location=%s>" % (
             self.extract_id,
             self.extract_filename,
             self.extract_location_id,
-            self.extract_status_id,
         )
 
     def full_filepath(self):

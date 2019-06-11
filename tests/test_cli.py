@@ -38,6 +38,7 @@ class TestCliDataStore(unittest.TestCase):
         "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
         "Skipping this test on Travis CI.",
     )
+    @unittest.skip("Causes a deadlock when run in the suite.")
     def test_setup_delete(self):
         """
         Testing that data store is deleted if delete is triggered.
@@ -63,6 +64,7 @@ class TestCliDataStore(unittest.TestCase):
         "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
         "Skipping this test on Travis CI.",
     )
+    @unittest.skip("Causes a deadlock when run in the suite.")
     def test_setup_initialize(self):
         """
         Testing that if data store is not already set up, create the data store and initialize required data.

@@ -43,28 +43,6 @@ class TestProcessTracker(unittest.TestCase):
         cls.session = cls.data_store.session
         cls.data_store_type = cls.data_store.data_store_type
 
-        # cls.client = boto3.client("s3"
-        #                           , region_name="us_east-1"
-        #                           , aws_access_key_id="fake_access_key"
-        #                           , aws_secret_access_key="fake_secret_key")
-        #
-        # try:
-        #     cls.s3 = boto3.resource("s3"
-        #                         , region_name="us_east-1"
-        #                         , aws_access_key_id="fake_access_key"
-        #                         , aws_secret_access_key="fake_secret_key")
-        #     cls.s3.meta.client.head_bucket(Bucket=test_bucket)
-        # except botocore.exceptions.ClientError:
-        #     pass
-        # else:
-        #     err = "{bucket} should not exist.".format(bucket=test_bucket)
-        #     raise EnvironmentError(err)
-        #
-        # cls.client.create_bucket(Bucket=test_bucket)
-        # current_dir = os.path.dirname(__file__)
-        # fixtures_dir = os.path.join(current_dir, "fixtures")
-        # _upload_fixtures(test_bucket, fixtures_dir)
-
     @classmethod
     def tearDownClass(cls):
         cls.session.query(Location).delete()
@@ -131,10 +109,10 @@ class TestProcessTracker(unittest.TestCase):
             location_path="/home/test/extract_dir",
         )
 
-        extracts = [extract, extract2]
+        extract_trackers = [extract, extract2]
 
         self.process_tracker.bulk_change_extract_status(
-            extracts=extracts, extract_status="loading"
+            extracts=extract_trackers, extract_status="loading"
         )
 
         given_result = (
@@ -1010,11 +988,17 @@ class TestProcessTracker(unittest.TestCase):
             Process.process_id == process_tracking_run[0].process_id
         )
 
+        fail_date = process[0].last_failed_run_date_time
+        fail_date = fail_date.replace(tzinfo=None)
+
         given_result = [
             process_tracking_run[0].process_status_id,
             process_tracking_run[0].process_run_end_date_time,
-            process[0].last_failed_run_date_time,
+            fail_date,
         ]
+
+        print(self.provided_end_date)
+        print(process[0].last_failed_run_date_time)
 
         expected_result = [
             self.process_tracker.process_status_failed,

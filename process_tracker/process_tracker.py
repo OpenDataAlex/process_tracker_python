@@ -104,13 +104,14 @@ class ProcessTracker:
         """
         Given a set of extract objects, update the extract process record to reflect the association and updated status
         as well as the extract record's' status.
-        :param extracts: List of Extract SQLAlchemy objects to be bulk updated.
+        :param extracts: List of ExtractTracking SQLAlchemy objects to be bulk updated.
         :param extract_status: The status to change the extract files to.
         :type extract_status: str
         :return:
         """
 
         for extract in extracts:
+
             extract.change_extract_status(new_status=extract_status)
 
     def change_run_status(self, new_status, end_date=None):
@@ -320,7 +321,7 @@ class ProcessTracker:
 
         if fail_run:
             self.change_run_status(new_status="failed", end_date=end_date)
-            self.session.commit()
+
             raise Exception("Process halting.  An error triggered the process to fail.")
 
     def register_extracts_by_location(self, location_path, location_name=None):

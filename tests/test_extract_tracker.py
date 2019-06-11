@@ -309,9 +309,70 @@ class TestExtractTracker(unittest.TestCase):
             dependent_extract.extract_dependency_check()
 
         return self.assertTrue(
-            "Extract files that this extract file is dependent on have not been loaded, are being "
-            "created, or are in the process of loading." in str(context.exception)
+            "Extract files that extract /home/test/extract_dir/Dependent File.csv is dependent on have not been loaded,"
+            " are being created, or are in the process of loading."
+            in str(context.exception)
         )
+
+    def test_extract_dependency_check_bulk(self):
+        """
+        Testing that if no dependencies are in a state that doesn't stop an extract from being loaded, then the extract
+        is loaded.
+        :return:
+        """
+        dependent_extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Dependent File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+        dependency = ExtractDependency(
+            child_extract_id=dependent_extract.extract.extract_id,
+            parent_extract_id=self.extract.extract.extract_id,
+        )
+
+        self.session.add(dependency)
+        self.session.commit()
+        self.extract.change_extract_status("loaded")
+
+        extract_trackers = [dependent_extract, self.extract]
+
+        given_result = dependent_extract.extract_dependency_check(
+            extracts=extract_trackers
+        )
+
+        expected_result = False
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_extract_dependency_check_bulk_in_list(self):
+        """
+        Testing that even if dependencies are in a state that stops an extract from being loaded, the extract status can
+        still be changed because it is in the bulk extract list.
+        :return:
+        """
+        dependent_extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Dependent File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+        dependency = ExtractDependency(
+            child_extract_id=dependent_extract.extract.extract_id,
+            parent_extract_id=self.extract.extract.extract_id,
+        )
+
+        self.session.add(dependency)
+        self.session.commit()
+        self.extract.change_extract_status("loading")
+
+        extracts = [dependent_extract, self.extract]
+
+        given_result = dependent_extract.extract_dependency_check(extracts=extracts)
+
+        expected_result = False
+
+        self.assertEqual(expected_result, given_result)
 
     def test_location_name_provided(self):
         """
