@@ -46,6 +46,7 @@ class TestExtractTracker(unittest.TestCase):
         cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
+        cls.session.close()
 
     def setUp(self):
         """

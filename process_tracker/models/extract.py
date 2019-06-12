@@ -60,6 +60,7 @@ class Extract(Base):
     extract_load_record_count = Column(Integer, nullable=True)
 
     extract_process = relationship("ExtractProcess", back_populates="process_extracts")
+    extract_status = relationship("ExtractStatus", foreign_keys=[extract_status_id])
     locations = relationship("Location", foreign_keys=[extract_location_id])
 
     def __repr__(self):

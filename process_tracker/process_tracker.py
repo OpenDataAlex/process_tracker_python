@@ -150,22 +150,29 @@ class ProcessTracker:
 
             self.session.commit()
 
+            if (
+                self.process_status_types[new_status] == self.process_status_complete
+            ) or (self.process_status_types[new_status] == self.process_status_failed):
+                self.session.close()
+
         else:
             raise Exception("The provided status type %s is invalid." % new_status)
 
-    def find_ready_extracts_by_filename(self, filename):
+    def find_extracts_by_filename(self, filename, status="ready"):
         """
         For the given filename, or filename part, find all matching extracts that are ready for processing.
-
-        :param filename:
-        :return:
+        :param filename: Filename or part of filename.
+        :type filename: str
+        :param status: Name of the status type for files being searched.  Default 'ready'.
+        :type status: str
+        :return: List of Extract SQLAlchemy objects.
         """
 
         process_files = (
             self.session.query(Extract)
             .join(ExtractStatus)
             .filter(Extract.extract_filename.like("%" + filename + "%"))
-            .filter(ExtractStatus.extract_status_name == "ready")
+            .filter(ExtractStatus.extract_status_name == status)
             .order_by(Extract.extract_registration_date_time)
             .order_by(Extract.extract_id)
             .all()
@@ -175,14 +182,18 @@ class ProcessTracker:
 
         return process_files
 
-    def find_ready_extracts_by_location(self, location_name=None, location_path=None):
+    def find_extracts_by_location(
+        self, location_name=None, location_path=None, status="ready"
+    ):
         """
         For the given location path or location name, find all matching extracts that are ready for processing
         :param location_name: The name of the location
         :type location_name: str
         :param location_path: The path of the location
         :type location_path: str
-        :return: List of extract files that are in 'ready' state'.
+        :param status: Name of the status type for files being searched.  Default 'ready'.
+        :type status: str
+        :return: List of Extract SQLAlchemy objects.
         """
 
         if location_path is not None:
@@ -190,7 +201,7 @@ class ProcessTracker:
                 self.session.query(Extract)
                 .join(Location)
                 .join(ExtractStatus)
-                .filter(ExtractStatus.extract_status_name == "ready")
+                .filter(ExtractStatus.extract_status_name == status)
                 .filter(Location.location_path == location_path)
                 .order_by(Extract.extract_registration_date_time)
                 .order_by(Extract.extract_id)
@@ -201,7 +212,7 @@ class ProcessTracker:
                 self.session.query(Extract)
                 .join(Location)
                 .join(ExtractStatus)
-                .filter(ExtractStatus.extract_status_name == "ready")
+                .filter(ExtractStatus.extract_status_name == status)
                 .filter(Location.location_name == location_name)
                 .order_by(Extract.extract_registration_date_time)
                 .order_by(Extract.extract_id)
@@ -218,10 +229,14 @@ class ProcessTracker:
         self.logger.info("Returning extract files by location.")
         return process_files
 
-    def find_ready_extracts_by_process(self, extract_process_name):
+    def find_extracts_by_process(self, extract_process_name, status="ready"):
         """
         For the given named process, find the extracts that are ready for processing.
-        :return: List of OS specific filepaths with filenames.
+        :param extract_process_name: Name of the process that is associated with extracts
+        :type extract_process_name: str
+        :param status: Name of the status type for files being searched.  Default 'ready'.
+        :type status: str
+        :return: List of Extract SQLAlchemy objects.
         """
 
         process_files = (
@@ -238,7 +253,7 @@ class ProcessTracker:
             .join(Process)
             .filter(
                 Process.process_name == extract_process_name,
-                ExtractStatus.extract_status_name == "ready",
+                ExtractStatus.extract_status_name == status,
             )
             .order_by(Extract.extract_registration_date_time)
             .all()

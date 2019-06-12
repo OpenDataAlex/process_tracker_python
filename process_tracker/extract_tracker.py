@@ -49,9 +49,10 @@ class ExtractTracker:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config["DEFAULT"]["log_level"])
 
-        self.data_store = DataStore()
-        self.session = self.data_store.session
         self.process_run = process_run
+
+        self.data_store = self.process_run.data_store
+        self.session = self.process_run.session
 
         self.filename = filename
 
