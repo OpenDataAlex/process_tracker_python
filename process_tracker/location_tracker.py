@@ -3,7 +3,6 @@
 import logging
 from os.path import basename, normpath
 
-from process_tracker.data_store import DataStore
 from process_tracker.utilities.logging import console
 from process_tracker.utilities.settings import SettingsManager
 
@@ -11,14 +10,18 @@ from process_tracker.models.extract import Location, LocationType
 
 
 class LocationTracker:
-    def __init__(self, location_path, location_name=None):
+    def __init__(self, location_path, location_name=None, data_store=None):
         config = SettingsManager().config
 
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config["DEFAULT"]["log_level"])
         self.logger.addHandler(console)
 
-        self.data_store = DataStore()
+        if data_store is None:
+            self.logger.error("Data store is not set.")
+            raise Exception("Data store is not set.")
+        else:
+            self.data_store = data_store
 
         self.location_path = location_path.lower()
 

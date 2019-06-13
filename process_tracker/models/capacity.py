@@ -2,10 +2,10 @@
 # Models for Process entities
 
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Sequence, String
+from sqlalchemy import Column, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
 
-from process_tracker.models.model_base import default_date, Base
+from process_tracker.models.model_base import Base
 
 
 class Cluster(Base):
@@ -26,6 +26,8 @@ class Cluster(Base):
     cluster_current_memory_usage = Column(Integer)
     cluster_current_process_usage = Column(Integer)
 
+    process_clusters = relationship("ClusterProcess")
+
     def __repr__(self):
 
         return "<Cluster (name=%s)>" % self.cluster_name
@@ -43,8 +45,8 @@ class ClusterProcess(Base):
     )
     process_id = Column(Integer, ForeignKey("process_tracker.process.process_id"))
 
-    cluster_processes = relationship("Process", foreign_key=[process_id])
-    process_clusters = relationship("Cluster", foreign_key=[cluster_id])
+    processes = relationship("Process", back_populates="cluster_processes")
+    clusters = relationship("Cluster", back_populates="process_clusters")
 
     def __repr__(self):
 

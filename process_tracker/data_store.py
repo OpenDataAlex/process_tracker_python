@@ -10,6 +10,7 @@ from process_tracker.utilities.settings import SettingsManager
 
 from process_tracker.models.model_base import Base
 from process_tracker.models.actor import Actor
+from process_tracker.models.capacity import Cluster, ClusterProcess
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
     ErrorType,
@@ -182,7 +183,18 @@ class DataStore:
 
         self.logger.debug("Finished the initialization check.")
 
-    def topic_creator(self, topic, name, parent=None, child=None):
+    def topic_creator(
+        self,
+        topic,
+        name,
+        parent=None,
+        child=None,
+        max_processing=None,
+        processing_unit=None,
+        max_memory=None,
+        memory_unit=None,
+        cluster=None,
+    ):
         """
         For the command line tool, validate the topic and create the new instance.
         :param topic: The name of the topic.
@@ -191,8 +203,19 @@ class DataStore:
         :type name: string
         :param parent: The parent process' name, if creating a process dependency
         :type parent: string
-        :param child: The child process' name, if creating a process dependency
+        :param child: The child process' name, if creating a process dependency.For cluster/process relationships, the
+                      name of the process.
         :type child: string
+        :param max_processing: For performance clusters, the maximum processing ability allocated to the cluster
+        :type max_processing: string
+        :param max_memory: For performance clusters, the maximum memory allocated to the cluster
+        :type max_memory: string
+        :param processing_unit: For performance clusters, the unit of processing ability allocated to the cluster
+        :type processing_unit: string
+        :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
+        :type memory_unit: string
+        :param cluster: For cluster/process relationships, the name of the cluster.
+        :type cluster: string
         :return:
         """
         self.logger.info("Attempting to create %s item: %s" % (topic, name))
@@ -202,6 +225,33 @@ class DataStore:
             if topic == "actor":
                 item = self.get_or_create_item(model=Actor, actor_name=name)
                 self.logger.info("Actor created: %s" % item.__repr__)
+
+            elif topic == "cluster":
+                item = self.get_or_create_item(
+                    model=Cluster,
+                    cluster_name=name,
+                    cluster_max_memory=max_memory,
+                    cluster_max_memory_unit=memory_unit,
+                    cluster_max_processing=max_processing,
+                    cluster_max_processing_unit=processing_unit,
+                )
+                self.logger.info("Cluster created: %s" % item.__repr__)
+
+            elif topic == "cluster process":
+                cluster = self.get_or_create_item(
+                    model=Cluster, create=False, cluster_name=cluster
+                )
+                process = self.get_or_create_item(
+                    model=Process, create=False, process_name=child
+                )
+
+                item = self.get_or_create_item(
+                    model=ClusterProcess,
+                    cluster_id=cluster.cluster_id,
+                    process_id=process.process_id,
+                )
+
+                self.logger.info("Cluster Process created: %s" % item.__repr__)
 
             elif topic == "extract status":
                 item = self.get_or_create_item(
@@ -260,7 +310,7 @@ class DataStore:
 
         return item
 
-    def topic_deleter(self, topic, name, parent=None, child=None):
+    def topic_deleter(self, topic, name, parent=None, child=None, cluster=None):
         """
         For the command line tool, validate that the topic name is not a default value and if not, delete it.
         :param topic: The SQLAlchemy object type
@@ -269,8 +319,9 @@ class DataStore:
         :type name: string
         :param parent: The parent process' name, if deleting a process dependency
         :type parent: string
-        :param child: The child process' name, if deleting a process dependency
+        :param child: The child process' name, if deleting a process dependency.  For cluster/process relationship, the name of the process.
         :type child: string
+        :param cluster: For cluster/process relationship, the name of the cluster.
         :return:
         """
         item_delete = False
@@ -283,6 +334,33 @@ class DataStore:
                 item_delete = True
                 self.session.query(Actor).filter(Actor.actor_name == name).delete()
                 self.logger.info("%s %s deleted." % (topic, name))
+
+            elif topic == "cluster":
+                item_delete = True
+                self.session.query(Cluster).filter(
+                    Cluster.cluster_name == name
+                ).delete()
+                self.logger.info("%s %s deleted." % (topic, name))
+
+            elif topic == "cluster process":
+                item_delete = True
+                cluster = self.get_or_create_item(
+                    model=Cluster, create=False, cluster_name=cluster
+                )
+                process = self.get_or_create_item(
+                    model=Process, create=False, process_name=child
+                )
+
+                item = self.get_or_create_item(
+                    model=ClusterProcess,
+                    create=False,
+                    cluster_id=cluster.cluster_id,
+                    process_id=process.process_id,
+                )
+
+                self.session.delete(item)
+
+                self.logger.info("%s %s - %s deleted." % (topic, cluster, child))
 
             elif topic == "extract status" and name not in preload_extract_status_types:
                 item_delete = True
@@ -359,7 +437,16 @@ class DataStore:
 
         return "blarg"
 
-    def topic_updater(self, topic, initial_name, name):
+    def topic_updater(
+        self,
+        topic,
+        initial_name,
+        name,
+        max_processing=None,
+        processing_unit=None,
+        max_memory=None,
+        memory_unit=None,
+    ):
         """
         For the command line tool, validate that the topic name is not a default value and if not, update it.
         :param topic: name of the SQLAlchemy object
@@ -368,6 +455,14 @@ class DataStore:
         :type initial_name: string
         :param name: The updated name of the object to be updated.
         :type name: string
+        :param max_processing: For performance clusters, the maximum processing ability allocated to the cluster
+        :type max_processing: string
+        :param max_memory: For performance clusters, the maximum memory allocated to the cluster
+        :type max_memory: string
+        :param processing_unit: For performance clusters, the unit of processing ability allocated to the cluster
+        :type processing_unit: string
+        :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
+        :type memory_unit: string
         :return:
         """
         if self.topic_validator(topic=topic):
@@ -376,6 +471,26 @@ class DataStore:
                     model=Actor, create=False, actor_name=initial_name
                 )
                 item.actor_name = name
+                self.logger.info("%s %s updated." % (topic, name))
+
+            elif topic == "cluster":
+                item = self.get_or_create_item(
+                    model=Cluster, create=False, cluster_name=initial_name
+                )
+
+                item.cluster_name = name
+                if max_memory is not None:
+                    item.cluster_max_memory = max_memory
+
+                if memory_unit is not None:
+                    item.cluster_max_memory_unit = memory_unit
+
+                if max_processing is not None:
+                    item.cluster_max_processing = max_processing
+
+                if processing_unit is not None:
+                    item.cluster_max_processing_unit = processing_unit
+
                 self.logger.info("%s %s updated." % (topic, name))
 
             elif (
@@ -455,6 +570,7 @@ class DataStore:
         # Only data store topics that should be allowed to be created from the command line tool.
         valid_topics = [
             "actor",
+            "cluster",
             "error type",
             "extract status",
             "process dependency",

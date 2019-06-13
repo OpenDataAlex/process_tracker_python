@@ -347,7 +347,9 @@ class ProcessTracker:
         :return:
         """
         location = LocationTracker(
-            location_path=location_path, location_name=location_name
+            location_path=location_path,
+            location_name=location_name,
+            data_store=self.data_store,
         )
 
         if location.location_type.location_type_name == "s3":

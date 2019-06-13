@@ -11,7 +11,6 @@ from process_tracker.models.process import (
     ProcessTracking,
 )
 
-from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractDependency, ExtractTracker
 from process_tracker.process_tracker import ErrorTracking, ProcessTracker
 from process_tracker.utilities import utilities
@@ -31,7 +30,7 @@ class TestExtractTracker(unittest.TestCase):
 
         cls.process_run = cls.process_tracker
 
-        data_store = DataStore()
+        data_store = cls.process_tracker.data_store
 
         cls.session = data_store.session
         cls.data_store_type = data_store.data_store_type

@@ -1,9 +1,14 @@
 import unittest
 
+from process_tracker.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
 
 
 class TestLocationTracker(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data_store = DataStore()
+
     def test_derive_location_name_none(self):
         """
         Testing that if no location name is provided, and it's not a location path, the last directory is set as the
@@ -13,7 +18,9 @@ class TestLocationTracker(unittest.TestCase):
         test_path = "/tmp/testing/test_dir"
 
         expected_result = "test_dir"
-        given_result = LocationTracker(location_path=test_path).location_name
+        given_result = LocationTracker(
+            location_path=test_path, data_store=self.data_store
+        ).location_name
 
         self.assertEqual(expected_result, given_result)
 
@@ -25,7 +32,9 @@ class TestLocationTracker(unittest.TestCase):
         test_path = "s3://tmp/testing/test_dir"
 
         expected_result = "s3 - test_dir"
-        given_result = LocationTracker(location_path=test_path).location_name
+        given_result = LocationTracker(
+            location_path=test_path, data_store=self.data_store
+        ).location_name
 
         self.assertEqual(expected_result, given_result)
 
@@ -38,7 +47,7 @@ class TestLocationTracker(unittest.TestCase):
 
         expected_result = "local filesystem"
         given_result = LocationTracker(
-            location_path=test_path
+            location_path=test_path, data_store=self.data_store
         ).location_type.location_type_name
 
         self.assertEqual(expected_result, given_result)
@@ -52,7 +61,7 @@ class TestLocationTracker(unittest.TestCase):
 
         expected_result = "s3"
         given_result = LocationTracker(
-            location_path=test_path
+            location_path=test_path, data_store=self.data_store
         ).location_type.location_type_name
 
         self.assertEqual(expected_result, given_result)

@@ -54,9 +54,39 @@ def upgrade():
     "-p", "--parent", help="The parent process' name, if creating a process dependency"
 )
 @click.option(
-    "-c", "--child", help="The child process' name, if creating a process dependency"
+    "-c",
+    "--child",
+    help="The child process' name, if creating a process dependency.  For cluster/process relationships, the name of "
+    "the process.",
 )
-def create(topic, name, parent=None, child=None):
+@click.option(
+    "--max-processing",
+    help="For clusters, the max processing ability allocated to the cluster",
+)
+@click.option(
+    "--max-memory", help="For clusters, the max memory allocated to the cluster"
+)
+@click.option(
+    "--processing-unit",
+    help="For clusters, the unit of processing ability (Ghz, CPU, DPU, etc.",
+)
+@click.option(
+    "--memory-unit", help="For clusters, the unit of allocated memory (MB, GB, etc."
+)
+@click.option(
+    "--cluster", help="For cluster/process relationships, the name of the cluster"
+)
+def create(
+    topic,
+    name,
+    parent=None,
+    child=None,
+    max_processing=None,
+    processing_unit=None,
+    max_memory=None,
+    memory_unit=None,
+    cluster=None,
+):
     """
     Create an item that is within the valid topics list.
     :param topic: The name of the topic.
@@ -65,11 +95,32 @@ def create(topic, name, parent=None, child=None):
     :type name: string
     :param parent: The parent process' name, if creating a process dependency
     :type parent: string
-    :param child: The child process' name, if creating a process dependency
+    :param child: The child process' name, if creating a process dependency.  For cluster/process relationships, the
+                  name of the process.
     :type child: string
+    :param max_processing: For performance clusters, the maximum processing ability allocated to the cluster
+    :type max_processing: integer
+    :param max_memory: For performance clusters, the maximum memory allocated to the cluster
+    :type max_memory: integer
+    :param processing_unit: For performance clusters, the unit of processing ability allocated to the cluster
+    :type processing_unit: string
+    :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
+    :type memory_unit: string
+    :param cluster: For cluster/process relationships, the name of the cluster.
+    :type cluster: string
     """
     click.echo("Attempting to create %s with name %s" % (topic, name))
-    data_store.topic_creator(topic=topic, name=name, parent=parent, child=child)
+    data_store.topic_creator(
+        topic=topic,
+        name=name,
+        parent=parent,
+        child=child,
+        max_processing=max_processing,
+        max_memory=max_memory,
+        processing_unit=processing_unit,
+        memory_unit=memory_unit,
+        cluster=cluster,
+    )
 
 
 @main.command()
@@ -81,7 +132,10 @@ def create(topic, name, parent=None, child=None):
 @click.option(
     "-c", "--child", help="The child process' name, if deleting a process dependency"
 )
-def delete(topic, name, parent=None, child=None):
+@click.option(
+    "--cluster", help="For cluster/process relationships, the name of the cluster"
+)
+def delete(topic, name, parent=None, child=None, cluster=None):
     """
     Delete an item that is within the valid topics list and not a pre-loaded item.
     :param topic: The name of the topic.
@@ -90,20 +144,71 @@ def delete(topic, name, parent=None, child=None):
     :type name: string
     :param parent: The parent process' name, if deleting a process dependency
     :type parent: string
-    :param child: The child process' name, if deleting a process dependency
+    :param child: The child process' name, if deleting a process dependency.  For cluster/process relationships, the
+                  name of the process.
     :type child: string
+    :param cluster: For cluster/process relationships, the name of the cluster.
+    :type cluster: string
     """
     click.echo("Attempting to delete %s with name %s" % (topic, name))
-    data_store.topic_deleter(topic=topic, name=name, parent=parent, child=child)
+    data_store.topic_deleter(
+        topic=topic, name=name, parent=parent, child=child, cluster=cluster
+    )
 
 
 @main.command()
 @click.option("-t", "--topic", help="The topic being created")
 @click.option("-i", "--initial-name", help="The name that needs to be changed.")
 @click.option("-n", "--name", help="The new name for the topic.")
-def update(topic, initial_name, name):
-
+@click.option(
+    "--max-processing",
+    help="For clusters, the max processing ability allocated to the cluster",
+)
+@click.option(
+    "--max-memory", help="For clusters, the max memory allocated to the cluster"
+)
+@click.option(
+    "--processing-unit",
+    help="For clusters, the unit of processing ability (Ghz, CPU, DPU, etc.",
+)
+@click.option(
+    "--memory-unit", help="For clusters, the unit of allocated memory (MB, GB, etc."
+)
+def update(
+    topic,
+    initial_name,
+    name,
+    max_processing=None,
+    max_memory=None,
+    processing_unit=None,
+    memory_unit=None,
+):
+    """
+    Update an item that is within the valid topics list and not a pre-loaded item.
+    :param topic: The name of the topic.
+    :type topic: string
+    :param initial_name: The revised name of the topic item to be updated.
+    :type initial_name: string
+    :param name: The original name of the topic item to be updated.
+    :type name: string
+    :param max_processing: For performance clusters, the maximum processing ability allocated to the cluster
+    :type max_processing: string
+    :param max_memory: For performance clusters, the maximum memory allocated to the cluster
+    :type max_memory: string
+    :param processing_unit: For performance clusters, the unit of processing ability allocated to the cluster
+    :type processing_unit: string
+    :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
+    :type memory_unit: string
+    """
     click.echo(
         "Attempting to update %s with name %s to %s" % (topic, initial_name, name)
     )
-    data_store.topic_updater(topic=topic, initial_name=initial_name, name=name)
+    data_store.topic_updater(
+        topic=topic,
+        initial_name=initial_name,
+        name=name,
+        max_processing=max_processing,
+        max_memory=max_memory,
+        processing_unit=processing_unit,
+        memory_unit=memory_unit,
+    )
