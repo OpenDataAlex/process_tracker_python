@@ -117,7 +117,7 @@ create table process
 	process_type_id integer null
 		constraint process_fk02
 			references process_type_lkup,
-	process_tool_id integer not null
+	process_tool_id integer null
 		constraint process_fk03
 			references tool_lkup,
 	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null
