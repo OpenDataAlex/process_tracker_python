@@ -2,6 +2,7 @@
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
 import logging
+from pathlib import Path
 from os.path import join
 
 from sqlalchemy.orm import aliased
@@ -81,12 +82,14 @@ class ExtractTracker:
                 "Location path was provided so building file path from it."
             )
 
-            self.full_filename = join(location_path, filename)
+            self.full_filename = str(Path(location_path).joinpath(filename))
         else:
             self.logger.info("Location provided so building file path from it.")
 
-            self.full_filename = join(
-                self.location.location_path, self.extract.extract_filename
+            self.full_filename = str(
+                Path(self.location.location_path).joinpath(
+                    self.extract.extract_filename
+                )
             )
 
         # Getting all status types in the event there are custom status types added later.

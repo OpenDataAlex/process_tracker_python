@@ -165,7 +165,7 @@ class TestProcessTracker(unittest.TestCase):
         extract.change_extract_status("blarg")
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename2.csv").absolute())
+            str(Path("/home/test/extract_dir/test_extract_filename2.csv"))
         ]
 
         given_result = self.process_tracker.find_extracts_by_filename(
@@ -193,7 +193,7 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename2.csv").absolute())
+            str(Path("/home/test/extract_dir/test_extract_filename2.csv"))
         ]
 
         given_result = self.process_tracker.find_extracts_by_filename(
@@ -233,8 +233,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename3-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename3-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename3-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename3-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_filename(
@@ -274,8 +274,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename3-2.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename3-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename3-2.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename3-1.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_filename(
@@ -310,8 +310,8 @@ class TestProcessTracker(unittest.TestCase):
         extract2.change_extract_status("blarg")
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_location(
@@ -351,8 +351,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_location(
@@ -392,8 +392,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_location(
@@ -429,8 +429,8 @@ class TestProcessTracker(unittest.TestCase):
         extract2.change_extract_status("blarg")
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_location(
@@ -470,8 +470,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_location(
@@ -520,8 +520,8 @@ class TestProcessTracker(unittest.TestCase):
         extract2.change_extract_status("blarg")
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_process(
@@ -560,8 +560,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_process(
@@ -606,8 +606,8 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv").absolute()),
-            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv")),
+            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv")),
         ]
 
         given_result = self.process_tracker.find_extracts_by_process(

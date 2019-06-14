@@ -73,11 +73,7 @@ class Extract(Base):
 
     def full_filepath(self):
 
-        return str(
-            Path(self.locations.location_path)
-            .joinpath(self.extract_filename)
-            .absolute()
-        )
+        return str(Path(self.locations.location_path).joinpath(self.extract_filename))
 
 
 class ExtractDependency(Base):

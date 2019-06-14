@@ -1,5 +1,6 @@
 # Tests for validating extract_tracking
 from datetime import datetime, timedelta
+from pathlib import Path
 import unittest
 
 from process_tracker.models.capacity import ClusterProcess
@@ -310,9 +311,11 @@ class TestExtractTracker(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             dependent_extract.extract_dependency_check()
 
+        clean_filename = str(Path("/home/test/extract_dir/Dependent File.csv"))
+
         return self.assertTrue(
-            "Extract files that extract /home/test/extract_dir/Dependent File.csv is dependent on have not been loaded,"
-            " are being created, or are in the process of loading."
+            "Extract files that extract %s is dependent on have not been loaded,"
+            " are being created, or are in the process of loading." % clean_filename
             in str(context.exception)
         )
 
