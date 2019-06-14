@@ -19,10 +19,10 @@ class Cluster(Base):
         primary_key=True,
     )
     cluster_name = Column(String(250), unique=True, nullable=False)
-    cluster_max_memory = Column(Integer, nullable=False)
-    cluster_max_memory_unit = Column(String(2), nullable=False)
-    cluster_max_processing = Column(Integer, nullable=False)
-    cluster_max_processing_unit = Column(String(3), nullable=False)
+    cluster_max_memory = Column(Integer, nullable=True)
+    cluster_max_memory_unit = Column(String(2), nullable=True)
+    cluster_max_processing = Column(Integer, nullable=True)
+    cluster_max_processing_unit = Column(String(3), nullable=True)
     cluster_current_memory_usage = Column(Integer)
     cluster_current_process_usage = Column(Integer)
 
@@ -50,7 +50,7 @@ class ClusterProcess(Base):
 
     def __repr__(self):
 
-        return (
-            "<ClusterProcess (cluster_id=%s, process_id=%s)" % self.cluster_id,
+        return "<ClusterProcess (cluster_id=%s, process_id=%s)" % (
+            self.cluster_id,
             self.process_id,
         )

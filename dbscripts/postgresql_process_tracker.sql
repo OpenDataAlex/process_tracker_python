@@ -423,10 +423,10 @@ create table cluster_tracking
 		constraint cluster_tracking_pk
 			primary key,
 	cluster_name varchar(250) not null,
-	cluster_max_memory integer not null,
-	cluster_max_memory_unit char(2) not null,
-	cluster_max_processing integer not null,
-	cluster_max_processing_unit varchar(3) not null,
+	cluster_max_memory integer null,
+	cluster_max_memory_unit char(2) null,
+	cluster_max_processing integer null,
+	cluster_max_processing_unit varchar(3) null,
 	cluster_current_memory_usage integer,
 	cluster_current_process_usage integer
 );

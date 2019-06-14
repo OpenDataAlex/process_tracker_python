@@ -16,6 +16,7 @@ from process_tracker.models.capacity import Cluster, ClusterProcess
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
     ErrorType,
+    Process,
     ProcessDependency,
     ProcessStatus,
     ProcessType,
@@ -127,6 +128,54 @@ class TestCli(unittest.TestCase):
         self.runner.invoke(main, ["delete", "-t", "cluster", "-n", "Test Cluster"])
 
         self.assertEqual("Test Cluster", given_name)
+
+    def test_create_cluster_process(self):
+        """
+        Testing that when creating a cluster process relationship record, it is added.
+        :return:
+        """
+        cluster = self.data_store.get_or_create_item(
+            model=Cluster, cluster_name="Test Cluster"
+        )
+
+        process = self.data_store.get_or_create_item(
+            model=Process, process_name="Test Cluster Process"
+        )
+
+        result = self.runner.invoke(
+            main,
+            'create -t "cluster process" --cluster "%s" --child "%s"'
+            % (cluster.cluster_name, process.process_name),
+        )
+
+        instance = (
+            self.session.query(ClusterProcess)
+            .filter(ClusterProcess.cluster_id == cluster.cluster_id)
+            .filter(ClusterProcess.process_id == process.process_id)
+            .first()
+        )
+
+        given_result = [instance.cluster_id, instance.process_id]
+        expected_result = [cluster.cluster_id, process.process_id]
+
+        self.runner.invoke(
+            main,
+            [
+                "delete",
+                "-t",
+                "cluster process",
+                "--cluster",
+                "Test Cluster",
+                "-c",
+                "Test Cluster Process",
+            ],
+        )
+        self.runner.invoke(main, ["delete", "-t", "cluster", "-n", "Test Cluster"])
+        self.runner.invoke(
+            main, ["delete", "-t", "process", "-n", "Test Cluster Process"]
+        )
+
+        self.assertEqual(expected_result, given_result)
 
     def test_create_extract_status(self):
         """
@@ -355,6 +404,51 @@ class TestCli(unittest.TestCase):
         self.logger.debug(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
+
+    def test_create_cluster_process(self):
+        """
+        Testing that when creating a cluster process relationship record, it is added.
+        :return:
+        """
+        cluster = self.data_store.get_or_create_item(
+            model=Cluster, cluster_name="Test Cluster"
+        )
+
+        process = self.data_store.get_or_create_item(
+            model=Process, process_name="Test Cluster Process"
+        )
+
+        result = self.runner.invoke(
+            main,
+            'create -t "cluster process" --cluster "%s" --child "%s"'
+            % (cluster.cluster_name, process.process_name),
+        )
+
+        self.runner.invoke(
+            main,
+            [
+                "delete",
+                "-t",
+                "cluster process",
+                "--cluster",
+                "Test Cluster",
+                "-c",
+                "Test Cluster Process",
+            ],
+        )
+        self.runner.invoke(main, ["delete", "-t", "cluster", "-n", "Test Cluster"])
+        self.runner.invoke(
+            main, ["delete", "-t", "process", "-n", "Test Cluster Process"]
+        )
+
+        instance = (
+            self.session.query(ClusterProcess)
+            .filter(ClusterProcess.cluster_id == cluster.cluster_id)
+            .filter(ClusterProcess.process_id == process.process_id)
+            .first()
+        )
+
+        self.assertEqual(None, instance)
 
     def test_delete_extract_status(self):
         """

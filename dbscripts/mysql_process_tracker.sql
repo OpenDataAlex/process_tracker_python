@@ -277,10 +277,10 @@ create table process_tracker.cluster_tracking
 	cluster_id int auto_increment
 		primary key,
 	cluster_name varchar(250) not null,
-	cluster_max_memory int not null,
+	cluster_max_memory int null,
 	cluster_max_memory_unit char(2) null,
-	cluster_max_processing int not null,
-	cluster_max_processing_unit varchar(3) not null,
+	cluster_max_processing int null,
+	cluster_max_processing_unit varchar(3) null,
 	cluster_current_memory_usage int null,
 	cluster_current_process_usage int null,
 	constraint cluster_tracking_cluster_name_uindex

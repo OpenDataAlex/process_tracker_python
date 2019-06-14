@@ -571,6 +571,7 @@ class DataStore:
         valid_topics = [
             "actor",
             "cluster",
+            "cluster process",
             "error type",
             "extract status",
             "process dependency",
@@ -656,6 +657,8 @@ class DataStore:
                     + data_store_password
                     + "@"
                     + data_store_host
+                    + ":"
+                    + data_store_port
                     + "/"
                     + data_store_name
                 )
@@ -669,6 +672,8 @@ class DataStore:
                     + data_store_password
                     + "@"
                     + data_store_host
+                    + ":"
+                    + data_store_port
                     + "/"
                     + data_store_name
                 )
@@ -681,6 +686,8 @@ class DataStore:
                     + data_store_password
                     + "@"
                     + data_store_host
+                    + ":"
+                    + data_store_port
                     + "/"
                     + data_store_name
                 )
