@@ -272,3 +272,31 @@ create index process_run_actor_id
 create index process_status_id
 	on process_tracking (process_status_id);
 
+create table process_tracker.cluster_tracking
+(
+	cluster_id int auto_increment
+		primary key,
+	cluster_name varchar(250) not null,
+	cluster_max_memory int null,
+	cluster_max_memory_unit char(2) null,
+	cluster_max_processing int null,
+	cluster_max_processing_unit varchar(3) null,
+	cluster_current_memory_usage int null,
+	cluster_current_process_usage int null,
+	constraint cluster_tracking_cluster_name_uindex
+		unique (cluster_name)
+)
+comment 'Capacity cluster tracking';
+
+create table process_tracker.cluster_process
+(
+	cluster_id int not null,
+	process_id int not null,
+	primary key (cluster_id, process_id),
+	constraint cluster_process_fk01
+		foreign key (cluster_id) references process_tracker.cluster_tracking (cluster_id),
+	constraint cluster_process_fk02
+		foreign key (process_id) references process_tracker.process (process_id)
+)
+comment 'Relationship tracking between processes and performance clusters.';
+

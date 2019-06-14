@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 import unittest
 
+from process_tracker.models.capacity import ClusterProcess
 from process_tracker.models.extract import Extract, ExtractProcess, Location
 from process_tracker.models.process import (
     Process,
@@ -11,7 +12,6 @@ from process_tracker.models.process import (
     ProcessTracking,
 )
 
-from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractDependency, ExtractTracker
 from process_tracker.process_tracker import ErrorTracking, ProcessTracker
 from process_tracker.utilities import utilities
@@ -31,13 +31,14 @@ class TestExtractTracker(unittest.TestCase):
 
         cls.process_run = cls.process_tracker
 
-        data_store = DataStore()
+        data_store = cls.process_tracker.data_store
 
         cls.session = data_store.session
         cls.data_store_type = data_store.data_store_type
 
     @classmethod
     def tearDownClass(cls):
+        cls.session.query(ClusterProcess).delete()
         cls.session.query(ErrorTracking).delete()
         cls.session.query(ExtractProcess).delete()
         cls.session.query(ProcessTracking).delete()
@@ -46,6 +47,7 @@ class TestExtractTracker(unittest.TestCase):
         cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
+        cls.session.close()
 
     def setUp(self):
         """

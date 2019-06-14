@@ -12,9 +12,11 @@ from process_tracker.process_tracker import ProcessTracker
 from process_tracker.utilities.logging import console
 
 from process_tracker.models.actor import Actor
+from process_tracker.models.capacity import Cluster, ClusterProcess
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
     ErrorType,
+    Process,
     ProcessDependency,
     ProcessStatus,
     ProcessType,
@@ -104,6 +106,76 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual("Test Test", given_name)
         self.assertEqual(0, result.exit_code)
+
+    def test_create_cluster(self):
+        """
+        Testing that when creating a performance cluster record it is added.
+        :return:
+        """
+        result = self.runner.invoke(
+            main,
+            'create -t cluster -n "Test Cluster" --max-processing 4 --processing-unit DPU --max-memory 128 --memory-unit GB',
+        )
+
+        instance = (
+            self.session.query(Cluster)
+            .filter(Cluster.cluster_name == "Test Cluster")
+            .first()
+        )
+
+        given_name = instance.cluster_name
+
+        self.runner.invoke(main, ["delete", "-t", "cluster", "-n", "Test Cluster"])
+
+        self.assertEqual("Test Cluster", given_name)
+
+    def test_create_cluster_process(self):
+        """
+        Testing that when creating a cluster process relationship record, it is added.
+        :return:
+        """
+        cluster = self.data_store.get_or_create_item(
+            model=Cluster, cluster_name="Test Cluster"
+        )
+
+        process = self.data_store.get_or_create_item(
+            model=Process, process_name="Test Cluster Process"
+        )
+
+        result = self.runner.invoke(
+            main,
+            'create -t "cluster process" --cluster "%s" --child "%s"'
+            % (cluster.cluster_name, process.process_name),
+        )
+
+        instance = (
+            self.session.query(ClusterProcess)
+            .filter(ClusterProcess.cluster_id == cluster.cluster_id)
+            .filter(ClusterProcess.process_id == process.process_id)
+            .first()
+        )
+
+        given_result = [instance.cluster_id, instance.process_id]
+        expected_result = [cluster.cluster_id, process.process_id]
+
+        self.runner.invoke(
+            main,
+            [
+                "delete",
+                "-t",
+                "cluster process",
+                "--cluster",
+                "Test Cluster",
+                "-c",
+                "Test Cluster Process",
+            ],
+        )
+        self.runner.invoke(main, ["delete", "-t", "cluster", "-n", "Test Cluster"])
+        self.runner.invoke(
+            main, ["delete", "-t", "process", "-n", "Test Cluster Process"]
+        )
+
+        self.assertEqual(expected_result, given_result)
 
     def test_create_extract_status(self):
         """
@@ -311,6 +383,72 @@ class TestCli(unittest.TestCase):
         self.logger.debug(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
+
+    def test_delete_cluster(self):
+        """
+        Testing that when deleting a cluster record it is deleted.
+        :return:
+        """
+        self.runner.invoke(
+            main,
+            'create -t cluster -n "Test Cluster" --max-processing 4 --processing-unit DPU --max-memory 128 --memory-unit GB',
+        )
+        result = self.runner.invoke(main, 'delete -t cluster -n "Test Cluster"')
+
+        instance = (
+            self.session.query(Cluster)
+            .filter(Cluster.cluster_name == "Test Cluster")
+            .first()
+        )
+
+        self.logger.debug(result.output)
+        self.assertEqual(None, instance)
+        self.assertEqual(0, result.exit_code)
+
+    def test_create_cluster_process(self):
+        """
+        Testing that when creating a cluster process relationship record, it is added.
+        :return:
+        """
+        cluster = self.data_store.get_or_create_item(
+            model=Cluster, cluster_name="Test Cluster"
+        )
+
+        process = self.data_store.get_or_create_item(
+            model=Process, process_name="Test Cluster Process"
+        )
+
+        result = self.runner.invoke(
+            main,
+            'create -t "cluster process" --cluster "%s" --child "%s"'
+            % (cluster.cluster_name, process.process_name),
+        )
+
+        self.runner.invoke(
+            main,
+            [
+                "delete",
+                "-t",
+                "cluster process",
+                "--cluster",
+                "Test Cluster",
+                "-c",
+                "Test Cluster Process",
+            ],
+        )
+        self.runner.invoke(main, ["delete", "-t", "cluster", "-n", "Test Cluster"])
+        self.runner.invoke(
+            main, ["delete", "-t", "process", "-n", "Test Cluster Process"]
+        )
+
+        instance = (
+            self.session.query(ClusterProcess)
+            .filter(ClusterProcess.cluster_id == cluster.cluster_id)
+            .filter(ClusterProcess.process_id == process.process_id)
+            .first()
+        )
+
+        self.assertEqual(None, instance)
 
     def test_delete_extract_status(self):
         """
@@ -556,6 +694,33 @@ class TestCli(unittest.TestCase):
         given_name = instance.actor_name
 
         self.runner.invoke(main, 'delete -t actor -n "Updated"')
+
+        self.assertEqual("Updated", given_name)
+        self.assertEqual(0, result.exit_code)
+
+    def test_update_cluster(self):
+        """
+        Testing that when updating a cluster record it is updated.
+        :return:
+        """
+        self.runner.invoke(
+            main,
+            'create -t cluster -n "Test Cluster" --max-processing 4 --processing-unit DPU --max-memory 128 --memory-unit GB',
+        )
+
+        result = self.runner.invoke(
+            main, 'update -t cluster -i "Test Cluster" -n "Updated"'
+        )
+
+        instance = (
+            self.session.query(Cluster)
+            .filter(Cluster.cluster_name == "Updated")
+            .first()
+        )
+
+        given_name = instance.cluster_name
+
+        self.runner.invoke(main, "delete -t cluster -n Updated")
 
         self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)

@@ -124,6 +124,7 @@ class Process(Base):
         DateTime(timezone=True), nullable=False, default=default_date
     )
 
+    cluster_processes = relationship("ClusterProcess")
     process_tracking = relationship("ProcessTracking")
     process_type = relationship("ProcessType", back_populates="processes")
     sources = relationship("ProcessSource")

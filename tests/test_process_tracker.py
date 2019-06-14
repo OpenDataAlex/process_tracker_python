@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 import os
+from pathlib import Path
 import time
 import unittest
 from unittest.mock import patch
@@ -43,6 +44,10 @@ class TestProcessTracker(unittest.TestCase):
         cls.session = cls.data_store.session
         cls.data_store_type = cls.data_store.data_store_type
 
+        cls.blarg = ExtractStatus(extract_status_name="blarg")
+        cls.session.add(cls.blarg)
+        cls.session.commit()
+
     @classmethod
     def tearDownClass(cls):
         cls.session.query(Location).delete()
@@ -50,7 +55,9 @@ class TestProcessTracker(unittest.TestCase):
         cls.session.query(ProcessTarget).delete()
         cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
+        cls.session.delete(cls.blarg)
         cls.session.commit()
+        cls.session.close()
 
         # bucket = cls.s3.Bucket(test_bucket)
         # for key in bucket.objects.all():
@@ -141,7 +148,34 @@ class TestProcessTracker(unittest.TestCase):
             "The provided status type blarg is invalid." in str(context.exception)
         )
 
-    def test_find_ready_extracts_by_filename_full(self):
+    def test_find_extracts_by_filename_custom_status(self):
+        """
+        Testing that for the given full filename and a custom status, find the extract.
+        :return:
+        """
+
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.change_extract_status("blarg")
+
+        expected_result = [
+            str(Path("/home/test/extract_dir/test_extract_filename2.csv").absolute())
+        ]
+
+        given_result = self.process_tracker.find_extracts_by_filename(
+            "test_extract_filename2.csv", status="blarg"
+        )
+        given_result = [record.full_filepath() for record in given_result]
+
+        self.assertCountEqual(expected_result, given_result)
+
+    def test_find_extracts_by_filename_full(self):
         """
         Testing that for the given full filename, find the extract, provided it's in 'ready' state.
         :return:
@@ -158,16 +192,18 @@ class TestProcessTracker(unittest.TestCase):
         session = Session.object_session(extract.extract)
         session.commit()
 
-        expected_result = ["/home/test/extract_dir/test_extract_filename2.csv"]
+        expected_result = [
+            str(Path("/home/test/extract_dir/test_extract_filename2.csv").absolute())
+        ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename(
+        given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename2.csv"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_filename_partial(self):
+    def test_find_extracts_by_filename_partial(self):
         """
         Testing that for the given partial filename, find the extracts, provided they are in 'ready' state. Should return in
         Ascending order.
@@ -197,18 +233,18 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename3-1.csv",
-            "/home/test/extract_dir/test_extract_filename3-2.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename3-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename3-2.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename(
+        given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_filename_partial_not_descending(self):
+    def test_find_extracts_by_filename_partial_not_descending(self):
         """
         Testing that for the given partial filename, find the extracts, provided they are in 'ready' state.  Verifying
         that records are NOT returned in descending order.
@@ -238,18 +274,54 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename3-2.csv",
-            "/home/test/extract_dir/test_extract_filename3-1.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename3-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename3-1.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_filename(
+        given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_location_name(self):
+    def test_find_extracts_by_location_name_custom_status(self):
+        """
+         Testing that for the given location name and custom status, find the extracts.  Should return
+         them in ascending order by registration datettime.
+         :return:
+         """
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.change_extract_status("blarg")
+        extract2.change_extract_status("blarg")
+
+        expected_result = [
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+        ]
+
+        given_result = self.process_tracker.find_extracts_by_location(
+            location_name="Test Location", status="blarg"
+        )
+        given_result = [record.full_filepath() for record in given_result]
+
+        self.assertCountEqual(expected_result, given_result)
+
+    def test_find_extracts_by_location_name(self):
         """
         Testing that for the given location name, find the extracts, provided they are in 'ready' state.  Should return
         them in ascending order by registration datettime.
@@ -279,18 +351,18 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename4-1.csv",
-            "/home/test/extract_dir/test_extract_filename4-2.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_location(
+        given_result = self.process_tracker.find_extracts_by_location(
             location_name="Test Location"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_location_not_descending(self):
+    def test_find_extracts_by_location_not_descending(self):
         """
         Testing that for the given location name, find the extracts, provided they are in 'ready' state.  Verifying that
         records NOT returned in descending order.
@@ -320,18 +392,55 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename4-2.csv",
-            "/home/test/extract_dir/test_extract_filename4-1.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_location(
+        given_result = self.process_tracker.find_extracts_by_location(
             location_name="Test Location"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_location_path(self):
+    def test_find_extracts_by_location_path_custom_status(self):
+        """
+                Testing that for the given location path and custom status, find the extracts.  Should return
+                them in ascending order by registration datettime.
+                :return:
+                """
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename4-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.change_extract_status("blarg")
+
+        extract2.change_extract_status("blarg")
+
+        expected_result = [
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
+        ]
+
+        given_result = self.process_tracker.find_extracts_by_location(
+            location_path="/home/test/extract_dir", status="blarg"
+        )
+        given_result = [record.full_filepath() for record in given_result]
+
+        self.assertCountEqual(expected_result, given_result)
+
+    def test_find_extracts_by_location_path(self):
         """
         Testing that for the given location path, find the extracts, provided they are in 'ready' state.  Should return
         them in ascending order by registration datettime.
@@ -361,32 +470,68 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename4-1.csv",
-            "/home/test/extract_dir/test_extract_filename4-2.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename4-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename4-2.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_location(
+        given_result = self.process_tracker.find_extracts_by_location(
             location_path="/home/test/extract_dir"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_location_unset(self):
+    def test_find_extracts_by_location_unset(self):
         """
         Testing that if both the location path and location name are not set, find_ready_extracts_by_location
         will throw an exception.
         :return:
         """
         with self.assertRaises(Exception) as context:
-            self.process_tracker.find_ready_extracts_by_location()
+            self.process_tracker.find_extracts_by_location()
 
         return self.assertTrue(
             "A location name or path must be provided.  Please try again."
             in str(context.exception)
         )
 
-    def test_find_ready_extracts_by_process(self):
+    def test_find_extracts_by_process_custom_status(self):
+        """
+        Testing that for the given process name and custom status, find the extracts.
+        :return:
+        """
+        extract = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename5-1.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        extract2 = ExtractTracker(
+            process_run=self.process_tracker,
+            filename="test_extract_filename5-2.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        # Need to manually change the status, because this would normally be done while the process was processing data
+        extract.change_extract_status("blarg")
+
+        extract2.change_extract_status("blarg")
+
+        expected_result = [
+            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv").absolute()),
+        ]
+
+        given_result = self.process_tracker.find_extracts_by_process(
+            "Testing Process Tracking Initialization", status="blarg"
+        )
+        given_result = [record.full_filepath() for record in given_result]
+
+        self.assertCountEqual(expected_result, given_result)
+
+    def test_find_extracts_by_process(self):
         """
         Testing that for the given process name, find the extracts, provided they are in 'ready' state.
         :return:
@@ -415,18 +560,18 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename5-1.csv",
-            "/home/test/extract_dir/test_extract_filename5-2.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_process(
+        given_result = self.process_tracker.find_extracts_by_process(
             "Testing Process Tracking Initialization"
         )
         given_result = [record.full_filepath() for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
-    def test_find_ready_extracts_by_process_not_descending(self):
+    def test_find_extracts_by_process_not_descending(self):
         """
         Testing that for the given process name, find the extracts, provided they are in 'ready' state.  Verifying that
         records are NOT returned in Descending order.
@@ -461,11 +606,11 @@ class TestProcessTracker(unittest.TestCase):
         session.commit()
 
         expected_result = [
-            "/home/test/extract_dir/test_extract_filename5-2.csv",
-            "/home/test/extract_dir/test_extract_filename5-1.csv",
+            str(Path("/home/test/extract_dir/test_extract_filename5-2.csv").absolute()),
+            str(Path("/home/test/extract_dir/test_extract_filename5-1.csv").absolute()),
         ]
 
-        given_result = self.process_tracker.find_ready_extracts_by_process(
+        given_result = self.process_tracker.find_extracts_by_process(
             "Testing Process Tracking Initialization"
         )
         given_result = [record.full_filepath() for record in given_result]

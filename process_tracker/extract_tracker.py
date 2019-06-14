@@ -6,7 +6,6 @@ from os.path import join
 
 from sqlalchemy.orm import aliased
 
-from process_tracker.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.settings import SettingsManager
 from process_tracker.utilities import utilities
@@ -49,9 +48,10 @@ class ExtractTracker:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config["DEFAULT"]["log_level"])
 
-        self.data_store = DataStore()
-        self.session = self.data_store.session
         self.process_run = process_run
+
+        self.data_store = self.process_run.data_store
+        self.session = self.process_run.session
 
         self.filename = filename
 
@@ -61,7 +61,9 @@ class ExtractTracker:
         elif location_path is not None:
             self.logger.info("Location path provided.  Creating Location object.")
             self.location = LocationTracker(
-                location_name=location_name, location_path=location_path
+                location_name=location_name,
+                location_path=location_path,
+                data_store=self.data_store,
             )
         else:
             raise Exception("A location object or location_path must be provided.")

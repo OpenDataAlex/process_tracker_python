@@ -2,7 +2,7 @@
 # Models for Extract (Data) entities
 
 from datetime import datetime
-from os.path import join
+from pathlib import Path
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
@@ -60,6 +60,7 @@ class Extract(Base):
     extract_load_record_count = Column(Integer, nullable=True)
 
     extract_process = relationship("ExtractProcess", back_populates="process_extracts")
+    extract_status = relationship("ExtractStatus", foreign_keys=[extract_status_id])
     locations = relationship("Location", foreign_keys=[extract_location_id])
 
     def __repr__(self):
@@ -72,7 +73,11 @@ class Extract(Base):
 
     def full_filepath(self):
 
-        return join(self.locations.location_path, self.extract_filename)
+        return str(
+            Path(self.locations.location_path)
+            .joinpath(self.extract_filename)
+            .absolute()
+        )
 
 
 class ExtractDependency(Base):
