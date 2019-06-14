@@ -2,7 +2,7 @@
 # Models for Extract (Data) entities
 
 from datetime import datetime
-from os.path import join
+from pathlib import Path
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
@@ -73,7 +73,11 @@ class Extract(Base):
 
     def full_filepath(self):
 
-        return join(self.locations.location_path, self.extract_filename)
+        return str(
+            Path(self.locations.location_path)
+            .joinpath(self.extract_filename)
+            .absolute()
+        )
 
 
 class ExtractDependency(Base):
