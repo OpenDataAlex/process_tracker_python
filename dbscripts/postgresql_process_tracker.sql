@@ -114,7 +114,7 @@ create table process
 			primary key,
 	process_name varchar(250) not null,
 	total_record_count integer default 0 not null,
-	process_type_id integer not null
+	process_type_id integer null
 		constraint process_fk02
 			references process_type_lkup,
 	process_tool_id integer not null
