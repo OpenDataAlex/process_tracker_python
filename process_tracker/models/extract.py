@@ -19,6 +19,7 @@ class ExtractStatus(Base):
         Integer,
         Sequence("extract_status_lkup_extract_status_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     extract_status_name = Column(String(75), nullable=False, unique=True)
 
@@ -41,13 +42,16 @@ class Extract(Base):
         Integer,
         Sequence("extract_tracking_extract_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     extract_filename = Column(String(750), nullable=False, unique=True)
     extract_location_id = Column(
-        Integer, ForeignKey("process_tracker.location_lkup.location_id")
+        Integer, ForeignKey("process_tracker.location_lkup.location_id"), nullable=False
     )
     extract_status_id = Column(
-        Integer, ForeignKey("process_tracker.extract_status_lkup.extract_status_id")
+        Integer,
+        ForeignKey("process_tracker.extract_status_lkup.extract_status_id"),
+        nullable=False,
     )
     extract_registration_date_time = Column(
         DateTime, nullable=False, default=datetime.now()
@@ -59,9 +63,15 @@ class Extract(Base):
     extract_load_high_date_time = Column(DateTime, nullable=True)
     extract_load_record_count = Column(Integer, nullable=True)
 
-    extract_process = relationship("ExtractProcess", back_populates="process_extracts")
-    extract_status = relationship("ExtractStatus", foreign_keys=[extract_status_id])
-    locations = relationship("Location", foreign_keys=[extract_location_id])
+    extract_process = relationship(
+        "ExtractProcess", back_populates="process_extracts", passive_deletes="all"
+    )
+    extract_status = relationship(
+        "ExtractStatus", foreign_keys=[extract_status_id], passive_deletes="all"
+    )
+    locations = relationship(
+        "Location", foreign_keys=[extract_location_id], passive_deletes="all"
+    )
 
     def __repr__(self):
 
@@ -85,15 +95,21 @@ class ExtractDependency(Base):
         Integer,
         ForeignKey("process_tracker.extract_tracking.extract_id"),
         primary_key=True,
+        nullable=False,
     )
     child_extract_id = Column(
         Integer,
         ForeignKey("process_tracker.extract_tracking.extract_id"),
         primary_key=True,
+        nullable=False,
     )
 
-    child_extract = relationship("Extract", foreign_keys=[child_extract_id])
-    parent_extract = relationship("Extract", foreign_keys=[parent_extract_id])
+    child_extract = relationship(
+        "Extract", foreign_keys=[child_extract_id], passive_deletes="all"
+    )
+    parent_extract = relationship(
+        "Extract", foreign_keys=[parent_extract_id], passive_deletes="all"
+    )
 
     def __repr__(self):
 
@@ -112,22 +128,28 @@ class ExtractProcess(Base):
         Integer,
         ForeignKey("process_tracker.extract_tracking.extract_id"),
         primary_key=True,
+        nullable=False,
     )
     process_tracking_id = Column(
         Integer,
         ForeignKey("process_tracker.process_tracking.process_tracking_id"),
         primary_key=True,
+        nullable=False,
     )
     extract_process_status_id = Column(
-        Integer, ForeignKey("process_tracker.extract_status_lkup.extract_status_id")
+        Integer,
+        ForeignKey("process_tracker.extract_status_lkup.extract_status_id"),
+        nullable=False,
     )
     extract_process_event_date_time = Column(
         DateTime, nullable=False, default=datetime.now()
     )
 
-    process_extracts = relationship("Extract", foreign_keys=[extract_tracking_id])
+    process_extracts = relationship(
+        "Extract", foreign_keys=[extract_tracking_id], passive_deletes="all"
+    )
     extract_processes = relationship(
-        "ProcessTracking", foreign_keys=[process_tracking_id]
+        "ProcessTracking", foreign_keys=[process_tracking_id], passive_deletes="all"
     )
 
     def __repr__(self):
@@ -148,10 +170,13 @@ class LocationType(Base):
         Integer,
         Sequence("location_type_lkup_location_type_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     location_type_name = Column(String(25), unique=True, nullable=False)
 
-    locations = relationship("Location", back_populates="location_types")
+    locations = relationship(
+        "Location", back_populates="location_types", passive_deletes="all"
+    )
 
     def __repr__(self):
 
@@ -170,16 +195,21 @@ class Location(Base):
         Integer,
         Sequence("location_lkup_location_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     location_name = Column(String(750), nullable=False, unique=True)
     location_path = Column(String(750), nullable=False, unique=True)
     location_type = Column(
-        Integer, ForeignKey("process_tracker.location_type_lkup.location_type_id")
+        Integer,
+        ForeignKey("process_tracker.location_type_lkup.location_type_id"),
+        nullable=False,
     )
 
     extracts = relationship("Extract")
 
-    location_types = relationship("LocationType", foreign_keys=[location_type])
+    location_types = relationship(
+        "LocationType", foreign_keys=[location_type], passive_deletes="all"
+    )
 
     def __repr__(self):
 

@@ -14,6 +14,7 @@ class Actor(Base):
         Integer,
         Sequence("actor_lkup_actor_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     actor_name = Column(String(250), nullable=False, unique=True)
 
