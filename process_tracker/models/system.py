@@ -15,6 +15,7 @@ class System(Base):
         Integer,
         Sequence("system_lkup_system_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     system_key = Column(String(250), nullable=False, unique=True)
     system_value = Column(String(250), nullable=False)

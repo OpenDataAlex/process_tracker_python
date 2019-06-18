@@ -15,6 +15,7 @@ class Source(Base):
         Integer,
         Sequence("source_lkup_source_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     source_name = Column(String(250), nullable=False, unique=True)
 

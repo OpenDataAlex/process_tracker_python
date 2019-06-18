@@ -17,6 +17,7 @@ class Cluster(Base):
         Integer,
         Sequence("cluster_tracking_cluster_id_seq", schema="process_tracker"),
         primary_key=True,
+        nullable=False,
     )
     cluster_name = Column(String(250), unique=True, nullable=False)
     cluster_max_memory = Column(Integer, nullable=True)
@@ -26,7 +27,7 @@ class Cluster(Base):
     cluster_current_memory_usage = Column(Integer)
     cluster_current_process_usage = Column(Integer)
 
-    process_clusters = relationship("ClusterProcess")
+    process_clusters = relationship("ClusterProcess", passive_deletes="all")
 
     def __repr__(self):
 
@@ -42,11 +43,21 @@ class ClusterProcess(Base):
         Integer,
         ForeignKey("process_tracker.cluster_tracking.cluster_id"),
         primary_key=True,
+        nullable=False,
     )
-    process_id = Column(Integer, ForeignKey("process_tracker.process.process_id"))
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
 
-    processes = relationship("Process", back_populates="cluster_processes")
-    clusters = relationship("Cluster", back_populates="process_clusters")
+    processes = relationship(
+        "Process", back_populates="cluster_processes", passive_deletes="all"
+    )
+    clusters = relationship(
+        "Cluster", back_populates="process_clusters", passive_deletes="all"
+    )
 
     def __repr__(self):
 
