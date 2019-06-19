@@ -30,10 +30,12 @@ from process_tracker.models.process import (
     ProcessTracking,
     ProcessStatus,
     ProcessSource,
+    ProcessSourceObject,
     ProcessTarget,
+    ProcessTargetObject,
     ProcessType,
 )
-from process_tracker.models.source import Source
+from process_tracker.models.source import Source, SourceObject
 from process_tracker.models.tool import Tool
 
 
@@ -44,8 +46,10 @@ class ProcessTracker:
         process_type,
         actor_name,
         tool_name,
-        sources,
-        targets,
+        sources=None,
+        targets=None,
+        source_objects=None,
+        target_objects=None,
         config_location=None,
     ):
         """
@@ -53,11 +57,18 @@ class ProcessTracker:
         :param process_name: Name of the process being tracked.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
-        :param sources: A single source name or list of source names for the given process.
+        :param sources: A single source name or list of source names for the given process. If source_objects is set,
+                        sources is ignored. Optional.
         :type sources: list
-        :param targets: A single target name or list of target names for the given process.
+        :param targets: A single target name or list of target names for the given process. If target_objects is set,
+                        targets is ignored. Optional.
         :type targets: list
-        :param config_location: Location where Process Tracker configuration file is.
+        :param source_objects: Finer grained list of sources, including source objects (i.e. tables). Optional.
+        :type source_objects: dict of lists
+        :param target_objects: Finer grained list of targets, including target objects (i.e. tables). Optional.
+        :type target_objects: dict of lists
+        :param config_location: Location where Process Tracker configuration file is. If not set, will use local home
+                                directory.
         :type config_location: file path
         """
         config = SettingsManager().config
@@ -84,8 +95,23 @@ class ProcessTracker:
             process_tool_id=self.tool.tool_id,
         )
 
-        self.sources = self.register_process_sources(sources=sources)
-        self.targets = self.register_process_targets(targets=targets)
+        # Either sources or source_objects should be set, not both.  Always go with lower grain if possible.
+
+        if source_objects is not None:
+            self.sources = self.register_process_sources(source_objects=source_objects)
+        elif sources is not None:
+            self.sources = self.register_process_sources(sources=sources)
+        else:
+            self.sources = None
+
+        # Either targets or target_objects should be set, not both.  Always go with lower grain if possible.
+
+        if target_objects is not None:
+            self.targets = self.register_process_targets(target_objects=target_objects)
+        elif targets is not None:
+            self.targets = self.register_process_targets(targets=targets)
+        else:
+            self.targets = None
 
         self.process_name = process_name
 
@@ -448,52 +474,129 @@ class ProcessTracker:
         else:
             raise Exception("The process %s is currently running." % self.process_name)
 
-    def register_process_sources(self, sources):
+    def register_process_sources(self, sources=None, source_objects=None):
         """
         Register source(s) to a given process.
-        :param sources: List of source name(s)
-        :return: List of source objects.
+        :param sources: List of source name(s)  If source_objects is set, sources is ignored.
+        :type sources: list
+        :param source_objects: Finer grained list of source name(s) and their objects used in this process.
+        :type source_objects: dict of lists
+        :return: List of source or source object SQLAlchemy objects.
         """
-        if isinstance(sources, str):
-            sources = [sources]
-        source_list = []
+        source_list = list()
 
-        for source in sources:
-            source = self.data_store.get_or_create_item(
-                model=Source, source_name=source
-            )
+        if source_objects is not None:
+            if isinstance(source_objects, dict):
+                for source, objects in source_objects.items():
 
-            self.data_store.get_or_create_item(
-                model=ProcessSource,
-                source_id=source.source_id,
-                process_id=self.process.process_id,
-            )
+                    source = self.data_store.get_or_create_item(
+                        model=Source, source_name=source
+                    )
 
-            source_list.append(source)
+                    self.data_store.get_or_create_item(
+                        model=ProcessSource,
+                        source_id=source.source_id,
+                        process_id=self.process.process_id,
+                    )
+
+                    for item in objects:
+
+                        source_object = self.data_store.get_or_create_item(
+                            model=SourceObject,
+                            source_id=source.source_id,
+                            source_object_name=item,
+                        )
+
+                        self.data_store.get_or_create_item(
+                            model=ProcessSourceObject,
+                            process_id=self.process.process_id,
+                            source_object_id=source_object.source_object_id,
+                        )
+
+                        source_list.append(source_object)
+            else:
+                self.logger.error("It appears source_objects is not a dictionary.")
+                raise Exception("It appears source_objects is not a dictionary.")
+
+        elif sources is not None:
+            if isinstance(sources, str):
+                sources = [sources]
+
+            for source in sources:
+                source = self.data_store.get_or_create_item(
+                    model=Source, source_name=source
+                )
+
+                self.data_store.get_or_create_item(
+                    model=ProcessSource,
+                    source_id=source.source_id,
+                    process_id=self.process.process_id,
+                )
+
+                source_list.append(source)
+
         return source_list
 
-    def register_process_targets(self, targets):
+    def register_process_targets(self, targets=None, target_objects=None):
         """
         Register target source(s) to a given process.
-        :param targets: List of source name(s)
-        :return: List of source objects.
+        :param targets: List of source name(s).  If target_objects is set, targets is ignored.
+        :type targets: list
+        :param target_objects: Finer grained list of target name(s) and their objects used in this process.
+        :type target_objects: dict of lists
+        :return: List of source or source object SQLAlchemy objects.
         """
-        if isinstance(targets, str):
-            targets = [targets]
-        target_list = []
+        target_list = list()
 
-        for target in targets:
-            source = self.data_store.get_or_create_item(
-                model=Source, source_name=target
-            )
+        if target_objects is not None:
+            if isinstance(target_objects, dict):
+                for target, objects in target_objects.items():
 
-            self.data_store.get_or_create_item(
-                model=ProcessTarget,
-                target_source_id=source.source_id,
-                process_id=self.process.process_id,
-            )
+                    target = self.data_store.get_or_create_item(
+                        model=Source, source_name=target
+                    )
 
-            target_list.append(source)
+                    self.data_store.get_or_create_item(
+                        model=ProcessTarget,
+                        target_source_id=target.source_id,
+                        process_id=self.process.process_id,
+                    )
+
+                    for item in objects:
+
+                        target_object = self.data_store.get_or_create_item(
+                            model=SourceObject,
+                            source_id=target.source_id,
+                            source_object_name=item,
+                        )
+
+                        self.data_store.get_or_create_item(
+                            model=ProcessTargetObject,
+                            process_id=self.process.process_id,
+                            target_object_id=target_object.source_object_id,
+                        )
+
+                        target_list.append(target_object)
+            else:
+                self.logger.error("It appears target_objects is not a dictionary.")
+                raise Exception("It appears target_objects is not a dictionary.")
+
+        elif targets is not None:
+            if isinstance(targets, str):
+                targets = [targets]
+
+            for target in targets:
+                source = self.data_store.get_or_create_item(
+                    model=Source, source_name=target
+                )
+
+                self.data_store.get_or_create_item(
+                    model=ProcessTarget,
+                    target_source_id=source.source_id,
+                    process_id=self.process.process_id,
+                )
+
+                target_list.append(source)
         return target_list
 
     def set_process_run_low_high_dates(self, low_date=None, high_date=None):

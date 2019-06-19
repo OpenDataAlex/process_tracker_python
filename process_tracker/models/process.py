@@ -173,14 +173,41 @@ class ProcessSource(Base):
         nullable=False,
     )
 
-    sources = relationship("Source", passive_deletes="all")
     processes = relationship("Process", passive_deletes="all")
+    sources = relationship("Source", passive_deletes="all")
 
     def __repr__(self):
 
         return "<ProcessSource (process=%s, source=%s)>" % (
             self.process_id,
             self.source_id,
+        )
+
+
+class ProcessSourceObject(Base):
+    __tablename__ = "process_source_object"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    source_object_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_object_lkup.source_object_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    objects = relationship("SourceObject", passive_deletes="all")
+    processes = relationship("Process", passive_deletes="all")
+
+    def __repr__(self):
+        return "<ProcessSourceObject (process_id=%s, source_object=%s)>" % (
+            self.process_id,
+            self.source_object_id,
         )
 
 
@@ -201,13 +228,41 @@ class ProcessTarget(Base):
         nullable=False,
     )
 
-    targets = relationship("Source", passive_deletes="all")
     processes = relationship("Process", passive_deletes="all")
+    targets = relationship("Source", passive_deletes="all")
 
     def __repr__(self):
         return "<ProcessSource (process=%s, target_source=%s)>" % (
             self.process_id,
-            self.source_id,
+            self.target_source_id,
+        )
+
+
+class ProcessTargetObject(Base):
+
+    __tablename__ = "process_target_object"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    target_object_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_object_lkup.source_object_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    objects = relationship("SourceObject", passive_deletes="all")
+    processes = relationship("Process", passive_deletes="all")
+
+    def __repr__(self):
+        return "<ProcessTargetObject (process_id=%s, target_object=%s)>" % (
+            self.process_id,
+            self.target_object_id,
         )
 
 

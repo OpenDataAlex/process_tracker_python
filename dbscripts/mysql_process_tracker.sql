@@ -300,3 +300,40 @@ create table process_tracker.cluster_process
 )
 comment 'Relationship tracking between processes and performance clusters.';
 
+create table process_tracker.source_object_lkup
+(
+	source_object_id int auto_increment,
+	source_id int not null,
+	source_object_name varchar(250) null,
+	constraint source_object_lkup_pk
+		primary key (source_object_id),
+	constraint source_object_lkup_udx01
+		unique (source_id, source_object_name),
+	constraint source_object_lkup_source_lkup_source_id_fk
+		foreign key (source_id) references process_tracker.source_lkup (source_id)
+);
+
+create table process_tracker.process_target_object
+(
+	process_id int not null,
+	target_object_id int not null,
+	constraint process_target_object_pk
+		primary key (process_id, target_object_id),
+	constraint process_target_object_fk01
+		foreign key (process_id) references process_tracker.process (process_id),
+	constraint process_target_object_fk02
+		foreign key (target_object_id) references process_tracker.source_object_lkup (source_object_id)
+);
+
+create table process_tracker.process_source_object
+(
+	process_id int not null,
+	source_object_id int not null,
+	constraint process_source_object_pk
+		primary key (process_id, source_object_id),
+	constraint process_source_object_fk01
+		foreign key (process_id) references process_tracker.process (process_id),
+	constraint process_source_object_fk02
+		foreign key (source_object_id) references process_tracker.source_object_lkup (source_object_id)
+);
+

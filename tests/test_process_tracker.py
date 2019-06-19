@@ -24,9 +24,12 @@ from process_tracker.models.process import (
     Process,
     ProcessDependency,
     ProcessSource,
+    ProcessSourceObject,
     ProcessTarget,
+    ProcessTargetObject,
     ProcessTracking,
 )
+from process_tracker.models.source import Source, SourceObject
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -44,13 +47,15 @@ class TestProcessTracker(unittest.TestCase):
         cls.session = cls.data_store.session
         cls.data_store_type = cls.data_store.data_store_type
 
-        cls.blarg = ExtractStatus(extract_status_name="blarg")
-        cls.session.add(cls.blarg)
-        cls.session.commit()
+        cls.blarg = cls.data_store.get_or_create_item(
+            model=ExtractStatus, extract_status_name="blarg"
+        )
 
     @classmethod
     def tearDownClass(cls):
         cls.session.query(Location).delete()
+        cls.session.query(ProcessSourceObject).delete()
+        cls.session.query(ProcessTargetObject).delete()
         cls.session.query(ProcessSource).delete()
         cls.session.query(ProcessTarget).delete()
         cls.session.query(ProcessDependency).delete()
@@ -851,8 +856,6 @@ class TestProcessTracker(unittest.TestCase):
             process_type="Extract",
             actor_name="UnitTesting",
             tool_name="Spark",
-            sources="Unittests",
-            targets="Unittests",
         )
 
         dependent_process.change_run_status(new_status="completed")
@@ -885,8 +888,6 @@ class TestProcessTracker(unittest.TestCase):
             process_type="Extract",
             actor_name="UnitTesting",
             tool_name="Spark",
-            sources="Unittests",
-            targets="Unittests",
         )
 
         dependent_process.change_run_status(new_status="running")
@@ -915,8 +916,6 @@ class TestProcessTracker(unittest.TestCase):
             process_type="Extract",
             actor_name="UnitTesting",
             tool_name="Spark",
-            sources="Unittests",
-            targets="Unittests",
         )
 
         dependent_process.change_run_status(new_status="failed")
@@ -976,6 +975,110 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_register_process_source_objects_one_source_ignore_sources(self):
+        """
+        Testing that when a new process is registered with both sources and source_objects, sources is ignored.
+        :return:
+        """
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Source Objects",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+            source_objects={"source": ["source_table", "source_table2"]},
+        )
+
+        given_result = (
+            self.session.query(ProcessSource)
+            .join(Process)
+            .join(Source)
+            .filter(Process.process_name == "Loading Source Objects")
+            .filter(Source.source_name == "Unittests")
+            .count()
+        )
+
+        expected_result = 0
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_source_objects_not_dict(self):
+        """
+        Testing that when a new process is registered with source_objects, and source_objects is not in dict format,
+        throw an error.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+            ProcessTracker(
+                process_name="Loading Target Objects",
+                process_type="Extract",
+                actor_name="UnitTesting",
+                tool_name="Spark",
+                source_objects=["source.source_table", "source.source_table2"],
+            )
+
+        return self.assertTrue(
+            "It appears source_objects is not a dictionary." in str(context.exception)
+        )
+
+    def test_register_process_source_objects_one_source(self):
+        """
+        Testing that when a new process is registered with source_objects, those source objects are registered as well.
+        :return:
+        """
+
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Source Objects",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            targets="Unittests",
+            source_objects={"source": ["source_table", "source_table2"]},
+        )
+
+        given_result = (
+            self.session.query(ProcessSourceObject)
+            .join(Process)
+            .filter(Process.process_name == "Loading Source Objects")
+            .count()
+        )
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_source_objects_two_sources(self):
+        """
+        Testing that when a new process is registered with multiple source objects, those source objects are registered
+        as well.
+        :return:
+        """
+
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Source Objects",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            targets="Unittests",
+            source_objects={
+                "source": ["source_table", "source_table2"],
+                "source2": ["source2_table"],
+            },
+        )
+
+        given_result = (
+            self.session.query(ProcessSourceObject)
+            .join(Process)
+            .filter(Process.process_name == "Loading Source Objects")
+            .count()
+        )
+
+        expected_result = 3
+
+        self.assertEqual(expected_result, given_result)
+
     def test_register_process_targets_one_target(self):
         """
         Testing that when a new process is registered, a target registered as well.
@@ -1014,6 +1117,112 @@ class TestProcessTracker(unittest.TestCase):
         )
 
         expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_target_objects_not_dict(self):
+        """
+        Testing that when a new process is registered with target_objects, and target_objects is not in dict format,
+        throw an error.
+        :return: 
+        """
+
+        with self.assertRaises(Exception) as context:
+            ProcessTracker(
+                process_name="Loading Target Objects",
+                process_type="Extract",
+                actor_name="UnitTesting",
+                tool_name="Spark",
+                sources="Unittests",
+                targets="Unittests",
+                target_objects=["target.target_table", "target.target_table2"],
+            )
+
+        return self.assertTrue(
+            "It appears target_objects is not a dictionary." in str(context.exception)
+        )
+
+    def test_register_process_target_objects_one_target_ignore_targets(self):
+        """
+        Testing that when a new process is registered with both targets and target_objects, targets is ignored.
+        :return:
+        """
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Target Objects",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+            target_objects={"target": ["target_table", "target_table2"]},
+        )
+
+        given_result = (
+            self.session.query(ProcessTarget)
+            .join(Process)
+            .join(Source)
+            .filter(Process.process_name == "Loading Target Objects")
+            .filter(Source.source_name == "Unittests")
+            .count()
+        )
+
+        expected_result = 0
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_target_objects_one_target(self):
+        """
+         Testing that when a new process is registered with source_objects, those source objects are registered as well.
+         :return:
+         """
+
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Target Objects",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            target_objects={"target": ["target_table", "target_table2"]},
+        )
+
+        given_result = (
+            self.session.query(ProcessTargetObject)
+            .join(Process)
+            .filter(Process.process_name == "Loading Target Objects")
+            .count()
+        )
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_target_objects_two_targets(self):
+        """
+         Testing that when a new process is registered with multiple source objects, those source objects are
+         registered as well.
+         :return:
+         """
+
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Target Objects",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            target_objects={
+                "target": ["target_table", "target_table2"],
+                "target2": ["target_table3"],
+            },
+        )
+
+        given_result = (
+            self.session.query(ProcessTargetObject)
+            .join(Process)
+            .filter(Process.process_name == "Loading Target Objects")
+            .count()
+        )
+
+        expected_result = 3
 
         self.assertEqual(expected_result, given_result)
 
