@@ -454,3 +454,53 @@ comment on table cluster_process is 'Relationship tracking between processes and
 
 alter table cluster_process owner to pt_admin;
 
+create table process_tracker.source_object_lkup
+(
+	source_object_id serial not null
+		constraint source_object_lkup_pk
+			primary key,
+	source_id integer not null
+		constraint source_object_lkup_fk01
+			references process_tracker.source_lkup,
+	source_object_name varchar(250)
+);
+
+comment on table process_tracker.source_object_lkup is 'Reference table for source/target objects.';
+
+alter table process_tracker.source_object_lkup owner to pt_admin;
+
+create unique index source_object_lkup_udx01
+	on process_tracker.source_object_lkup (source_id, source_object_name);
+
+create table process_tracker.process_target_object
+(
+	process_id integer not null
+		constraint process_target_object_fk01
+			references process_tracker.process,
+	target_object_id integer not null
+		constraint process_target_object_fk02
+			references process_tracker.source_object_lkup,
+	constraint process_target_object_pk
+		primary key (process_id, target_object_id)
+);
+
+comment on table process_tracker.process_target_object is 'Relationship between processes and target objects';
+
+alter table process_tracker.process_target_object owner to pt_admin;
+
+create table process_tracker.process_source_object
+(
+	process_id integer not null
+		constraint process_source_object_fk01
+			references process_tracker.process,
+	source_object_id integer not null
+		constraint process_source_object_fk02
+			references process_tracker.source_object_lkup,
+	constraint process_source_object_pk
+		primary key (process_id, source_object_id)
+);
+
+comment on table process_tracker.process_source_object is 'Relationship between processes and source objects';
+
+alter table process_tracker.process_source_object owner to pt_admin;
+
