@@ -68,9 +68,6 @@ class SettingsManager:
 
         if exists:
             self.read_config_file()
-        else:
-            self.logger.error("Config file not found.  Unable to read.")
-            raise Exception("Config file not found.  Unable to read.")
 
     def create_config_file(self):
         """
