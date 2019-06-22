@@ -25,6 +25,7 @@ class SettingsManager:
         self.aws_utils = AwsUtilities()
 
         exists = False
+        cloud = False
 
         if config_location is None:
             home = Path.home()
@@ -62,14 +63,13 @@ class SettingsManager:
             if self.aws_utils.determine_valid_s3_path(
                 path=self.config_path
             ) and self.aws_utils.determine_s3_file_exists(path=self.config_file):
-
+                cloud = True
                 exists = True
 
         if exists:
             self.read_config_file()
-        else:
-            # How to handle if exists is false and it's s3?
 
+        elif not cloud:
             self.create_config_file()
 
     def create_config_file(self):

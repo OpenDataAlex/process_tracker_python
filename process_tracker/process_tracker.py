@@ -71,10 +71,11 @@ class ProcessTracker:
                                 directory.
         :type config_location: file path
         """
-        config = SettingsManager().config
+        self.config_location = config_location
+        self.config = SettingsManager(config_location=self.config_location).config
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config["DEFAULT"]["log_level"])
+        self.logger.setLevel(self.config["DEFAULT"]["log_level"])
         self.logger.addHandler(console)
 
         self.data_store = DataStore(config_location=config_location)
@@ -395,11 +396,16 @@ class ProcessTracker:
                     filename=file.key,
                     location=location,
                     status="ready",
+                    config_location=self.config_location,
                 )
         else:
             for file in os.listdir(location_path):
                 ExtractTracker(
-                    process_run=self, filename=file, location=location, status="ready"
+                    process_run=self,
+                    filename=file,
+                    location=location,
+                    status="ready",
+                    config_location=self.config_location,
                 )
 
     def register_new_process_run(self):
