@@ -1,6 +1,7 @@
 # Tests for validating process_tracking works as expected.
 
 from datetime import datetime, timedelta
+import logging
 import os
 from pathlib import Path
 import time
@@ -29,7 +30,7 @@ from process_tracker.models.process import (
     ProcessTargetObject,
     ProcessTracking,
 )
-from process_tracker.models.source import Source, SourceObject
+from process_tracker.models.source import Source
 
 from process_tracker.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -43,6 +44,8 @@ test_bucket = "test_bucket"
 class TestProcessTracker(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.logger = logging.Logger(__name__)
+
         cls.data_store = DataStore()
         cls.session = cls.data_store.session
         cls.data_store_type = cls.data_store.data_store_type
@@ -696,6 +699,10 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertCountEqual(expected_result, given_result)
 
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
     @mock_s3
     def test_register_extracts_by_location_s3(self):
         """
@@ -740,9 +747,9 @@ class TestProcessTracker(unittest.TestCase):
 
             key = os.path.join(test_bucket, file)
 
-            print(file)
-            print(key)
-            print(fixtures_dir)
+            self.logger.debug("Filename %s" % file)
+            self.logger.debug("File key %s" % key)
+            self.logger.debug("Fixtures dir %s" % fixtures_dir)
 
             file = os.path.join(fixtures_dir, file)
             client.upload_file(Filename=file, Bucket=test_bucket, Key=key)
