@@ -27,6 +27,7 @@ class ExtractTracker:
         location_name=None,
         location_path=None,
         status=None,
+        config_location=None,
     ):
         """
         ExtractTracker is the primary engine for tracking data extracts
@@ -43,8 +44,10 @@ class ExtractTracker:
         :type location_name: string
         :param status: Optional if status does not need to be 'initializing', which is default.
         :type status: string
+        :param config_location: Optional location for the process_tracker configuration file.
+        :type config_location: string
         """
-        config = SettingsManager().config
+        config = SettingsManager(config_location=config_location).config
 
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config["DEFAULT"]["log_level"])
