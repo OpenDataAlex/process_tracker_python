@@ -3,6 +3,7 @@ ProcessTracker - Python
 Data integration process management made easy!
 
 [![Coverage Status](https://coveralls.io/repos/github/OpenDataAlex/process_tracker_python/badge.svg?branch=master)](https://coveralls.io/github/OpenDataAlex/process_tracker_python?branch=master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5600be1990974a4688a4fa4852edb5d5)](https://www.codacy.com/app/alexmeadows_2718/process_tracker_python?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=OpenDataAlex/process_tracker_python&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/OpenDataAlex/process_tracker_python.svg?branch=master)](https://travis-ci.org/OpenDataAlex/process_tracker_python)
 [![Downloads](https://pepy.tech/badge/processtracker)](https://pepy.tech/project/processtracker)
 [![PyPI version](https://badge.fury.io/py/processtracker.svg)](https://badge.fury.io/py/processtracker)
