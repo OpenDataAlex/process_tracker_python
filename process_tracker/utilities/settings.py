@@ -1,10 +1,10 @@
 # Settings manager and configuration, both for initialization and reading.
 
 import configparser
+import io
 import logging
 import os
 from pathlib import Path
-import tempfile
 
 from process_tracker.utilities.aws_utilities import AwsUtilities
 
@@ -68,6 +68,10 @@ class SettingsManager:
 
         if exists:
             self.read_config_file()
+        else:
+            self.logger.info("Config file does not exist.")
+            if not cloud:
+                self.create_config_file()
 
     def create_config_file(self):
         """
@@ -100,17 +104,15 @@ class SettingsManager:
             path=self.config_path
         ) and self.aws_utils.determine_s3_file_exists(path=self.config_file):
 
-            temp_file = tempfile.NamedTemporaryFile()
             bucket_name = self.aws_utils.determine_bucket_name(path=self.config_path)
 
             bucket = self.aws_utils.get_s3_bucket(bucket_name=bucket_name)
             key = self.aws_utils.determine_file_key(path=self.config_file)
 
-            bucket.download_file(key, temp_file.name)
+            cfg = bucket.Object(key).get()
+            cfg = io.TextIOWrapper(io.BytesIO(cfg["Body"].read()))
 
-            with open(temp_file.name, "r") as f:
-                self.config.readfp(f)
-            temp_file.close()
+            self.config.readfp(cfg)
 
         else:
 
