@@ -1,10 +1,10 @@
 # Settings manager and configuration, both for initialization and reading.
 
 import configparser
-import io
 import logging
 import os
 from pathlib import Path
+import tempfile
 
 from process_tracker.utilities.aws_utilities import AwsUtilities
 
@@ -109,10 +109,14 @@ class SettingsManager:
             bucket = self.aws_utils.get_s3_bucket(bucket_name=bucket_name)
             key = self.aws_utils.determine_file_key(path=self.config_file)
 
-            cfg = bucket.Object(key).get()
-            cfg = io.TextIOWrapper(io.BytesIO(cfg["Body"].read()))
+            temporary_file = tempfile.NamedTemporaryFile()
 
-            self.config.readfp(cfg)
+            bucket.download_file(key, temporary_file.name)
+
+            with open(temporary_file.name, "r") as f:
+                self.config.read_file(f)
+
+            temporary_file.close()
 
         else:
 
