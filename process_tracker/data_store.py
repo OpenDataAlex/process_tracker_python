@@ -47,9 +47,10 @@ class DataStore:
         :param config_location: Location where Process Tracker configuration file is.
         :type config_location: file path
         """
-        config = SettingsManager().config
+        log_level = SettingsManager().determine_log_level()
+
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config["DEFAULT"]["log_level"])
+        self.logger.setLevel(log_level)
 
         self.config_location = config_location
 

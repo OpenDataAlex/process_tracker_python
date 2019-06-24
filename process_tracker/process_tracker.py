@@ -72,10 +72,12 @@ class ProcessTracker:
         :type config_location: file path
         """
         self.config_location = config_location
-        self.config = SettingsManager(config_location=self.config_location).config
+        log_level = SettingsManager(
+            config_location=self.config_location
+        ).determine_log_level()
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(self.config["DEFAULT"]["log_level"])
+        self.logger.setLevel(log_level)
         self.logger.addHandler(console)
 
         self.data_store = DataStore(config_location=config_location)

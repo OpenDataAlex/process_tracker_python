@@ -47,10 +47,12 @@ class ExtractTracker:
         :param config_location: Optional location for the process_tracker configuration file.
         :type config_location: string
         """
-        config = SettingsManager(config_location=config_location).config
+        log_level = SettingsManager(
+            config_location=config_location
+        ).determine_log_level()
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config["DEFAULT"]["log_level"])
+        self.logger.setLevel(log_level)
 
         self.process_run = process_run
 

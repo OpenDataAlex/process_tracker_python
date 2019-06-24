@@ -5,10 +5,10 @@ import logging
 
 from process_tracker.utilities.settings import SettingsManager
 
-config = SettingsManager().config
+log_level = SettingsManager().determine_log_level()
 
 logger = logging.getLogger(__name__)
-logger.setLevel(config["DEFAULT"]["log_level"])
+logger.setLevel(log_level)
 
 
 def determine_low_high_date(date, previous_date, date_type):

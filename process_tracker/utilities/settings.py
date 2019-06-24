@@ -70,7 +70,7 @@ class SettingsManager:
             self.read_config_file()
         else:
             self.logger.info("Config file does not exist.")
-            if not cloud:
+            if not cloud and config_location is not None:
                 self.create_config_file()
 
     def create_config_file(self):
@@ -93,6 +93,18 @@ class SettingsManager:
 
         with open(self.config_file, "w") as configfile:
             self.config.write(configfile)
+
+    def determine_log_level(self):
+        """
+        Provide log level even if config file is not available.
+        :return:
+        """
+        try:
+            log_level = self.config["DEFAULT"]["log_level"]
+        except Exception:
+            log_level = "DEBUG"
+
+        return log_level
 
     def read_config_file(self):
         """

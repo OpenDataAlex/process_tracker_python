@@ -11,10 +11,11 @@ from process_tracker.models.extract import Location, LocationType
 
 class LocationTracker:
     def __init__(self, location_path, location_name=None, data_store=None):
-        config = SettingsManager().config
+
+        log_level = SettingsManager().determine_log_level()
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config["DEFAULT"]["log_level"])
+        self.logger.setLevel(log_level)
         self.logger.addHandler(console)
 
         if data_store is None:
