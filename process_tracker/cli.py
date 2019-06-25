@@ -4,7 +4,7 @@
 import click
 import logging
 
-from process_tracker.data_store import DataStore
+from process_tracker.utilities.data_store import DataStore
 from process_tracker.utilities.logging import console
 
 data_store = DataStore()
