@@ -8,7 +8,7 @@ import os
 import boto3
 from sqlalchemy.orm import aliased
 
-from process_tracker.data_store import DataStore
+from process_tracker.utilities.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.location_tracker import LocationTracker
 from process_tracker.utilities.logging import console

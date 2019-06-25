@@ -1,13 +1,12 @@
 import logging
 import os
-import time
 import unittest
 
 from click.testing import CliRunner
 import sqlalchemy
 
 from process_tracker.cli import main
-from process_tracker.data_store import DataStore
+from process_tracker.utilities.data_store import DataStore
 from process_tracker.process_tracker import ProcessTracker
 from process_tracker.utilities.logging import console
 

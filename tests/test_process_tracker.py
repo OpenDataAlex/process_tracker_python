@@ -32,7 +32,7 @@ from process_tracker.models.process import (
 )
 from process_tracker.models.source import Source
 
-from process_tracker.data_store import DataStore
+from process_tracker.utilities.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
 from process_tracker.utilities import utilities

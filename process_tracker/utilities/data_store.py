@@ -47,12 +47,13 @@ class DataStore:
         :param config_location: Location where Process Tracker configuration file is.
         :type config_location: file path
         """
-        log_level = SettingsManager().determine_log_level()
+        self.config = SettingsManager(config_location=config_location).config
+        log_level = SettingsManager(
+            config_location=config_location
+        ).determine_log_level()
 
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
-
-        self.config_location = config_location
 
         data_store = self.verify_and_connect_to_data_store()
         self.engine = data_store["engine"]
@@ -598,15 +599,13 @@ class DataStore:
         Based on environment variables, create the data store connection engine.
         :return:
         """
-        self.logger.info("Obtaining application configuration.")
-        config = SettingsManager(config_location=self.config_location).config
 
-        data_store_type = config["DEFAULT"]["data_store_type"]
-        data_store_username = config["DEFAULT"]["data_store_username"]
-        data_store_password = config["DEFAULT"]["data_store_password"]
-        data_store_host = config["DEFAULT"]["data_store_host"]
-        data_store_port = config["DEFAULT"]["data_store_port"]
-        data_store_name = config["DEFAULT"]["data_store_name"]
+        data_store_type = self.config["DEFAULT"]["data_store_type"]
+        data_store_username = self.config["DEFAULT"]["data_store_username"]
+        data_store_password = self.config["DEFAULT"]["data_store_password"]
+        data_store_host = self.config["DEFAULT"]["data_store_host"]
+        data_store_port = self.config["DEFAULT"]["data_store_port"]
+        data_store_name = self.config["DEFAULT"]["data_store_name"]
 
         errors = []
 

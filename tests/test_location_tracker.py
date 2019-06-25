@@ -1,6 +1,6 @@
 import unittest
 
-from process_tracker.data_store import DataStore
+from process_tracker.utilities.data_store import DataStore
 from process_tracker.location_tracker import LocationTracker
 
 
