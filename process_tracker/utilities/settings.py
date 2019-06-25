@@ -24,7 +24,7 @@ class SettingsManager:
 
         self.aws_utils = AwsUtilities()
 
-        exists = False
+        local_exists = False
         cloud = False
 
         if config_location is None:

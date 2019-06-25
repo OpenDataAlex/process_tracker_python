@@ -52,7 +52,7 @@ class ErrorTracking(Base):
         nullable=False,
     )
 
-    error_tracking = relationship("ProcessTracking", passive_deletes="all")
+    error_tracking = relationship("ProcessTracking")
 
     def __repr__(self):
 
@@ -139,12 +139,10 @@ class Process(Base):
 
     cluster_processes = relationship("ClusterProcess", passive_deletes="all")
     process_tracking = relationship("ProcessTracking", passive_deletes="all")
-    process_type = relationship(
-        "ProcessType", back_populates="processes", passive_deletes="all"
-    )
+    process_type = relationship("ProcessType", back_populates="processes")
     sources = relationship("ProcessSource", passive_deletes="all")
     targets = relationship("ProcessTarget", passive_deletes="all")
-    tool = relationship("Tool", passive_deletes="all")
+    tool = relationship("Tool")
 
     def __repr__(self):
 
@@ -173,8 +171,8 @@ class ProcessSource(Base):
         nullable=False,
     )
 
-    processes = relationship("Process", passive_deletes="all")
-    sources = relationship("Source", passive_deletes="all")
+    processes = relationship("Process")
+    sources = relationship("Source")
 
     def __repr__(self):
 
@@ -201,8 +199,8 @@ class ProcessSourceObject(Base):
         nullable=False,
     )
 
-    objects = relationship("SourceObject", passive_deletes="all")
-    processes = relationship("Process", passive_deletes="all")
+    objects = relationship("SourceObject")
+    processes = relationship("Process")
 
     def __repr__(self):
         return "<ProcessSourceObject (process_id=%s, source_object=%s)>" % (
@@ -228,8 +226,8 @@ class ProcessTarget(Base):
         nullable=False,
     )
 
-    processes = relationship("Process", passive_deletes="all")
-    targets = relationship("Source", passive_deletes="all")
+    processes = relationship("Process")
+    targets = relationship("Source")
 
     def __repr__(self):
         return "<ProcessSource (process=%s, target_source=%s)>" % (
@@ -256,8 +254,8 @@ class ProcessTargetObject(Base):
         nullable=False,
     )
 
-    objects = relationship("SourceObject", passive_deletes="all")
-    processes = relationship("Process", passive_deletes="all")
+    objects = relationship("SourceObject")
+    processes = relationship("Process")
 
     def __repr__(self):
         return "<ProcessTargetObject (process_id=%s, target_object=%s)>" % (
@@ -284,12 +282,8 @@ class ProcessDependency(Base):
         nullable=False,
     )
 
-    child_process = relationship(
-        "Process", foreign_keys=[child_process_id], passive_deletes="all"
-    )
-    parent_process = relationship(
-        "Process", foreign_keys=[parent_process_id], passive_deletes="all"
-    )
+    child_process = relationship("Process", foreign_keys=[child_process_id])
+    parent_process = relationship("Process", foreign_keys=[parent_process_id])
 
     def __repr__(self):
 
@@ -333,9 +327,7 @@ class ProcessTracking(Base):
     extracts = relationship(
         "ExtractProcess", back_populates="extract_processes", passive_deletes="all"
     )
-    process = relationship(
-        "Process", back_populates="process_tracking", passive_deletes="all"
-    )
+    process = relationship("Process", back_populates="process_tracking")
 
     def __repr__(self):
 

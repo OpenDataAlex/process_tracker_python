@@ -52,12 +52,8 @@ class ClusterProcess(Base):
         nullable=False,
     )
 
-    processes = relationship(
-        "Process", back_populates="cluster_processes", passive_deletes="all"
-    )
-    clusters = relationship(
-        "Cluster", back_populates="process_clusters", passive_deletes="all"
-    )
+    processes = relationship("Process", back_populates="cluster_processes")
+    clusters = relationship("Cluster", back_populates="process_clusters")
 
     def __repr__(self):
 

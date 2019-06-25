@@ -66,12 +66,8 @@ class Extract(Base):
     extract_process = relationship(
         "ExtractProcess", back_populates="process_extracts", passive_deletes="all"
     )
-    extract_status = relationship(
-        "ExtractStatus", foreign_keys=[extract_status_id], passive_deletes="all"
-    )
-    locations = relationship(
-        "Location", foreign_keys=[extract_location_id], passive_deletes="all"
-    )
+    extract_status = relationship("ExtractStatus", foreign_keys=[extract_status_id])
+    locations = relationship("Location", foreign_keys=[extract_location_id])
 
     def __repr__(self):
 
@@ -104,12 +100,8 @@ class ExtractDependency(Base):
         nullable=False,
     )
 
-    child_extract = relationship(
-        "Extract", foreign_keys=[child_extract_id], passive_deletes="all"
-    )
-    parent_extract = relationship(
-        "Extract", foreign_keys=[parent_extract_id], passive_deletes="all"
-    )
+    child_extract = relationship("Extract", foreign_keys=[child_extract_id])
+    parent_extract = relationship("Extract", foreign_keys=[parent_extract_id])
 
     def __repr__(self):
 
@@ -145,11 +137,9 @@ class ExtractProcess(Base):
         DateTime, nullable=False, default=datetime.now()
     )
 
-    process_extracts = relationship(
-        "Extract", foreign_keys=[extract_tracking_id], passive_deletes="all"
-    )
+    process_extracts = relationship("Extract", foreign_keys=[extract_tracking_id])
     extract_processes = relationship(
-        "ProcessTracking", foreign_keys=[process_tracking_id], passive_deletes="all"
+        "ProcessTracking", foreign_keys=[process_tracking_id]
     )
 
     def __repr__(self):
@@ -207,9 +197,7 @@ class Location(Base):
 
     extracts = relationship("Extract")
 
-    location_types = relationship(
-        "LocationType", foreign_keys=[location_type], passive_deletes="all"
-    )
+    location_types = relationship("LocationType", foreign_keys=[location_type])
 
     def __repr__(self):
 
