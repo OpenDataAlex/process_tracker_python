@@ -36,7 +36,7 @@ class SettingsManager:
             )
 
             exists = os.path.isfile(self.config_file)
-
+            file_type = "local"
         else:
             self.config_path = config_location
 
@@ -63,11 +63,11 @@ class SettingsManager:
             if self.aws_utils.determine_valid_s3_path(
                 path=self.config_path
             ) and self.aws_utils.determine_s3_file_exists(path=self.config_file):
-                cloud = True
+                file_type = "aws"
                 exists = True
 
         if exists:
-            self.read_config_file()
+            self.read_config_file(file_type=file_type)
         else:
             self.logger.info("Config file does not exist.")
             if not cloud and config_location is not None:
@@ -106,15 +106,13 @@ class SettingsManager:
 
         return log_level
 
-    def read_config_file(self):
+    def read_config_file(self, file_type):
         """
         Read and parse the config file for use.
         :return:
         """
 
-        if self.aws_utils.determine_valid_s3_path(
-            path=self.config_path
-        ) and self.aws_utils.determine_s3_file_exists(path=self.config_file):
+        if file_type == "aws":
 
             bucket_name = self.aws_utils.determine_bucket_name(path=self.config_path)
 
@@ -130,6 +128,9 @@ class SettingsManager:
 
             temporary_file.close()
 
-        else:
+        elif file_type == "local":
 
             return self.config.read(self.config_file)
+
+        else:
+            self.logger.error("File type is not valid.")
