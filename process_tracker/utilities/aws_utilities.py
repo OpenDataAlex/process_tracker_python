@@ -65,10 +65,9 @@ class AwsUtilities:
                         bucket_name = path.split("/")[0]
 
                     else:
+                        # For URL format where bucket is the first item past http(s)://
                         bucket_name = path.split(".")[0]
-                else:
-                    # For URL format where bucket is the first item past http(s)://
-                    bucket_name = path.split(".")[0]
+
         else:
             error_msg = "It appears the URL is not a valid s3 path. %s" % path
 
@@ -101,13 +100,16 @@ class AwsUtilities:
                 size = len(groups) - 1
                 key = groups[size]
 
+                # For files where the bucket is provided after the https://
                 if key.count(".") >= 2:
                     groups = key.split(".", 1)
                     key = groups[1]
 
             else:
-                self.logger.debug("File does not match url pattern.")
-                key = groups[1]
+                error_msg = "It appears the URL is not a valid s3 path. %s" % path
+
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
 
         else:
             error_msg = "It appears the URL is not valid. %s" % path
@@ -159,6 +161,12 @@ class AwsUtilities:
             self.logger.error("Path is invalid.")
             return False
 
-    def get_s3_bucket(self, bucket_name):
+    def get_s3_bucket(self, path):
+        """
+        For the given path, find the bucket and return the bucket object.
+        :param path:
+        :return:
+        """
+        bucket_name = self.determine_bucket_name(path=path)
 
         return self.s3.Bucket(bucket_name)

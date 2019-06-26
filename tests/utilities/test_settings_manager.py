@@ -31,6 +31,31 @@ class TestSettingsManager(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_config_location_set_no_file(self):
+        """
+        Testing that if config_location is set, but no config file is provided and the path does not end with
+        a forward slash, it is added.
+        :return:
+        """
+        expected_result = "/tmp/testing/process_tracker_config.ini"
+
+        given_result = SettingsManager(config_location="/tmp/testing").config_file
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_config_location_set_with_file(self):
+        """
+        Testing that if config_location is set, but a config file is provided.
+        :return:
+        """
+        expected_result = "/tmp/testing/process_tracker_config.ini"
+
+        given_result = SettingsManager(
+            config_location="/tmp/testing/process_tracker_config.ini"
+        ).config_file
+
+        self.assertEqual(expected_result, given_result)
+
     def test_config_location_s3(self):
         """
         Testing that if config_location is set and the path is an s3 file/location, use that instead of the home
@@ -56,6 +81,18 @@ class TestSettingsManager(unittest.TestCase):
         expected_result = "None"
 
         self.assertEqual(expected_result, given_result)
+
+    # def test_determine_log_level_no_file(self):
+    #     """
+    #     If unable to get config option 'log_level', return value 'DEBUG'
+    #     :return:
+    #     """
+    #     expected_result = "DEBUG"
+    #     given_result = SettingsManager(
+    #         config_location="/not/real"
+    #     ).determine_log_level()
+    #
+    #     self.assertEqual(expected_result, given_result)
 
     @unittest.skipIf(
         "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",

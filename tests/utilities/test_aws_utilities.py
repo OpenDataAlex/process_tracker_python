@@ -112,6 +112,22 @@ class TestAwsUtilities(unittest.TestCase):
             in str(context.exception)
         )
 
+    def test_determine_bucket_name_invalid_path_url(self):
+        """
+        If path provided is an invalid s3 path, throw exception.
+        :return:
+        """
+        path = "httpz://s3.amazonaws.com/test_bucket/bucket_file.csv"
+
+        with self.assertRaises(Exception) as context:
+
+            self.aws_util.determine_bucket_name(path=path)
+
+        return self.assertTrue(
+            "It appears the URL is not valid. httpz://s3.amazonaws.com/test_bucket/bucket_file.csv"
+            in str(context.exception)
+        )
+
     def test_determine_file_key_valid_path_s3(self):
         """
         If path provided is an AWS CLI url, parse and return the object key.
@@ -237,6 +253,23 @@ class TestAwsUtilities(unittest.TestCase):
 
         return self.assertTrue(
             "It appears the URL is not valid. invalid.path/test_bucket/bucket_file.csv"
+            in str(context.exception)
+        )
+
+    def test_determine_file_key_invalid_path_url(self):
+        """
+        If path provided is an invalid URL, throw an exception.
+        :return:
+        """
+
+        path = "https://s3.argle-barglenarf.amazonaws.com/test_bucket/test_file.csv"
+
+        with self.assertRaises(Exception) as context:
+
+            self.aws_util.determine_file_key(path=path)
+
+        return self.assertTrue(
+            "It appears the URL is not a valid s3 path. https://s3.argle-barglenarf.amazonaws.com/test_bucket/test_file.csv"
             in str(context.exception)
         )
 

@@ -5,12 +5,12 @@ from datetime import datetime
 import logging
 import os
 
-import boto3
 from sqlalchemy.orm import aliased
 
 from process_tracker.utilities.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.location_tracker import LocationTracker
+from process_tracker.utilities.aws_utilities import AwsUtilities
 from process_tracker.utilities.logging import console
 from process_tracker.utilities.settings import SettingsManager
 from process_tracker.utilities import utilities
@@ -382,15 +382,11 @@ class ProcessTracker:
         )
 
         if location.location_type.location_type_name == "s3":
-            s3 = boto3.resource("s3")
+            aws_util = AwsUtilities()
 
             path = location.location_path
 
-            path = path[path.startswith("s3://") and len("s3://") :]
-
-            self.logger.debug("Path is now %s" % path)
-
-            bucket = s3.Bucket(path)
+            bucket = aws_util.get_s3_bucket(path=path)
 
             for file in bucket.objects.all():
                 ExtractTracker(

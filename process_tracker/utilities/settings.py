@@ -116,9 +116,7 @@ class SettingsManager:
             path=self.config_path
         ) and self.aws_utils.determine_s3_file_exists(path=self.config_file):
 
-            bucket_name = self.aws_utils.determine_bucket_name(path=self.config_path)
-
-            bucket = self.aws_utils.get_s3_bucket(bucket_name=bucket_name)
+            bucket = self.aws_utils.get_s3_bucket(path=self.config_path)
             key = self.aws_utils.determine_file_key(path=self.config_file)
 
             temporary_file = tempfile.NamedTemporaryFile()
