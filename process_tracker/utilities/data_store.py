@@ -3,10 +3,11 @@ import logging
 from click import ClickException
 
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import aliased, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists
 
 from process_tracker.utilities.settings import SettingsManager
+from process_tracker.utilities.utilities import decrypt_password
 
 from process_tracker.models.model_base import Base
 from process_tracker.models.actor import Actor
@@ -637,6 +638,9 @@ class DataStore:
             )
 
             raise Exception(errors)
+
+        if "Encrypted" in data_store_password:
+            data_store_password = decrypt_password(password=data_store_password)
 
         if data_store_type in supported_data_stores:
 
