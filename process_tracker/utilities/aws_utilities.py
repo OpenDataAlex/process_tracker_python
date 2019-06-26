@@ -9,10 +9,11 @@ from botocore.errorfactory import ClientError
 
 
 class AwsUtilities:
-    def __init__(self):
+    def __init__(self, config_location=None):
+        self.log_level = "INFO"
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel("DEBUG")
+        self.logger.setLevel(self.log_level)
 
         self.s3 = boto3.resource("s3")
 
@@ -158,7 +159,7 @@ class AwsUtilities:
             self.logger.debug("s3 and .amazonaws.com in path")
             return True
         else:
-            self.logger.error("Path is invalid.")
+            self.logger.info("Path is not to s3.")
             return False
 
     def get_s3_bucket(self, path):
