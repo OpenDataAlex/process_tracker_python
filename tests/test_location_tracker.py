@@ -65,3 +65,14 @@ class TestLocationTracker(unittest.TestCase):
         ).location_type.location_type_name
 
         self.assertEqual(expected_result, given_result)
+
+    def test_location_tracker_no_data_store(self):
+        """
+        Testing that if location tracker is used but data store is not provided, throw error.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+            LocationTracker(location_name="testing", location_path="fake path")
+
+        self.assertTrue("Data store is not set." in str(context.exception))

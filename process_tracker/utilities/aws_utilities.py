@@ -2,6 +2,7 @@
 # Utilities for working with AWS services
 
 import logging
+import re
 
 import boto3
 from botocore.errorfactory import ClientError
@@ -14,6 +15,10 @@ class AwsUtilities:
         self.logger.setLevel("DEBUG")
 
         self.s3 = boto3.resource("s3")
+
+        self.url_match = re.compile(
+            "s3.([a-z]{2}-[a-z]{3,9}(-[a-z]{3,9}){0,1}-[1,2,3,4]{1}.){0,1}amazonaws.com\/"
+        )
 
     def determine_bucket_name(self, path):
         """
@@ -51,7 +56,18 @@ class AwsUtilities:
                     self.logger.error(error_msg)
                     raise Exception(error_msg)
 
-                bucket_name = path.split(".")[0]
+                if self.url_match.search(path):
+                    # For URL format where bucket is the first item past the .com portion of the URL.
+                    self.logger.debug("Path matched url_match")
+                    path = re.sub(self.url_match, "", path)
+
+                    if "/" in path:
+                        bucket_name = path.split("/")[0]
+
+                    else:
+                        # For URL format where bucket is the first item past http(s)://
+                        bucket_name = path.split(".")[0]
+
         else:
             error_msg = "It appears the URL is not a valid s3 path. %s" % path
 
@@ -74,9 +90,26 @@ class AwsUtilities:
             key = groups[3]
 
         elif "s3" in path and ".amazonaws.com" in path:
-            groups = path.split(".amazonaws.com/")
 
-            key = groups[1]
+            groups = path.split("/", 4)
+
+            if self.url_match.search(path):
+                self.logger.debug("File matches url pattern.")
+                path = re.sub(self.url_match, "", path)
+                groups = path.split("/", 3)
+                size = len(groups) - 1
+                key = groups[size]
+
+                # For files where the bucket is provided after the https://
+                if key.count(".") >= 2:
+                    groups = key.split(".", 1)
+                    key = groups[1]
+
+            else:
+                error_msg = "It appears the URL is not a valid s3 path. %s" % path
+
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
 
         else:
             error_msg = "It appears the URL is not valid. %s" % path
@@ -128,16 +161,12 @@ class AwsUtilities:
             self.logger.error("Path is invalid.")
             return False
 
-    def get_s3_bucket(self, bucket_name):
-
-        return self.s3.Bucket(bucket_name)
-
-    def read_from_s3(self, bucket_name, filename):
+    def get_s3_bucket(self, path):
         """
-        With a given bucket and filename, read from s3.
-        :param bucket:
-        :param file:
+        For the given path, find the bucket and return the bucket object.
+        :param path:
         :return:
         """
+        bucket_name = self.determine_bucket_name(path=path)
 
-        bucket = self.get_s3_bucket(bucket_name=bucket_name)
+        return self.s3.Bucket(bucket_name)
