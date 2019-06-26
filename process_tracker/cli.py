@@ -6,6 +6,7 @@ import logging
 
 from process_tracker.utilities.data_store import DataStore
 from process_tracker.utilities.logging import console
+from process_tracker.utilities.utilities import encrypt_password
 
 data_store = DataStore()
 logger = logging.getLogger("Process Tracker")
@@ -211,4 +212,15 @@ def update(
         max_memory=max_memory,
         processing_unit=processing_unit,
         memory_unit=memory_unit,
+    )
+
+
+@main.command()
+@click.option("-p", "--password", help="The password to be encrypted")
+def encrypt(password):
+    click.echo("Attempting to encrypt the provided password.")
+    password = encrypt_password(password=password)
+    click.echo("Encrypted password is now: %s" % password)
+    click.echo(
+        "When storing in your config file, please be sure to include 'Encrypted ' as well as the hash."
     )
