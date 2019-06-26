@@ -3,7 +3,6 @@
 from datetime import datetime
 import logging
 from pathlib import Path
-from os.path import join
 
 from sqlalchemy.orm import aliased
 

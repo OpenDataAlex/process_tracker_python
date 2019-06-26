@@ -70,10 +70,10 @@ class TestSettingsManager(unittest.TestCase):
         expected_keys = ["process_tracker_config.ini"]
         test_bucket = "test_bucket"
 
-        path = (
-            "s3://test_bucket/process_tracker_config/SANDBOX/process_tracker_config.ini"
-        )
-        # path = "s3://test_bucket/process_tracker_config.ini"
+        # path = (
+        #    "s3://test_bucket/process_tracker_config/SANDBOX/process_tracker_config.ini"
+        # )
+        path = "s3://test_bucket/process_tracker_config.ini"
 
         client = boto3.client(
             "s3",

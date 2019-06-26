@@ -3,7 +3,7 @@ import logging
 from click import ClickException
 
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import aliased, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists
 
 from process_tracker.utilities.settings import SettingsManager

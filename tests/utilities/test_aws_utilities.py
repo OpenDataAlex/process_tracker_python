@@ -29,7 +29,7 @@ class TestAwsUtilities(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
-    def test_determine_bucket_name_valid_path_url_http(self):
+    def test_determine_bucket_name_valid_path_url_http_bucket_front(self):
         """
         If path provided is an AWS http URL, parse and return the bucket name.
         :return:
@@ -42,12 +42,53 @@ class TestAwsUtilities(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
-    def test_determine_bucket_name_valid_path_url_https(self):
+    def test_determine_bucket_name_valid_path_url_https_bucket_front(self):
         """
         If path provided is an AWS https URL, parse and return the bucket name
         :return:
         """
         path = "https://test_bucket.s3.amazonaws.com/bucket_file.csv"
+
+        expected_result = "test_bucket"
+
+        given_result = self.aws_util.determine_bucket_name(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_bucket_name_valid_path_url_http_bucket_back(self):
+        """
+        If path provided is an AWS http URL, parse and return the bucket name.
+        :return:
+        """
+        path = "http://s3.amazonaws.com/test_bucket/bucket_file.csv"
+
+        expected_result = "test_bucket"
+
+        given_result = self.aws_util.determine_bucket_name(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_bucket_name_valid_path_url_http_bucket_back_long_key(self):
+        """
+        If path provided is an AWS http URL, parse and return the bucket name.
+        :return:
+        """
+        path = (
+            "http://s3.amazonaws.com/test_bucket/with/subdirs/aplenty/bucket_file.csv"
+        )
+
+        expected_result = "test_bucket"
+
+        given_result = self.aws_util.determine_bucket_name(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_bucket_name_valid_path_url_https_bucket_back(self):
+        """
+        If path provided is an AWS https URL, parse and return the bucket name
+        :return:
+        """
+        path = "https://s3.amazonaws.com/test_bucket/bucket_file.csv"
 
         expected_result = "test_bucket"
 
@@ -84,7 +125,7 @@ class TestAwsUtilities(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
-    def test_determine_file_key_valid_path_http(self):
+    def test_determine_file_key_valid_path_http_bucket_front(self):
         """
         If path provided is an AWS http URL, parse and return the object key.
         :return:
@@ -98,13 +139,83 @@ class TestAwsUtilities(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
-    def test_determine_file_key_valid_path_https(self):
+    def test_determine_file_key_valid_path_https_bucket_front(self):
         """
         If path provided is an AWS https URL, parse and return the object key.
         :return:
         """
 
         path = "https://test_bucket.s3.amazonaws.com/bucket_file.csv"
+
+        expected_result = "bucket_file.csv"
+
+        given_result = self.aws_util.determine_file_key(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_file_key_valid_path_http_bucket_back(self):
+        """
+        If path provided is an AWS http URL, parse and return the object key.
+        :return:
+        """
+
+        path = "http://s3.amazonaws.com/test_bucket/bucket_file.csv"
+
+        expected_result = "bucket_file.csv"
+
+        given_result = self.aws_util.determine_file_key(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_file_key_valid_path_http_bucket_back_long_key(self):
+        """
+        If path provided is an AWS http URL, parse and return the object key.
+        :return:
+        """
+
+        path = "http://s3.amazonaws.com/test_bucket/with/afew/subdir/bucket_file.csv"
+
+        expected_result = "with/afew/subdir/bucket_file.csv"
+
+        given_result = self.aws_util.determine_file_key(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_file_key_valid_path_https_bucket_back(self):
+        """
+        If path provided is an AWS https URL, parse and return the object key.
+        :return:
+        """
+
+        path = "https://s3.amazonaws.com/test_bucket/bucket_file.csv"
+
+        expected_result = "bucket_file.csv"
+
+        given_result = self.aws_util.determine_file_key(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_file_key_valid_path_http_bucket_back_with_region(self):
+        """
+        If path provided is an AWS http URL, parse and return the object key.
+        :return:
+        """
+
+        path = "http://s3.us-east-1.amazonaws.com/test_bucket/bucket_file.csv"
+
+        expected_result = "bucket_file.csv"
+
+        given_result = self.aws_util.determine_file_key(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_file_key_valid_path_https_bucket_back_with_region(self):
+        """
+        If path provided is an AWS https URL, parse and return the object key.
+        :return:
+        """
+
+        path = "https://s3.us-east-1.amazonaws.com/test_bucket/bucket_file.csv"
 
         expected_result = "bucket_file.csv"
 

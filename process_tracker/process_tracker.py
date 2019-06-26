@@ -475,9 +475,9 @@ class ProcessTracker:
             self.session.add(new_run)
             self.session.commit()
 
-            return new_run
-
             self.logger.info("Process tracking record added for %s" % self.process_name)
+
+            return new_run
 
         else:
             raise Exception("The process %s is currently running." % self.process_name)
