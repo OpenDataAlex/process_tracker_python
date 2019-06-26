@@ -46,3 +46,25 @@ class TestUtilities(unittest.TestCase):
         )
 
         self.assertEqual(expected_result, given_result)
+
+    def test_encrypt_password(self):
+        """
+        Given a password, it's hash will be returned.
+        :return:
+        """
+        expected_result = "Encrypted wqfCvsKKwpzCrsOYw4rCvsKBwrHCrMOawr_DlcOZwro="
+        given_result = utilities.encrypt_password("MySecretPassword")
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_decrypt_password(self):
+        """
+        Given an encrypted password, return it's plaintext.
+        :return:
+        """
+        expected_result = "MySecretPassword"
+        given_result = utilities.decrypt_password(
+            password="Encrypted wqfCvsKKwpzCrsOYw4rCvsKBwrHCrMOawr_DlcOZwro="
+        )
+
+        self.assertEqual(expected_result, given_result)

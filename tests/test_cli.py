@@ -927,4 +927,14 @@ class TestCli(unittest.TestCase):
         self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
 
-    # def test_update_process_dependency(self):
+    def test_encrypt_password(self):
+        """
+        Testing that when trying to encrypt a password via CLI, it is encrypted.
+        :return:
+        """
+
+        result = self.runner.invoke(main, "encrypt -p MySecretPassword")
+
+        expected_result = "Encrypted wqfCvsKKwpzCrsOYw4rCvsKBwrHCrMOawr_DlcOZwro="
+
+        self.assertIn(expected_result, result.output)

@@ -1,9 +1,12 @@
 """
 Space for generalized helpers that can be utilized across the entire framework.
 """
+import base64
 import logging
 
 from process_tracker.utilities.settings import SettingsManager
+
+key = "ZE77KfeJ1P9gHfgVzsZIaafzoZXEuwKI7wDe4c1F8AY="
 
 log_level = SettingsManager().determine_log_level()
 
@@ -56,3 +59,43 @@ def timestamp_converter(data_store_type, timestamp):
         timestamp = timestamp
 
     return timestamp
+
+
+def encrypt_password(password):
+    """
+    Helper function for encrypting passwords (specifically for data store connections).
+    :param password:
+    :return:
+    """
+    encoded_chars = []
+
+    for i in range(len(password)):
+        key_c = key[i % len(key)]
+        encoded_c = chr(ord(password[i]) + ord(key_c) % 256)
+        encoded_chars.append(encoded_c)
+
+    encoded_password = "".join(encoded_chars).encode()
+    encrypted_password = base64.urlsafe_b64encode(encoded_password).decode()
+
+    return "Encrypted %s" % encrypted_password
+
+
+def decrypt_password(password):
+    """
+    Helper function for decrypting passwords (specifically for data store connections).
+    :param password:
+    :return:
+    """
+
+    password = password.replace("Encrypted ", "")
+
+    decode = []
+    encode = base64.urlsafe_b64decode(password).decode()
+    for i in range(len(encode)):
+        key_c = key[i % len(key)]
+        dec_c = chr((256 + ord(encode[i]) - ord(key_c)) % 256)
+        decode.append(dec_c)
+
+    decrypted_password = "".join(decode)
+
+    return decrypted_password
