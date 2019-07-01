@@ -353,8 +353,8 @@ create table process_tracker.process_source_object
 
 create table source_dataset_type
 (
-	source_id int null,
-	dataset_type_id int null,
+	source_id int not null,
+	dataset_type_id int not null,
 	constraint source_dataset_type_pk
 		primary key (source_id, dataset_type_id),
 	constraint source_dataset_type_fk01
