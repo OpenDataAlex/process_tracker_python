@@ -94,3 +94,13 @@ class LocationTracker:
             )
 
         return location_type
+
+    def register_file_count(self, file_count):
+        """
+        For the given file count, replace existing count with the new count.
+        :param file_count:
+        :return:
+        """
+
+        self.location.location_file_count = file_count
+        self.data_store.session.commit()

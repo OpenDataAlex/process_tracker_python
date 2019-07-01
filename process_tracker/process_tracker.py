@@ -400,6 +400,8 @@ class ProcessTracker:
             data_store=self.data_store,
         )
 
+        file_count = 0
+
         if location.location_type.location_type_name == "s3":
             aws_util = AwsUtilities()
 
@@ -408,6 +410,9 @@ class ProcessTracker:
             bucket = aws_util.get_s3_bucket(path=path)
 
             for file in bucket.objects.all():
+                file_count += 1
+
+                self.logger.debug("Registering file %s." % file.key)
                 ExtractTracker(
                     process_run=self,
                     filename=file.key,
@@ -417,6 +422,9 @@ class ProcessTracker:
                 )
         else:
             for file in os.listdir(location_path):
+                file_count += 1
+
+                self.logger.debug("Registering file %s." % file)
                 ExtractTracker(
                     process_run=self,
                     filename=file,
@@ -424,6 +432,10 @@ class ProcessTracker:
                     status="ready",
                     config_location=self.config_location,
                 )
+
+        if file_count != 0:
+            # Only want to register the file count for a given location if files actually there.
+            location.register_file_count(file_count=file_count)
 
     def register_new_process_run(self):
         """

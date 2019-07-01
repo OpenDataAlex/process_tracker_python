@@ -43,6 +43,7 @@ create table location_lkup
 	location_name varchar(750) not null,
 	location_path varchar(750) not null,
 	location_type int null,
+	location_file_count int null,
 	constraint location_name
 		unique (location_name),
 	constraint location_path
