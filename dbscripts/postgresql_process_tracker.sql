@@ -4,6 +4,22 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
+create table process_tracker.dataset_type_lkup
+(
+	dataset_type_id serial not null
+		constraint dataset_type_lkup_pk
+			primary key,
+	dataset_type varchar(250)
+);
+
+comment on table process_tracker.dataset_type_lkup is 'High level of dataset type categories';
+
+alter table process_tracker.dataset_type_lkup owner to pt_admin;
+
+create unique index dataset_type_lkup_dataset_type_uindex
+	on process_tracker.dataset_type_lkup (dataset_type);
+
+
 create table error_type_lkup
 (
 	error_type_id serial not null
@@ -503,4 +519,68 @@ create table process_tracker.process_source_object
 comment on table process_tracker.process_source_object is 'Relationship between processes and source objects';
 
 alter table process_tracker.process_source_object owner to pt_admin;
+
+create table process_tracker.extract_dataset_type
+(
+	extract_id integer not null
+		constraint extract_dataset_type_fk01
+			references process_tracker.extract_tracking,
+	dataset_type_id integer not null
+		constraint extract_dataset_type_fk02
+			references process_tracker.dataset_type_lkup,
+	constraint extract_dataset_type_pk
+		primary key (extract_id, dataset_type_id)
+);
+
+comment on table process_tracker.extract_dataset_type is 'Relationship between extract file and dataset type';
+
+alter table process_tracker.extract_dataset_type owner to pt_admin;
+
+create table process_tracker.process_dataset_type
+(
+	process_id integer not null
+		constraint process_dataset_type_fk01
+			references process_tracker.process,
+	dataset_type_id integer not null
+		constraint process_dataset_type_fk02
+			references process_tracker.dataset_type_lkup,
+	constraint process_dataset_type_pk
+		primary key (process_id, dataset_type_id)
+);
+
+comment on table process_tracker.process_dataset_type is 'Relationship between process and dataset type';
+
+alter table process_tracker.process_dataset_type owner to pt_admin;
+
+create table process_tracker.source_dataset_type
+(
+	source_id integer not null
+		constraint source_dataset_type_fk01
+			references process_tracker.source_lkup,
+	dataset_type_id integer not null
+		constraint source_dataset_type_fk02
+			references process_tracker.dataset_type_lkup,
+	constraint source_dataset_type_pk
+		primary key (source_id, dataset_type_id)
+);
+
+comment on table process_tracker.source_dataset_type is 'Relationship between source and dataset type';
+
+alter table process_tracker.source_dataset_type owner to pt_admin;
+
+create table process_tracker.source_object_dataset_type
+(
+	source_object_id integer not null
+		constraint source_object_dataset_type_fk01
+			references process_tracker.source_object_lkup,
+	dataset_type_id integer not null
+		constraint source_object_dataset_type_fk02
+			references process_tracker.dataset_type_lkup,
+	constraint source_object_dataset_type_pk
+		primary key (source_object_id, dataset_type_id)
+);
+
+comment on table process_tracker.source_object_dataset_type is 'Relationship between source object and dataset type';
+
+alter table process_tracker.source_object_dataset_type owner to pt_admin;
 

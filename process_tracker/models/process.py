@@ -2,7 +2,16 @@
 # Models for Process entities
 
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Sequence, String
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Sequence,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from process_tracker.models.model_base import default_date, Base
@@ -150,6 +159,37 @@ class Process(Base):
             self.process_id,
             self.process_name,
             self.process_type_id,
+        )
+
+
+class ProcessDatasetType(Base):
+
+    __tablename__ = "process_dataset_type"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    dataset_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.dataset_type_lkup.dataset_type_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    UniqueConstraint(process_id, dataset_type_id)
+
+    dataset_type_processes = relationship("Process", passive_deletes="all")
+    process_dataset_types = relationship("DatasetType", passive_deletes="all")
+
+    def __repr__(self):
+
+        return "<ProcessDatasetType process_id=%s, dataset_type_id=%s>" % (
+            self.process_id,
+            self.dataset_type_id,
         )
 
 

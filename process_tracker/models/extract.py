@@ -4,7 +4,15 @@
 from datetime import datetime
 from pathlib import Path
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Sequence,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from process_tracker.models.model_base import Base
@@ -63,6 +71,11 @@ class Extract(Base):
     extract_load_high_date_time = Column(DateTime, nullable=True)
     extract_load_record_count = Column(Integer, nullable=True)
 
+    extract_dataset_types = relationship(
+        "ExtractDatasetType",
+        back_populates="dataset_type_extracts",
+        passive_deletes="all",
+    )
     extract_process = relationship(
         "ExtractProcess", back_populates="process_extracts", passive_deletes="all"
     )
@@ -80,6 +93,36 @@ class Extract(Base):
     def full_filepath(self):
 
         return str(Path(self.locations.location_path).joinpath(self.extract_filename))
+
+
+class ExtractDatasetType(Base):
+
+    __tablename__ = "extract_dataset_type"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_id = Column(
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        nullable=False,
+        primary_key=True,
+    )
+    dataset_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.dataset_type_lkup.dataset_type_id"),
+        nullable=False,
+        primary_key=True,
+    )
+
+    UniqueConstraint(extract_id, dataset_type_id)
+
+    dataset_type_extracts = relationship("Extract")
+    extract_dataset_types = relationship("DatasetType")
+
+    def __repr__(self):
+        return "<ExtractDatasetType extract_id=%s, dataset_type_id=%s>" % (
+            self.extract_id,
+            self.dataset_type_id,
+        )
 
 
 class ExtractDependency(Base):

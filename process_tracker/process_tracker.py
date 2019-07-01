@@ -26,6 +26,7 @@ from process_tracker.models.process import (
     ErrorTracking,
     ErrorType,
     Process,
+    ProcessDatasetType,
     ProcessDependency,
     ProcessTracking,
     ProcessStatus,
@@ -35,7 +36,13 @@ from process_tracker.models.process import (
     ProcessTargetObject,
     ProcessType,
 )
-from process_tracker.models.source import Source, SourceObject
+from process_tracker.models.source import (
+    DatasetType,
+    Source,
+    SourceDatasetType,
+    SourceObject,
+    SourceObjectDatasetType,
+)
 from process_tracker.models.tool import Tool
 
 
@@ -51,6 +58,7 @@ class ProcessTracker:
         source_objects=None,
         target_objects=None,
         config_location=None,
+        dataset_types=None,
     ):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
@@ -70,6 +78,8 @@ class ProcessTracker:
         :param config_location: Location where Process Tracker configuration file is. If not set, will use local home
                                 directory.
         :type config_location: file path
+        :param dataset_types: A single dataset category type or list of dataset category types for the given process.
+        :type dataset_types: list
         """
         self.config_location = config_location
         log_level = SettingsManager(
@@ -97,6 +107,15 @@ class ProcessTracker:
             process_type_id=self.process_type.process_type_id,
             process_tool_id=self.tool.tool_id,
         )
+
+        # Dataset types should be loaded before source and target because they are also used there.
+
+        if dataset_types is not None:
+            self.dataset_types = self.register_process_dataset_types(
+                dataset_types=dataset_types
+            )
+        else:
+            self.dataset_types = None
 
         # Either sources or source_objects should be set, not both.  Always go with lower grain if possible.
 
@@ -478,6 +497,34 @@ class ProcessTracker:
         else:
             raise Exception("The process %s is currently running." % self.process_name)
 
+    def register_process_dataset_types(self, dataset_types):
+        """
+        If dataset category types are provided, register them to the process.
+        :param dataset_types:
+        :return:
+        """
+
+        dataset_type_list = list()
+
+        if not isinstance(dataset_types, list):
+            dataset_types = [dataset_types]
+
+        for dataset_type in dataset_types:
+            self.logger.debug("Registering dataset_type %s to process." % dataset_type)
+            dataset_type = self.data_store.get_or_create_item(
+                model=DatasetType, dataset_type=dataset_type
+            )
+
+            self.data_store.get_or_create_item(
+                model=ProcessDatasetType,
+                process_id=self.process.process_id,
+                dataset_type_id=dataset_type.dataset_type_id,
+            )
+
+            dataset_type_list.append(dataset_type)
+
+        return dataset_type_list
+
     def register_process_sources(self, sources=None, source_objects=None):
         """
         Register source(s) to a given process.
@@ -502,6 +549,14 @@ class ProcessTracker:
                         source_id=source.source_id,
                         process_id=self.process.process_id,
                     )
+
+                    if self.dataset_types is not None:
+                        for dataset_type in self.dataset_types:
+                            self.data_store.get_or_create_item(
+                                model=SourceDatasetType,
+                                source_id=source.source_id,
+                                dataset_type_id=dataset_type.dataset_type_id,
+                            )
 
                     for item in objects:
 
@@ -538,6 +593,14 @@ class ProcessTracker:
                 source = self.data_store.get_or_create_item(
                     model=Source, source_name=source
                 )
+
+                if self.dataset_types is not None:
+                    for dataset_type in self.dataset_types:
+                        self.data_store.get_or_create_item(
+                            model=SourceDatasetType,
+                            source_id=source.source_id,
+                            dataset_type_id=dataset_type.dataset_type_id,
+                        )
 
                 self.data_store.get_or_create_item(
                     model=ProcessSource,
@@ -589,6 +652,13 @@ class ProcessTracker:
                             source_id=target.source_id,
                             source_object_name=item,
                         )
+                        if self.dataset_types is not None:
+                            for dataset_type in self.dataset_types:
+                                self.data_store.get_or_create_item(
+                                    model=SourceObjectDatasetType,
+                                    source_object_id=target_object.source_object_id,
+                                    dataset_type_id=dataset_type.dataset_type_id,
+                                )
 
                         self.data_store.get_or_create_item(
                             model=ProcessTargetObject,
@@ -609,6 +679,13 @@ class ProcessTracker:
                 source = self.data_store.get_or_create_item(
                     model=Source, source_name=target
                 )
+                if self.dataset_types is not None:
+                    for dataset_type in self.dataset_types:
+                        self.data_store.get_or_create_item(
+                            model=SourceDatasetType,
+                            source_id=source.source_id,
+                            dataset_type_id=dataset_type.dataset_type_id,
+                        )
 
                 self.data_store.get_or_create_item(
                     model=ProcessTarget,
