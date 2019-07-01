@@ -1,5 +1,19 @@
 USE process_tracker;
 
+create table dataset_type_lkup
+(
+	dataset_type_id int auto_increment,
+	dataset_type varchar(250) null,
+	constraint dataset_type_lkup_pk
+		primary key (dataset_type_id)
+)
+comment 'Dataset type category lookup.';
+
+create unique index dataset_type_lkup_dataset_type_uindex
+	on dataset_type_lkup (dataset_type);
+
+
+
 create table actor_lkup
 (
 	actor_id int auto_increment
@@ -337,4 +351,58 @@ create table process_tracker.process_source_object
 	constraint process_source_object_fk02
 		foreign key (source_object_id) references process_tracker.source_object_lkup (source_object_id)
 );
+
+create table source_dataset_type
+(
+	source_id int not null,
+	dataset_type_id int not null,
+	constraint source_dataset_type_pk
+		primary key (source_id, dataset_type_id),
+	constraint source_dataset_type_fk01
+		foreign key (source_id) references source_lkup (source_id),
+	constraint source_dataset_type_fk02
+		foreign key (dataset_type_id) references dataset_type_lkup (dataset_type_id)
+)
+comment 'Relationship between source and dataset type category';
+
+create table source_object_dataset_type
+(
+	source_object_id int not null,
+	dataset_type_id int not null,
+	constraint source_object_dataset_type_pk
+		primary key (source_object_id, dataset_type_id),
+	constraint source_object_dataset_type_fk01
+		foreign key (source_object_id) references source_object_lkup (source_object_id),
+	constraint source_object_dataset_type_fk02
+		foreign key (dataset_type_id) references dataset_type_lkup (dataset_type_id)
+)
+comment 'Relationship between source object and dataset type category.';
+
+create table extract_dataset_type
+(
+	extract_id int not null,
+	dataset_type_id int not null,
+	constraint extract_dataset_type_pk
+		primary key (extract_id, dataset_type_id),
+	constraint extract_dataset_type_fk01
+		foreign key (extract_id) references extract_tracking (extract_id),
+	constraint extract_dataset_type_fk02
+		foreign key (dataset_type_id) references dataset_type_lkup (dataset_type_id)
+)
+comment 'Relationship between extract and dataset type category';
+
+create table process_dataset_type
+(
+	process_id int not null,
+	dataset_type_id int not null,
+	constraint process_dataset_type_pk
+		primary key (process_id, dataset_type_id),
+	constraint process_dataset_type_fk01
+		foreign key (process_id) references process (process_id),
+	constraint process_dataset_type_fk02
+		foreign key (dataset_type_id) references dataset_type_lkup (dataset_type_id)
+)
+comment 'Relationship between process and dataset type category';
+
+
 
