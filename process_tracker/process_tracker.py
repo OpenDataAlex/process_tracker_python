@@ -434,6 +434,7 @@ class ProcessTracker:
                 )
 
         if file_count != 0:
+            self.logger.debug("File count is %s!" % file_count)
             # Only want to register the file count for a given location if files actually there.
             location.register_file_count(file_count=file_count)
 
