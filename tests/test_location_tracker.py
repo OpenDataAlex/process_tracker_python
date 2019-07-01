@@ -76,3 +76,13 @@ class TestLocationTracker(unittest.TestCase):
             LocationTracker(location_name="testing", location_path="fake path")
 
         self.assertTrue("Data store is not set." in str(context.exception))
+
+    def test_register_file_count(self):
+
+        test_path = "/tmp/testing/test_dir"
+        expected_result = 123
+
+        location = LocationTracker(location_path=test_path, data_store=self.data_store)
+        location.register_file_count(file_count=123)
+
+        self.assertEqual(expected_result, location.location.location_file_count)

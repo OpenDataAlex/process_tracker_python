@@ -644,6 +644,28 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_register_extracts_by_location_local_file_count(self):
+        """
+        Testing that when the location is local, all the extracts are counted and registered in the location's file count.
+        :return: 
+        """
+        with patch("os.listdir") as mocked_os_listdir:
+            mocked_os_listdir.return_value = [
+                "test_local_dir_1.csv",
+                "test_local_dir_2.csv",
+            ]
+
+            self.process_tracker.register_extracts_by_location(
+                location_path="/test/local/dir/"
+            )
+
+        given_result = self.session.query(Location.location_file_count).filter(
+            Location.location_path == "/test/local/dir/"
+        )
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result[0].location_file_count)
+
     def test_register_extracts_by_location_local(self):
         """
         Testing that when the location is local, all the extracts are registered and set to 'ready' status.
@@ -807,6 +829,12 @@ class TestProcessTracker(unittest.TestCase):
             ["test_bucket/test_local_dir_2.csv", "ready", "ready"],
         ]
 
+        given_file_count = self.session.query(Location).filter(
+            Location.location_path == "s3://test_bucket"
+        )
+        expected_file_count = 2
+
+        self.assertEqual(expected_file_count, given_file_count[0].location_file_count)
         self.assertCountEqual(expected_result, given_result)
 
     def test_register_new_process_run(self):

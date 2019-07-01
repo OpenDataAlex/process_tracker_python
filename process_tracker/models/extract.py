@@ -237,6 +237,7 @@ class Location(Base):
         ForeignKey("process_tracker.location_type_lkup.location_type_id"),
         nullable=False,
     )
+    location_file_count = Column(Integer, nullable=True)
 
     extracts = relationship("Extract")
 
