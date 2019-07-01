@@ -11,10 +11,12 @@ from process_tracker.utilities.settings import SettingsManager
 from process_tracker.utilities import utilities
 from process_tracker.models.extract import (
     Extract,
+    ExtractDatasetType,
     ExtractDependency,
     ExtractProcess,
     ExtractStatus,
 )
+from process_tracker.models.source import DatasetType
 
 
 class ExtractTracker:
@@ -95,6 +97,14 @@ class ExtractTracker:
                     self.extract.extract_filename
                 )
             )
+
+        if self.process_run.dataset_types is not None:
+            self.logger.info("Associating dataset type(s) with extract.")
+            self.dataset_types = self.register_extract_dataset_types(
+                dataset_types=self.process_run.dataset_types
+            )
+        else:
+            self.dataset_types = None
 
         # Getting all status types in the event there are custom status types added later.
         self.extract_status_types = self.get_extract_status_types()
@@ -283,6 +293,22 @@ class ExtractTracker:
             status_types[record.extract_status_name] = record.extract_status_id
 
         return status_types
+
+    def register_extract_dataset_types(self, dataset_types):
+        """
+        For the provided dataset types from process_run instance, associate with given Extract instance.
+        :return:
+        """
+
+        for dataset_type in dataset_types:
+
+            self.data_store.get_or_create_item(
+                model=ExtractDatasetType,
+                extract_id=self.extract.extract_id,
+                dataset_type_id=dataset_type.dataset_type_id,
+            )
+
+        return dataset_types
 
     def retrieve_extract_process(self):
         """

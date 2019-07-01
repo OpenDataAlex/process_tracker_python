@@ -15,6 +15,7 @@ from sqlalchemy.orm import aliased, Session
 
 from process_tracker.models.extract import (
     Extract,
+    ExtractDatasetType,
     ExtractProcess,
     ExtractStatus,
     Location,
@@ -23,6 +24,7 @@ from process_tracker.models.process import (
     ErrorType,
     ErrorTracking,
     Process,
+    ProcessDatasetType,
     ProcessDependency,
     ProcessSource,
     ProcessSourceObject,
@@ -30,7 +32,13 @@ from process_tracker.models.process import (
     ProcessTargetObject,
     ProcessTracking,
 )
-from process_tracker.models.source import Source
+from process_tracker.models.source import (
+    DatasetType,
+    Source,
+    SourceDatasetType,
+    SourceObject,
+    SourceObjectDatasetType,
+)
 
 from process_tracker.utilities.data_store import DataStore
 from process_tracker.extract_tracker import ExtractTracker
@@ -57,6 +65,7 @@ class TestProcessTracker(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.session.query(Location).delete()
+        cls.session.query(DatasetType).delete()
         cls.session.query(ProcessSourceObject).delete()
         cls.session.query(ProcessTargetObject).delete()
         cls.session.query(ProcessSource).delete()
@@ -66,11 +75,6 @@ class TestProcessTracker(unittest.TestCase):
         cls.session.delete(cls.blarg)
         cls.session.commit()
         cls.session.close()
-
-        # bucket = cls.s3.Bucket(test_bucket)
-        # for key in bucket.objects.all():
-        #     key.delete()
-        # bucket.delete()
 
     def setUp(self):
         """
@@ -84,6 +88,7 @@ class TestProcessTracker(unittest.TestCase):
             tool_name="Spark",
             sources="Unittests",
             targets="Unittests",
+            dataset_types="Category 1",
         )
 
         self.process_id = self.process_tracker.process.process_id
@@ -99,6 +104,10 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
         self.session.query(ExtractProcess).delete()
+        self.session.query(ExtractDatasetType).delete()
+        self.session.query(SourceDatasetType).delete()
+        self.session.query(SourceObjectDatasetType).delete()
+        self.session.query(ProcessDatasetType).delete()
         self.session.query(ErrorTracking).delete()
         self.session.query(ProcessTracking).delete()
         self.session.query(Extract).delete()
@@ -941,6 +950,59 @@ class TestProcessTracker(unittest.TestCase):
             in str(context.exception)
         )
 
+    def test_register_process_dataset_types_one_type(self):
+        """
+        Testing that when a new process is registered, a dataset type is registered as well.
+        :return:
+        """
+        self.process_tracker = ProcessTracker(
+            process_name="Single dataset types",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+            dataset_types="Category1",
+        )
+
+        given_result = (
+            self.session.query(ProcessDatasetType)
+            .join(Process)
+            .filter(Process.process_name == "Single dataset types")
+            .count()
+        )
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_dataset_types_two_types(self):
+        """
+        Testing that when a new process is registered with multiple dataset types, those dataset types are registered as well.
+        :return:
+        """
+
+        self.process_tracker = ProcessTracker(
+            process_name="Multiple dataset types",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+            dataset_types=["Category1", "Category2"],
+        )
+
+        given_result = (
+            self.session.query(ProcessDatasetType)
+            .join(Process)
+            .filter(Process.process_name == "Multiple dataset types")
+            .count()
+        )
+
+        expected_result = 2
+
+        self.assertEqual(expected_result, given_result)
+
     def test_register_process_sources_one_source(self):
         """
         Testing that when a new process is registered, a source registered as well.
@@ -1527,3 +1589,118 @@ class TestProcessTracker(unittest.TestCase):
         ]
 
         self.assertEqual(expected_result, given_result)
+
+    def test_register_source_dataset_type(self):
+        """
+        When both a source and dataset_type are provided, the source is registered to the dataset_type.
+        :return:
+        """
+        given_result = (
+            self.session.query(SourceDatasetType)
+            .join(Source)
+            .filter(Source.source_name == "Unittests")
+            .count()
+        )
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_target_dataset_type(self):
+        """
+        When both a target and dataset type are provided, the target is registered to the dataset type.
+        :return:
+        """
+        self.process_tracker = ProcessTracker(
+            process_name="Testing Process Tracking Initialization 2",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests Target",
+            dataset_types="Category 1",
+        )
+
+        given_result = (
+            self.session.query(SourceDatasetType)
+            .join(Source)
+            .filter(Source.source_name == "Unittests Target")
+            .count()
+        )
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_source_object_dataset_type(self):
+        """
+        When both a source object and dataset type are provided, the source and source object are registered to the
+        dataset type.
+        :return:
+        """
+        self.process_tracker = ProcessTracker(
+            process_name="Testing Register Source Object Dataset Type",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            source_objects={"Unittests": ["Table1"]},
+            target_objects={"Unittests": ["Table1"]},
+            dataset_types="Category 1",
+        )
+
+        source_given_result = (
+            self.session.query(SourceDatasetType)
+            .join(Source)
+            .filter(Source.source_name == "Unittests")
+            .count()
+        )
+        source_expected_result = 1
+
+        object_given_result = (
+            self.session.query(SourceObjectDatasetType)
+            .join(SourceObject)
+            .join(Source)
+            .filter(Source.source_name == "Unittests")
+            .filter(SourceObject.source_object_name == "Table1")
+            .count()
+        )
+        object_expected_result = 1
+
+        self.assertEqual(source_expected_result, source_given_result)
+        self.assertEqual(object_expected_result, object_given_result)
+
+    def test_register_target_object_dataset_type(self):
+        """
+        When both a source object and dataset type are provided, the target source and target source object are
+        registered to the dataset type.
+        :return:
+        """
+
+        self.process_tracker = ProcessTracker(
+            process_name="Testing Register Target Object Dataset Type",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            source_objects={"Unittests": ["Table1"]},
+            target_objects={"Unittest Target": ["Table1"]},
+            dataset_types="Category 1",
+        )
+
+        source_given_result = (
+            self.session.query(SourceDatasetType)
+            .join(Source)
+            .filter(Source.source_name == "Unittest Target")
+            .count()
+        )
+        source_expected_result = 1
+
+        object_given_result = (
+            self.session.query(SourceObjectDatasetType)
+            .join(SourceObject)
+            .join(Source)
+            .filter(Source.source_name == "Unittest Target")
+            .filter(SourceObject.source_object_name == "Table1")
+            .count()
+        )
+        object_expected_result = 1
+
+        self.assertEqual(source_expected_result, source_given_result)
+        self.assertEqual(object_expected_result, object_given_result)

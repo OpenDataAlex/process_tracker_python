@@ -511,6 +511,14 @@ class ProcessTracker:
                             source_object_name=item,
                         )
 
+                        if self.dataset_types is not None:
+                            for dataset_type in self.dataset_types:
+                                self.data_store.get_or_create_item(
+                                    model=SourceObjectDatasetType,
+                                    source_object_id=source_object.source_object_id,
+                                    dataset_type_id=dataset_type.dataset_type_id,
+                                )
+
                         self.data_store.get_or_create_item(
                             model=ProcessSourceObject,
                             process_id=self.process.process_id,
@@ -559,6 +567,14 @@ class ProcessTracker:
                     target = self.data_store.get_or_create_item(
                         model=Source, source_name=target
                     )
+
+                    if self.dataset_types is not None:
+                        for dataset_type in self.dataset_types:
+                            self.data_store.get_or_create_item(
+                                model=SourceDatasetType,
+                                source_id=target.source_id,
+                                dataset_type_id=dataset_type.dataset_type_id,
+                            )
 
                     self.data_store.get_or_create_item(
                         model=ProcessTarget,

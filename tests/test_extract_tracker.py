@@ -4,14 +4,21 @@ from pathlib import Path
 import unittest
 
 from process_tracker.models.capacity import ClusterProcess
-from process_tracker.models.extract import Extract, ExtractProcess, Location
+from process_tracker.models.extract import (
+    Extract,
+    ExtractDatasetType,
+    ExtractProcess,
+    Location,
+)
 from process_tracker.models.process import (
     Process,
+    ProcessDatasetType,
     ProcessDependency,
     ProcessSource,
     ProcessTarget,
     ProcessTracking,
 )
+from process_tracker.models.source import DatasetType
 
 from process_tracker.extract_tracker import ExtractDependency, ExtractTracker
 from process_tracker.process_tracker import ErrorTracking, ProcessTracker
@@ -28,6 +35,7 @@ class TestExtractTracker(unittest.TestCase):
             tool_name="Spark",
             sources="Unittests",
             targets="Unittests",
+            dataset_types="Category 1",
         )
 
         cls.process_run = cls.process_tracker
@@ -40,8 +48,10 @@ class TestExtractTracker(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.session.query(ClusterProcess).delete()
+        cls.session.query(DatasetType)
         cls.session.query(ErrorTracking).delete()
         cls.session.query(ExtractProcess).delete()
+        cls.session.query(ProcessDatasetType).delete()
         cls.session.query(ProcessTracking).delete()
         cls.session.query(ProcessSource).delete()
         cls.session.query(ProcessTarget).delete()
@@ -68,6 +78,7 @@ class TestExtractTracker(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
+        self.session.query(ExtractDatasetType).delete()
         self.session.query(ExtractDependency).delete()
         self.session.query(ExtractProcess).delete()
         self.session.query(Extract).delete()
@@ -390,6 +401,23 @@ class TestExtractTracker(unittest.TestCase):
 
         given_result = location[0].location_name
         expected_result = "Test Location"
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_extract_dataset_types(self):
+        """
+        Testing that dataset types that are part of the process are also registering to the extract.
+        :return:
+        """
+
+        given_result = (
+            self.session.query(ExtractDatasetType)
+            .join(Extract)
+            .filter(Extract.extract_filename == self.extract.extract.extract_filename)
+            .count()
+        )
+
+        expected_result = 1
 
         self.assertEqual(expected_result, given_result)
 
