@@ -364,19 +364,6 @@ create table source_dataset_type
 )
 comment 'Relationship between source and dataset type category';
 
-create table source_dataset_type
-(
-	source_id int not null,
-	dataset_type_id int not null,
-	constraint source_dataset_type_pk
-		primary key (source_id, dataset_type_id),
-	constraint source_dataset_type_fk01
-		foreign key (source_id) references source_lkup (source_id),
-	constraint source_dataset_type_fk02
-		foreign key (dataset_type_id) references dataset_type_lkup (dataset_type_id)
-)
-comment 'Relationship between source and dataset type category';
-
 create table source_object_dataset_type
 (
 	source_object_id int not null,
