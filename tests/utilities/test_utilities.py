@@ -26,7 +26,7 @@ class TestUtilities(unittest.TestCase):
             utilities.determine_low_high_date(
                 date=lower_low_date, previous_date=low_date, date_type="blarg"
             )
-        print(context.exception)
+
         return self.assertTrue(
             "blarg is not a valid date_type." in str(context.exception)
         )
