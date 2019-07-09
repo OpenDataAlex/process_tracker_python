@@ -114,6 +114,28 @@ class TestProcessTracker(unittest.TestCase):
         self.session.query(ErrorType).delete()
         self.session.commit()
 
+    def process_run_setup(self, process_name, status, num_runs):
+        """
+        Helper function to setup mutliple process tracking runs for a given process and set to a given status. Used to
+        test the on_hold status logic.
+        :param process_name: Name of the process that runs will be created of.
+        :param status: Status the runs should be changed to
+        :param num_runs: Number of runs that should be created
+        :return:
+        """
+        i = 1
+        while i <= num_runs:
+            process_run = ProcessTracker(
+                process_name=process_name,
+                process_type="Extract",
+                actor_name="UnitTesting",
+                tool_name="Spark",
+            )
+
+            process_run.change_run_status(new_status=status)
+            i += 1
+            time.sleep(2)
+
     def test_bulk_change_extract_status(self):
         """
         Testing that bulk change occurs when extracts provided.
@@ -643,6 +665,90 @@ class TestProcessTracker(unittest.TestCase):
         expected_result = "UnitTesting"
 
         self.assertEqual(expected_result, given_result)
+
+    @unittest.skip("Issue with hanging queries on database.")
+    def test_process_on_hold_max_failures(self):
+        """
+        Testing that when number of failed processes matches the maximum_sequential_failures (default 5), process run
+        goes on_hold.
+        :return:
+        """
+
+        self.process_run_setup(
+            process_name="On Hold Max Failures Test", status="failed", num_runs=5
+        )
+
+        with self.assertRaises(Exception) as context:
+            ProcessTracker(
+                process_name="On Hold Max Failures Test",
+                process_type="Extract",
+                actor_name="UnitTesting",
+                tool_name="Spark",
+            )
+
+        self.assertTrue(
+            "The process On Hold Max Failures Test is currently running or on_hold."
+            in str(context.exception)
+        )
+
+    @unittest.skip("Issue with hanging queries on database.")
+    def test_process_on_hold_under_max_failures(self):
+        """
+        Testing that when number of failed processes is less than the maximum_sequential_failures (default 5), process run
+        continues.
+        :return:
+        """
+        process_name = "On Hold Under Max Failures Test"
+        self.process_run_setup(process_name=process_name, status="failed", num_runs=3)
+
+        process_run = ProcessTracker(
+            process_name=process_name,
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+        )
+
+        current_run_status = (
+            self.session.query(ProcessTracking)
+            .join(Process)
+            .filter(Process.process_name == process_name)
+            .filter(ProcessTracking.is_latest_run == True)
+        )
+        given_result = current_run_status[0].process_status_id
+
+        expected_result = process_run.process_status_running
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_process_on_hold_previous_run_on_hold(self):
+        """
+        If the previous run does not get moved from on_hold status, then the next run will not kick off and the process
+        will remain on_hold.
+        :return:
+        """
+        process_name = "On Hold Previous Run Test"
+
+        process_run = ProcessTracker(
+            process_name=process_name,
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+        )
+
+        process_run.change_run_status(new_status="on hold")
+
+        with self.assertRaises(Exception) as context:
+            ProcessTracker(
+                process_name=process_name,
+                process_type="Extract",
+                actor_name="UnitTesting",
+                tool_name="Spark",
+            )
+
+        self.assertTrue(
+            "The process %s is currently running or on hold." % process_name
+            in str(context.exception)
+        )
 
     def test_register_extracts_by_location_local_file_count(self):
         """

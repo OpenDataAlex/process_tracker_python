@@ -82,9 +82,8 @@ class ProcessTracker:
         :type dataset_types: list
         """
         self.config_location = config_location
-        log_level = SettingsManager(
-            config_location=self.config_location
-        ).determine_log_level()
+        self.config = SettingsManager(config_location=self.config_location)
+        log_level = self.config.determine_log_level()
 
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
@@ -144,6 +143,7 @@ class ProcessTracker:
         self.process_status_running = self.process_status_types["running"]
         self.process_status_complete = self.process_status_types["completed"]
         self.process_status_failed = self.process_status_types["failed"]
+        self.process_status_hold = self.process_status_types["on hold"]
 
         self.process_tracking_run = self.register_new_process_run()
 
@@ -205,6 +205,48 @@ class ProcessTracker:
 
         else:
             raise Exception("The provided status type %s is invalid." % new_status)
+
+    def determine_hold_status(self, last_run_status):
+        """
+        Based on the setting 'max_concurrent_failures', count the number of failures for that number of process runs.
+        If the counts match, process will remain on hold.  If last run is 'on_hold' process will remain on hold.
+        :return:
+        """
+        self.logger.debug("Determining if process should be put on or remain on hold.")
+
+        max_concurrent_failures = int(
+            self.config.config["DEFAULT"]["max_sequential_failures"]
+        )
+
+        self.logger.debug("Max Concurrent failures is %s" % max_concurrent_failures)
+        last_runs = (
+            self.session.query(ProcessTracking.process_tracking_id)
+            .join(Process)
+            .filter(Process.process_name == self.process_name)
+            .order_by(ProcessTracking.process_run_id.desc())
+            .limit(max_concurrent_failures)
+            .subquery()
+        )
+
+        failure_count = (
+            self.session.query(ProcessTracking)
+            .filter(ProcessTracking.process_tracking_id.in_(last_runs))
+            .filter(ProcessTracking.process_status_id == self.process_status_failed)
+            .count()
+        )
+
+        self.logger.debug("Number of failures in past runs is %s" % failure_count)
+
+        if last_run_status == self.process_status_hold:
+            self.logger.error("Last run still in hold status.  Need to remain in hold.")
+            return True
+        elif failure_count == max_concurrent_failures:
+            self.logger.error(
+                "Number of failures has reached max_concurrent_failures.  Putting process on hold until resolved."
+            )
+            return True
+        else:
+            return False
 
     def find_extracts_by_filename(self, filename, status="ready"):
         """
@@ -325,9 +367,6 @@ class ProcessTracker:
             .order_by(ProcessTracking.process_run_id.desc())
             .first()
         )
-
-        if instance is None:
-            return False
 
         return instance
 
@@ -480,14 +519,23 @@ class ProcessTracker:
                 "Processes that this process is dependent on are running or failed."
             )
 
-        if last_run:
+        if last_run is not None and last_run:
             # Must validate that the process is not currently running.
 
-            if last_run.process_status_id != self.process_status_running:
+            if (
+                last_run.process_status_id != self.process_status_running
+                and last_run.process_status_id != self.process_status_hold
+            ):
                 last_run.is_latest_run = False
                 new_run_flag = True
                 new_run_id = last_run.process_run_id + 1
             else:
+                new_run_flag = False
+
+            if self.determine_hold_status(last_run_status=last_run.process_status_id):
+                self.logger.error(
+                    "Process is on hold due to number of concurrent failures or previous run is in on hold status."
+                )
                 new_run_flag = False
 
         if new_run_flag:
@@ -508,7 +556,9 @@ class ProcessTracker:
             return new_run
 
         else:
-            raise Exception("The process %s is currently running." % self.process_name)
+            raise Exception(
+                "The process %s is currently running or on hold." % self.process_name
+            )
 
     def register_process_dataset_types(self, dataset_types):
         """

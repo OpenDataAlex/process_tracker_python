@@ -11,6 +11,8 @@ INSERT INTO process_tracker.extract_status_lkup (extract_status_id, extract_stat
 INSERT INTO process_tracker.process_status_lkup (process_status_id, process_status_name) VALUES (default, 'running');
 INSERT INTO process_tracker.process_status_lkup (process_status_id, process_status_name) VALUES (default, 'completed');
 INSERT INTO process_tracker.process_status_lkup (process_status_id, process_status_name) VALUES (default, 'failed');
+INSERT INTO process_tracker.process_status_lkup (process_status_id, process_status_name) VALUES (default, 'on hold');
+
 
 INSERT INTO process_tracker.error_type_lkup (error_type_id, error_type_name) VALUES (default, 'File Error');
 INSERT INTO process_tracker.error_type_lkup (error_type_id, error_type_name) VALUES (default, 'Data Error');
