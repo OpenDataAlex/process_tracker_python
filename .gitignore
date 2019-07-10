@@ -173,3 +173,5 @@ pip-selfcheck.json
 .idea/misc.xml
 .idea/modules.xml
 .idea/process_tracker_python.iml
+/tests/s3:/
+/tests/s3:\/
