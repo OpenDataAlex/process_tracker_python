@@ -206,10 +206,12 @@ class ProcessTracker:
         else:
             raise Exception("The provided status type %s is invalid." % new_status)
 
-    def determine_hold_status(self, last_run_status):
+    def determine_hold_status(self, last_run_status, last_run_id):
         """
         Based on the setting 'max_concurrent_failures', count the number of failures for that number of process runs.
         If the counts match, process will remain on hold.  If last run is 'on_hold' process will remain on hold.
+        :param last_run_status: The status of the previous run
+        :param last_run_id:  The process_run_id of the previous run
         :return:
         """
         self.logger.debug("Determining if process should be put on or remain on hold.")
@@ -219,21 +221,32 @@ class ProcessTracker:
         )
 
         self.logger.debug("Max Concurrent failures is %s" % max_concurrent_failures)
-        last_runs = (
-            self.session.query(ProcessTracking.process_tracking_id)
-            .join(Process)
-            .filter(Process.process_name == self.process_name)
-            .order_by(ProcessTracking.process_run_id.desc())
-            .limit(max_concurrent_failures)
-            .subquery()
-        )
+        # last_runs = (
+        #     self.session.query(ProcessTracking.process_tracking_id)
+        #     .join(Process)
+        #     .filter(Process.process_name == self.process_name)
+        #     .order_by(ProcessTracking.process_run_id.desc())
+        #     .limit(max_concurrent_failures)
+        #     .subquery()
+        # )
 
         failure_count = (
             self.session.query(ProcessTracking)
-            .filter(ProcessTracking.process_tracking_id.in_(last_runs))
+            .join(Process)
+            .filter(Process.process_name == self.process_name)
+            .filter(
+                ProcessTracking.process_run_id > (last_run_id - max_concurrent_failures)
+            )
             .filter(ProcessTracking.process_status_id == self.process_status_failed)
             .count()
         )
+
+        # failure_count = (
+        #     self.session.query(ProcessTracking)
+        #     .filter(ProcessTracking.process_tracking_id.in_(last_runs))
+        #     .filter(ProcessTracking.process_status_id == self.process_status_failed)
+        #     .count()
+        # )
 
         self.logger.debug("Number of failures in past runs is %s" % failure_count)
 
@@ -532,7 +545,10 @@ class ProcessTracker:
             else:
                 new_run_flag = False
 
-            if self.determine_hold_status(last_run_status=last_run.process_status_id):
+            if self.determine_hold_status(
+                last_run_status=last_run.process_status_id,
+                last_run_id=last_run.process_run_id,
+            ):
                 self.logger.error(
                     "Process is on hold due to number of concurrent failures or previous run is in on hold status."
                 )

@@ -746,7 +746,7 @@ class TestProcessTracker(unittest.TestCase):
             )
 
         self.assertTrue(
-            "The process %s is currently running or on hold." % process_name
+            "The process On Hold Previous Run Test is currently running or on hold."
             in str(context.exception)
         )
 
