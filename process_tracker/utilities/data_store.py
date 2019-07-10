@@ -34,9 +34,9 @@ preload_extract_status_types = [
     "deleted",
     "error",
 ]
-preload_process_status_types = ["running", "completed", "failed"]
+preload_process_status_types = ["running", "completed", "failed", "on hold"]
 preload_process_types = ["extract", "load"]
-preload_system_keys = [{"version", "0.2.0"}]
+preload_system_keys = [{"version", "0.5.0"}]
 
 supported_data_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
 
