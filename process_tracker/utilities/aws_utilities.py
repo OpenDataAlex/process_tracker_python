@@ -9,7 +9,7 @@ from botocore.errorfactory import ClientError
 
 
 class AwsUtilities:
-    def __init__(self, config_location=None):
+    def __init__(self):
         self.log_level = "INFO"
 
         self.logger = logging.getLogger(__name__)

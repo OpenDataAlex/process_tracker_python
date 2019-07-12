@@ -16,7 +16,6 @@ from process_tracker.models.extract import (
     ExtractProcess,
     ExtractStatus,
 )
-from process_tracker.models.source import DatasetType
 
 
 class ExtractTracker:
