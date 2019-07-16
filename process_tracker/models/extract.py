@@ -232,7 +232,7 @@ class Location(Base):
     )
     location_name = Column(String(750), nullable=False, unique=True)
     location_path = Column(String(750), nullable=False, unique=True)
-    location_type = Column(
+    location_type_id = Column(
         Integer,
         ForeignKey("process_tracker.location_type_lkup.location_type_id"),
         nullable=False,
@@ -242,7 +242,7 @@ class Location(Base):
 
     extracts = relationship("Extract")
 
-    location_types = relationship("LocationType", foreign_keys=[location_type])
+    location_types = relationship("LocationType", foreign_keys=[location_type_id])
 
     def __repr__(self):
 

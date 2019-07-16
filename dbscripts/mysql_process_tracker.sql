@@ -56,7 +56,7 @@ create table location_lkup
 		primary key,
 	location_name varchar(750) not null,
 	location_path varchar(750) not null,
-	location_type int null,
+	location_type_id int null,
 	location_file_count int null,
 	location_bucket_name varchar(750) null,
 	constraint location_name
@@ -64,7 +64,7 @@ create table location_lkup
 	constraint location_path
 		unique (location_path),
 	constraint location_lkup_ibfk_1
-		foreign key (location_type) references location_type_lkup (location_type_id)
+		foreign key (location_type_id) references location_type_lkup (location_type_id)
 );
 
 create table process_tracker.extract_tracking
