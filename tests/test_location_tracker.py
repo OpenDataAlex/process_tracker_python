@@ -78,6 +78,10 @@ class TestLocationTracker(unittest.TestCase):
         self.assertTrue("Data store is not set." in str(context.exception))
 
     def test_register_file_count(self):
+        """
+        Testing that if a file count is set, it will be returned correctly.
+        :return:
+        """
 
         test_path = "/tmp/testing/test_dir"
         expected_result = 123
@@ -86,3 +90,34 @@ class TestLocationTracker(unittest.TestCase):
         location.register_file_count(file_count=123)
 
         self.assertEqual(expected_result, location.location.location_file_count)
+
+    def test_determine_location_bucket_name_s3(self):
+        """
+        Testing that if the location is related to s3, a bucket name will be set.
+        :return:
+        """
+        expected_result = "test-bucket"
+
+        location = LocationTracker(
+            location_path="https://test-bucket.s3.amazonaws.com/this/is/a/test/dir/file.txt",
+            data_store=self.data_store,
+        )
+
+        given_result = location.location.location_bucket_name
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_determine_location_bucket_name_local(self):
+        """
+        Testing that if the location is not related to s3, a bucket name will not be set.
+        :return:
+        """
+        expected_result = None
+
+        location = LocationTracker(
+            location_path="/local/dir/path/text.txt", data_store=self.data_store
+        )
+
+        given_result = location.location.location_bucket_name
+
+        self.assertEqual(expected_result, given_result)

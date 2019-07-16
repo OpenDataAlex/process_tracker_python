@@ -29,6 +29,22 @@ class TestAwsUtilities(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_determine_bucket_name_valid_path_url_https_bucket_front_long_filepath(
+        self
+    ):
+        """
+        Ensuring that bucket name is correctly found, event with long urls
+        :return:
+        """
+
+        path = "https://test-bucket.s3.amazonaws.com/this/is/a/test/dir/file.txt"
+
+        expected_result = "test-bucket"
+
+        given_result = self.aws_util.determine_bucket_name(path=path)
+
+        self.assertEqual(expected_result, given_result)
+
     def test_determine_bucket_name_valid_path_url_http_bucket_front(self):
         """
         If path provided is an AWS http URL, parse and return the bucket name.

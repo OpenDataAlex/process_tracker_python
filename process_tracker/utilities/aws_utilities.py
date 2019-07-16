@@ -62,12 +62,19 @@ class AwsUtilities:
                     self.logger.debug("Path matched url_match")
                     path = re.sub(self.url_match, "", path)
 
+                    self.logger.debug("Path is now %s" % path)
+
                     if "/" in path:
+
                         bucket_name = path.split("/")[0]
 
+                        if "." in bucket_name:
+                            bucket_name = bucket_name.split(".")[0]
                     else:
                         # For URL format where bucket is the first item past http(s)://
                         bucket_name = path.split(".")[0]
+
+                self.logger.debug("Bucket name is %s" % bucket_name)
 
         else:
             error_msg = "It appears the URL is not a valid s3 path. %s" % path

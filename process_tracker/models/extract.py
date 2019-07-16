@@ -238,6 +238,7 @@ class Location(Base):
         nullable=False,
     )
     location_file_count = Column(Integer, nullable=True)
+    location_bucket_name = Column(String(750), nullable=True, unique=False)
 
     extracts = relationship("Extract")
 
