@@ -287,7 +287,8 @@ create table location_lkup
 	location_type integer not null
 		constraint location_lkup_fk01
 			references location_type_lkup,
-	location_file_count integer null
+	location_file_count integer null,
+    location_bucket_name varchar(750) null
 );
 
 comment on table location_lkup is 'Locations where files are located.';
