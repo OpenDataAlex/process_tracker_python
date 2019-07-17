@@ -177,8 +177,8 @@ def delete(topic, name, parent=None, child=None, cluster=None):
 )
 def update(
     topic,
-    initial_name,
     name,
+    initial_name=None,
     max_processing=None,
     max_memory=None,
     processing_unit=None,

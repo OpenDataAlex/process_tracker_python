@@ -90,6 +90,8 @@ class ProcessStatus(Base):
     )
     process_status_name = Column(String(75), nullable=False, unique=True)
 
+    process_runs = relationship("ProcessTracking")
+
     def __repr__(self):
 
         return "<ProcessStatus (id=%s, process_status_name=%s)>" % (
@@ -368,6 +370,8 @@ class ProcessTracking(Base):
         "ExtractProcess", back_populates="extract_processes", passive_deletes="all"
     )
     process = relationship("Process", back_populates="process_tracking")
+
+    status = relationship("ProcessStatus")
 
     def __repr__(self):
 

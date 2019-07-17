@@ -41,7 +41,7 @@ class LocationTracker:
             model=Location,
             location_name=self.location_name,
             location_path=location_path,
-            location_type=self.location_type.location_type_id,
+            location_type_id=self.location_type.location_type_id,
         )
 
     def derive_location_name(self):
