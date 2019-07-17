@@ -36,22 +36,24 @@ class TestCliDataStore(unittest.TestCase):
         cls.logger = logging.getLogger(__name__)
         cls.logger.addHandler(console)
 
+        cls.data_store = DataStore()
+        cls.session = cls.data_store.session
+
     @classmethod
     def tearDownClass(cls):
         cls.session.query(ProcessDependency).delete()
+        cls.session.query(ProcessSource).delete()
+        cls.session.query(ProcessTarget).delete()
+        cls.session.query(ProcessDatasetType).delete()
+        cls.session.query(ProcessTracking).delete()
         cls.session.query(Process).delete()
         cls.session.commit()
         cls.session.close()
 
     def setUp(self):
-        self.data_store = DataStore()
-        self.session = self.data_store.session
         self.runner = CliRunner()
 
     def tearDown(self):
-        self.session.query(ProcessSource).delete()
-        self.session.query(ProcessTarget).delete()
-        self.session.query(ProcessDatasetType).delete()
         self.session.query(ErrorTracking).delete()
         self.session.query(ProcessTracking).delete()
         self.session.query(ErrorType).delete()
