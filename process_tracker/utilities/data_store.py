@@ -550,6 +550,10 @@ class DataStore:
                 )
 
                 if item.process_status_id == process_status_hold.process_status_id:
+                    self.logger.info(
+                        "Process is currently on hold.  Changing to completed."
+                    )
+
                     process_status_completed = self.get_or_create_item(
                         model=ProcessStatus,
                         create=False,

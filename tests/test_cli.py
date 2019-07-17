@@ -865,7 +865,10 @@ class TestCli(unittest.TestCase):
     #     expected_result = "Invalid topic.  Unable to delete instance."
     #
     #     return self.assertEqual(expected_result, given_result)
-
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
     def test_update_process_run_on_hold(self):
         """
         Testing that when updating a process run and it is in 'on hold' status,
@@ -878,7 +881,6 @@ class TestCli(unittest.TestCase):
             actor_name="UnitTesting",
             tool_name="Spark",
         )
-
         process_tracker.change_run_status("on hold")
 
         self.runner.invoke(
@@ -889,6 +891,10 @@ class TestCli(unittest.TestCase):
             self.data_store.session.query(ProcessTracking)
             .join(Process)
             .filter(Process.process_name == "Testing Process Run Update On Hold")
+            .filter(
+                ProcessTracking.process_tracking_id
+                == process_tracker.process_tracking_run.process_tracking_id
+            )
         )
         given_result = record[0].process_status_id
 
@@ -919,6 +925,10 @@ class TestCli(unittest.TestCase):
             self.data_store.session.query(ProcessTracking)
             .join(Process)
             .filter(Process.process_name == "Testing Process Run Update")
+            .filter(
+                ProcessTracking.process_tracking_id
+                == process_tracker.process_tracking_run.process_tracking_id
+            )
         )
         given_result = record[0].process_status_id
         expected_result = process_tracker.process_status_running
