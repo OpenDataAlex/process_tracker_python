@@ -3,6 +3,7 @@
 import logging
 from os.path import basename, normpath
 
+from process_tracker.utilities.aws_utilities import AwsUtilities
 from process_tracker.utilities.logging import console
 from process_tracker.utilities.settings import SettingsManager
 
@@ -43,6 +44,8 @@ class LocationTracker:
             location_path=location_path,
             location_type_id=self.location_type.location_type_id,
         )
+
+        self.location_bucket_name = self.determine_location_bucket_name()
 
     def derive_location_name(self):
         """
@@ -104,3 +107,28 @@ class LocationTracker:
 
         self.location.location_file_count = file_count
         self.data_store.session.commit()
+
+    def determine_location_bucket_name(self):
+        """
+        If location is of type 's3', then find which bucket the location belongs to.
+        :return:
+        """
+        self.logger.info("Determining if location is s3.")
+        if "s3" in self.location_path or "s3" in self.location_name:
+
+            self.logger.info("Location is in s3.")
+            if self.location.location_bucket_name is None:
+                self.logger.info("Location bucket was not set.")
+
+                self.location.location_bucket_name = AwsUtilities().determine_bucket_name(
+                    path=self.location.location_path
+                )
+
+                self.data_store.session.commit()
+
+        else:
+            self.location.location_bucket_name = None
+
+            self.data_store.session.commit()
+
+        return self.location.location_bucket_name

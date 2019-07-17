@@ -284,10 +284,11 @@ create table location_lkup
 			primary key,
 	location_name varchar(750) not null,
 	location_path varchar(750) not null,
-	location_type integer not null
+	location_type_id integer not null
 		constraint location_lkup_fk01
 			references location_type_lkup,
-	location_file_count integer null
+	location_file_count integer null,
+    location_bucket_name varchar(750) null
 );
 
 comment on table location_lkup is 'Locations where files are located.';

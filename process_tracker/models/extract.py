@@ -238,10 +238,11 @@ class Location(Base):
         nullable=False,
     )
     location_file_count = Column(Integer, nullable=True)
+    location_bucket_name = Column(String(750), nullable=True, unique=False)
 
     extracts = relationship("Extract")
 
-    location_types = relationship("LocationType", foreign_keys=[location_type])
+    location_types = relationship("LocationType", foreign_keys=[location_type_id])
 
     def __repr__(self):
 
