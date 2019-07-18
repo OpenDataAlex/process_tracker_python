@@ -17,6 +17,7 @@ from process_tracker.models.process import (
     ErrorType,
     Process,
     ProcessDependency,
+    ProcessTracking,
     ProcessType,
     ProcessStatus,
 )
@@ -438,8 +439,6 @@ class DataStore:
         if item_delete:
             self.session.commit()
 
-        return "blarg"
-
     def topic_updater(
         self,
         topic,
@@ -529,6 +528,47 @@ class DataStore:
                 )
                 item.process_status_name = name
                 self.logger.info("%s %s updated." % (topic, name))
+            elif topic == "process run":
+                """
+                This option is ONLY for process runs that are in 'on hold' status and getting them out of 'on hold'.
+                """
+                self.logger.info("Testing if process run is on hold.")
+                item = (
+                    self.session.query(ProcessTracking)
+                    .join(Process)
+                    .join(ProcessStatus)
+                    .filter(Process.process_name == name)
+                    .filter(ProcessStatus.process_status_name == "on hold")
+                    .order_by(ProcessTracking.process_run_id.desc())
+                    .first()
+                )
+
+                self.logger.info("Process run status is %s" % item.process_status_id)
+
+                process_status_hold = self.get_or_create_item(
+                    model=ProcessStatus, create=False, process_status_name="on hold"
+                )
+
+                if item.process_status_id == process_status_hold.process_status_id:
+                    self.logger.info(
+                        "Process is currently on hold.  Changing to completed."
+                    )
+
+                    process_status_completed = self.get_or_create_item(
+                        model=ProcessStatus,
+                        create=False,
+                        process_status_name="completed",
+                    )
+
+                    item.process_status_id = process_status_completed.process_status_id
+
+                    self.logger.info(
+                        "%s %s updated to finished status." % (topic, name)
+                    )
+                else:
+                    self.logger.error(
+                        "Process run was not 'on hold'.  Process status will not be updated."
+                    )
 
             elif topic == "source":
                 item = self.get_or_create_item(
@@ -578,6 +618,7 @@ class DataStore:
             "error type",
             "extract status",
             "process dependency",
+            "process run",
             "process status",
             "process type",
             "source",

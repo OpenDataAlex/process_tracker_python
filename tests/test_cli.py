@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 import unittest
 
 from click.testing import CliRunner
@@ -15,8 +16,13 @@ from process_tracker.models.capacity import Cluster, ClusterProcess
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
     ErrorType,
+    ErrorTracking,
     Process,
+    ProcessDatasetType,
     ProcessDependency,
+    ProcessSource,
+    ProcessTarget,
+    ProcessTracking,
     ProcessStatus,
     ProcessType,
 )
@@ -30,10 +36,28 @@ class TestCliDataStore(unittest.TestCase):
         cls.logger = logging.getLogger(__name__)
         cls.logger.addHandler(console)
 
+        cls.data_store = DataStore()
+        cls.session = cls.data_store.session
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.session.query(ProcessDependency).delete()
+        cls.session.query(ProcessSource).delete()
+        cls.session.query(ProcessTarget).delete()
+        cls.session.query(ProcessDatasetType).delete()
+        cls.session.query(ProcessTracking).delete()
+        cls.session.query(Process).delete()
+        cls.session.commit()
+        cls.session.close()
+
     def setUp(self):
-        self.data_store = DataStore()
-        self.session = self.data_store.session
         self.runner = CliRunner()
+
+    def tearDown(self):
+        self.session.query(ErrorTracking).delete()
+        self.session.query(ProcessTracking).delete()
+        self.session.query(ErrorType).delete()
+        self.session.commit()
 
     @unittest.skipIf(
         "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
@@ -282,6 +306,18 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
         self.assertEqual(0, result.exit_code)
+
+    def test_create_process_run(self):
+        """
+        Ensuring that error is thrown if CLI is used to try and create a process run.
+        :return:
+        """
+
+        result = self.runner.invoke(
+            main, 'create -t "process run" -n "Test Process Run"'
+        )
+
+        self.assertTrue(result.exception)
 
     def test_create_process_type(self):
         """
@@ -576,6 +612,23 @@ class TestCli(unittest.TestCase):
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
 
+    def test_delete_process_run(self):
+        """
+        Ensuring that error is thrown if CLI is used to try and delete a process run.
+        :return:
+        """
+
+        result = self.runner.invoke(
+            main, 'delete -t "process run" -n "Test Process Run"'
+        )
+
+        expected_result = (
+            "The item could not be deleted because it is a protected record."
+        )
+
+        self.assertIn(expected_result, result.output)
+        self.assertEqual(0, result.exit_code)
+
     def test_delete_process_type(self):
         """
         Testing that when deleting an process type record not on the protected list, it is deleted.
@@ -812,6 +865,75 @@ class TestCli(unittest.TestCase):
     #     expected_result = "Invalid topic.  Unable to delete instance."
     #
     #     return self.assertEqual(expected_result, given_result)
+    @unittest.skipIf(
+        "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
+        "Skipping this test on Travis CI.",
+    )
+    def test_update_process_run_on_hold(self):
+        """
+        Testing that when updating a process run and it is in 'on hold' status,
+        that the process run is updated to 'completed'.
+        :return:
+        """
+        process_tracker = ProcessTracker(
+            process_name="Testing Process Run Update On Hold",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+        )
+        process_tracker.change_run_status("on hold")
+
+        self.runner.invoke(
+            main, 'update -t "process run" -n "Testing Process Run Update On Hold"'
+        )
+
+        record = (
+            self.data_store.session.query(ProcessTracking)
+            .join(Process)
+            .filter(Process.process_name == "Testing Process Run Update On Hold")
+            .filter(
+                ProcessTracking.process_tracking_id
+                == process_tracker.process_tracking_run.process_tracking_id
+            )
+        )
+        given_result = record[0].process_status_id
+
+        expected_result = process_tracker.process_status_complete
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_update_process_run_not_on_hold(self):
+        """
+        Testing that when updating a process run and it is not in 'on hold' status,
+        that the process run is not updated.
+        :return:
+        """
+        process_tracker = ProcessTracker(
+            process_name="Testing Process Run Update",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            sources="Unittests",
+            targets="Unittests",
+            dataset_types="Category 1",
+        )
+
+        self.runner.invoke(
+            main, 'update -t "process run" -n "Testing Process Run Update"'
+        )
+        record = (
+            self.data_store.session.query(ProcessTracking)
+            .join(Process)
+            .filter(Process.process_name == "Testing Process Run Update")
+            .filter(
+                ProcessTracking.process_tracking_id
+                == process_tracker.process_tracking_run.process_tracking_id
+            )
+        )
+        given_result = record[0].process_status_id
+        expected_result = process_tracker.process_status_running
+
+        self.assertEqual(expected_result, given_result)
 
     def test_update_process_type(self):
         """
