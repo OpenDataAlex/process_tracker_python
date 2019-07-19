@@ -1,7 +1,8 @@
 # Location
 # For processes dealing with Extract Locations.
 import logging
-from os.path import basename, normpath
+from pathlib import PurePath
+from os.path import basename, dirname, join, isdir, normpath
 
 from process_tracker.utilities.aws_utilities import AwsUtilities
 from process_tracker.utilities.logging import console
@@ -24,15 +25,15 @@ class LocationTracker:
             raise Exception("Data store is not set.")
         else:
             self.data_store = data_store
+            self.session = self.data_store.session
 
         self.location_path = location_path.lower()
+        self.location_name = location_name
+        self.location_bucket_name = self.determine_location_bucket_name()
 
         if location_name is None:
             self.logger.info("Location name not provided.  Generating.")
             self.location_name = self.derive_location_name()
-        else:
-            self.logger.info("Using provided location name: %s" % location_name)
-            self.location_name = location_name
 
         self.location_type = self.derive_location_type()
 
@@ -43,9 +44,8 @@ class LocationTracker:
             location_name=self.location_name,
             location_path=location_path,
             location_type_id=self.location_type.location_type_id,
+            location_bucket_name=self.location_bucket_name,
         )
-
-        self.location_bucket_name = self.determine_location_bucket_name()
 
     def derive_location_name(self):
         """
@@ -57,18 +57,50 @@ class LocationTracker:
 
         location_prefix = None
 
-        location_name = ""
+        current_name = (
+            self.session.query(Location.location_name)
+            .filter(Location.location_path == self.location_path)
+            .first()
+        )
 
-        if "s3" in self.location_path:
-            # If the path is an S3 Bucket, prefix to name.
-            self.logger.info("Location appears to be s3 related.  Setting prefix.")
-            location_prefix = "s3"
+        if current_name is not None:
+            location_name = current_name[0].location_name
+        else:
+            location_name = ""
 
-        if location_prefix is not None:
-            self.logger.info("Location prefix provided.  Appending to location name.")
-            location_name = location_prefix + " - "
+            if "s3" in self.location_path:
+                # If the path is an S3 Bucket, prefix to name.
+                self.logger.info("Location appears to be s3 related.  Setting prefix.")
+                location_prefix = "s3 %s" % self.location_bucket_name
+            else:
+                location_prefix = "local"
 
-        location_name += basename(normpath(self.location_path))
+            if location_prefix is not None:
+                self.logger.info(
+                    "Location prefix provided.  Appending to location name."
+                )
+                location_name = location_prefix + " - "
+
+            if "." in str(PurePath(self.location_path).name):
+                location_name += PurePath(self.location_path).parent.name
+            else:
+                location_name += PurePath(self.location_path).name
+
+            name_count = (
+                self.session.query(Location)
+                .filter(Location.location_name.like(location_name + "%"))
+                .count()
+            )
+
+            if name_count >= 1:
+                self.logger.info(
+                    "The location name already exists.  There are %s instances."
+                    % name_count
+                )
+
+                location_name = "%s - %s" % (location_name, name_count)
+
+                self.logger.info("Location name is now %s" % location_name)
 
         return location_name
 
@@ -106,7 +138,7 @@ class LocationTracker:
         """
 
         self.location.location_file_count = file_count
-        self.data_store.session.commit()
+        self.session.commit()
 
     def determine_location_bucket_name(self):
         """
@@ -114,21 +146,18 @@ class LocationTracker:
         :return:
         """
         self.logger.info("Determining if location is s3.")
-        if "s3" in self.location_path or "s3" in self.location_name:
+        if "s3" in self.location_path or (
+            self.location_name is not None and "s3" in self.location_name
+        ):
 
             self.logger.info("Location is in s3.")
-            if self.location.location_bucket_name is None:
-                self.logger.info("Location bucket was not set.")
-
-                self.location.location_bucket_name = AwsUtilities().determine_bucket_name(
-                    path=self.location.location_path
-                )
-
-                self.data_store.session.commit()
+            location_bucket_name = AwsUtilities().determine_bucket_name(
+                path=self.location_path
+            )
 
         else:
-            self.location.location_bucket_name = None
+            location_bucket_name = None
 
-            self.data_store.session.commit()
+            self.session.commit()
 
-        return self.location.location_bucket_name
+        return location_bucket_name
