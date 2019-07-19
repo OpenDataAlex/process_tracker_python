@@ -246,7 +246,7 @@ class TestExtractTracker(unittest.TestCase):
         )
 
         given_result = location[0].location_name
-        expected_result = "extract_dir2"
+        expected_result = "local - extract_dir2"
 
         self.assertEqual(expected_result, given_result)
 
@@ -266,7 +266,7 @@ class TestExtractTracker(unittest.TestCase):
         )
 
         given_result = location[0].location_name
-        expected_result = "s3 - extract_dir"
+        expected_result = "s3 test-test - extract_dir"
 
         self.assertEqual(expected_result, given_result)
 

@@ -58,13 +58,13 @@ class LocationTracker:
         location_prefix = None
 
         current_name = (
-            self.session.query(Location.location_name)
+            self.session.query(Location)
             .filter(Location.location_path == self.location_path)
             .first()
         )
 
         if current_name is not None:
-            location_name = current_name[0].location_name
+            location_name = current_name.location_name
         else:
             location_name = ""
 
