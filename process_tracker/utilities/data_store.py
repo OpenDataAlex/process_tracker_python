@@ -529,9 +529,9 @@ class DataStore:
                 item.process_status_name = name
                 self.logger.info("%s %s updated." % (topic, name))
             elif topic == "process run":
-                """
-                This option is ONLY for process runs that are in 'on hold' status and getting them out of 'on hold'.
-                """
+
+                # This option is ONLY for process runs that are in 'on hold' status and getting them out of 'on hold'.
+
                 self.logger.info("Testing if process run is on hold.")
                 item = (
                     self.session.query(ProcessTracking)

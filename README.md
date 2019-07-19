@@ -22,6 +22,5 @@ Want to contribute?  Check out our contributors guide!
 
 Found a bug?  Have an idea for an improvement?  Submit it into our [Issues tracker][2]
 
-
 [1]: https://process-tracker.readthedocs.io/en/latest/
 [2]: https://github.com/OpenDataAlex/process_tracker_python/issues
