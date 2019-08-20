@@ -210,7 +210,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename2.csv", status="blarg"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -238,7 +238,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename2.csv"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -279,7 +279,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -320,7 +320,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_filename(
             "test_extract_filename"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
@@ -356,7 +356,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_location(
             location_name="Test Location", status="blarg"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -397,7 +397,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_location(
             location_name="Test Location"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -438,7 +438,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_location(
             location_name="Test Location"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
@@ -475,7 +475,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_location(
             location_path="/home/test/extract_dir", status="blarg"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -516,7 +516,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_location(
             location_path="/home/test/extract_dir"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -566,7 +566,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_process(
             "Testing Process Tracking Initialization", status="blarg"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -606,7 +606,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_process(
             "Testing Process Tracking Initialization"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertCountEqual(expected_result, given_result)
 
@@ -652,7 +652,7 @@ class TestProcessTracker(unittest.TestCase):
         given_result = self.process_tracker.find_extracts_by_process(
             "Testing Process Tracking Initialization"
         )
-        given_result = [record.full_filepath() for record in given_result]
+        given_result = [record.full_filename for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
 
