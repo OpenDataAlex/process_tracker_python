@@ -206,6 +206,27 @@ class ProcessTracker:
         else:
             raise Exception("The provided status type %s is invalid." % new_status)
 
+    def create_extract_tracker_objects(self, files):
+        """
+        For extract finders, take the file list and create an array of extract tracker objects from it.
+        :param files: SQLAlchemy list of extract file records.
+        :return: Array of extract tracker objects.
+        """
+        file_list = list()
+
+        for file in files:
+            self.logger.debug("Adding %s to file_list." % file.extract_filename)
+            file_list.append(
+                ExtractTracker(
+                    process_run=self,
+                    filename=file.extract_filename,
+                    location_name=file.locations.location_name,
+                    location_path=file.locations.location_path,
+                )
+            )
+
+        return file_list
+
     def determine_hold_status(self, last_run_status, last_run_id):
         """
         Based on the setting 'max_concurrent_failures', count the number of failures for that number of process runs.
@@ -217,7 +238,7 @@ class ProcessTracker:
         self.logger.debug("Determining if process should be put on or remain on hold.")
 
         max_concurrent_failures = int(
-            self.config.config["DEFAULT"]["max_sequential_failures"]
+            self.config.config["DEFAULT"]["max_concurrent_failures"]
         )
 
         self.logger.debug("Max Concurrent failures is %s" % max_concurrent_failures)
@@ -281,6 +302,10 @@ class ProcessTracker:
             .all()
         )
 
+        self.logger.info("Processing file records to extract tracker objects")
+
+        process_files = self.create_extract_tracker_objects(files=process_files)
+
         self.logger.info("Returning extract files by filename.")
 
         return process_files
@@ -329,6 +354,10 @@ class ProcessTracker:
                 "A location name or path must be provided.  Please try again."
             )
 
+        self.logger.info("Processing file records to extract tracker objects")
+
+        process_files = self.create_extract_tracker_objects(files=process_files)
+
         self.logger.info("Returning extract files by location.")
         return process_files
 
@@ -361,6 +390,10 @@ class ProcessTracker:
             .order_by(Extract.extract_registration_date_time)
             .all()
         )
+
+        self.logger.info("Processing file records to extract tracker objects")
+
+        process_files = self.create_extract_tracker_objects(files=process_files)
 
         self.logger.info("Returning extract files by process.")
 
