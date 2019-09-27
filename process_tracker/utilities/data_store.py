@@ -654,7 +654,6 @@ class DataStore:
             "process status",
             "process type",
             "source",
-            "source contact",
             "tool",
         ]
 
