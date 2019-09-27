@@ -50,6 +50,29 @@ class Source(Base):
         return "<Source (name=%s)>" % self.source_name
 
 
+class SourceContact(Base):
+
+    __tablename__ = "source_contact"
+    __table_args__ = {"schema": "process_tracker"}
+
+    source_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_lkup.source_id"),
+        nullable=False,
+        primary_key=True,
+    )
+    contact_id = Column(
+        Integer,
+        ForeignKey("process_tracker.contact_lkup.contact_id"),
+        nullable=False,
+        primary_key=True,
+    )
+
+    UniqueConstraint(source_id, contact_id)
+    sources = relationship("Source")
+    contacts = relationship("Contact")
+
+
 class SourceDatasetType(Base):
 
     __tablename__ = "source_dataset_type"

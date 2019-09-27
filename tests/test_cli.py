@@ -13,6 +13,7 @@ from process_tracker.utilities.logging import console
 
 from process_tracker.models.actor import Actor
 from process_tracker.models.capacity import Cluster, ClusterProcess
+from process_tracker.models.contact import Contact
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
     ErrorType,
@@ -26,7 +27,7 @@ from process_tracker.models.process import (
     ProcessStatus,
     ProcessType,
 )
-from process_tracker.models.source import Source
+from process_tracker.models.source import Source, SourceContact
 from process_tracker.models.tool import Tool
 
 
@@ -130,6 +131,38 @@ class TestCli(unittest.TestCase):
         self.assertEqual("Test Test", given_name)
         self.assertEqual(0, result.exit_code)
 
+    def test_create_contact(self):
+        """
+        Testing that when creating a contact record it is added.
+        :return:
+        """
+
+        result = self.runner.invoke(
+            main,
+            [
+                "create",
+                "-t",
+                "contact",
+                "-n",
+                "Test Test",
+                "--email",
+                "testtest@test.com",
+            ],
+        )
+
+        instance = (
+            self.session.query(Contact)
+            .filter(Contact.contact_name == "Test Test")
+            .first()
+        )
+
+        given_name = instance.contact_name
+
+        self.runner.invoke(main, ["delete", "-t", "contact", "-n", "Test Test"])
+
+        self.assertEqual("Test Test", given_name)
+        self.assertEqual(0, result.exit_code)
+
     def test_create_cluster(self):
         """
         Testing that when creating a performance cluster record it is added.
@@ -226,10 +259,8 @@ class TestCli(unittest.TestCase):
         :return:
         """
         result = self.runner.invoke(main, 'create -t "error type" -n "New Error Type"')
-        instance = (
-            self.session.query(ErrorType)
-            .filter(ErrorType.error_type_name == "New Error Type")
-            .first()
+        instance = DataStore().get_or_create_item(
+            model=ErrorType, create=False, error_type_name="New Error Type"
         )
         try:
             self.logger.debug(str(instance.error_type_name))
@@ -415,6 +446,27 @@ class TestCli(unittest.TestCase):
         instance = (
             self.session.query(Actor).filter(Actor.actor_name == "Test Test").first()
         )
+        self.logger.debug(result.output)
+        self.assertEqual(None, instance)
+        self.assertEqual(0, result.exit_code)
+
+    def test_delete_contact(self):
+        """
+        Testing that when deleting a contact record it is deleted.
+        :return:
+        """
+        self.runner.invoke(
+            main, 'create -t "contact" -n "Test Test" --email "testtest@test.com"'
+        )
+
+        result = self.runner.invoke(main, 'delete -t "contact" -n "Test Test"')
+
+        instance = (
+            self.session.query(Contact)
+            .filter(Contact.contact_name == "Test Test")
+            .first()
+        )
+
         self.logger.debug(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -746,6 +798,32 @@ class TestCli(unittest.TestCase):
         given_name = instance.actor_name
 
         self.runner.invoke(main, 'delete -t actor -n "Updated"')
+
+        self.assertEqual("Updated", given_name)
+        self.assertEqual(0, result.exit_code)
+
+    def test_update_contact(self):
+        """
+        Testing that when updating a contact record it is updated.
+        :return:
+        """
+        self.runner.invoke(
+            main, 'create -t contact -n "Test Test" --email "testtest@test.com"'
+        )
+
+        result = self.runner.invoke(
+            main, 'update -t contact -i "Test Test" -n "Updated"'
+        )
+
+        instance = (
+            self.session.query(Contact)
+            .filter(Contact.contact_name == "Updated")
+            .first()
+        )
+
+        given_name = instance.contact_name
+
+        self.runner.invoke(main, 'delete -t contact -n "Updated"')
 
         self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)

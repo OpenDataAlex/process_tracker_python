@@ -12,6 +12,7 @@ from process_tracker.utilities.utilities import decrypt_password
 from process_tracker.models.model_base import Base
 from process_tracker.models.actor import Actor
 from process_tracker.models.capacity import Cluster, ClusterProcess
+from process_tracker.models.contact import Contact
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
     ErrorType,
@@ -198,6 +199,7 @@ class DataStore:
         max_memory=None,
         memory_unit=None,
         cluster=None,
+        email=None,
     ):
         """
         For the command line tool, validate the topic and create the new instance.
@@ -220,6 +222,8 @@ class DataStore:
         :type memory_unit: string
         :param cluster: For cluster/process relationships, the name of the cluster.
         :type cluster: string
+        :param email:  For contacts, the contact's email address
+        :type email: string
         :return:
         """
         self.logger.info("Attempting to create %s item: %s" % (topic, name))
@@ -229,6 +233,12 @@ class DataStore:
             if topic == "actor":
                 item = self.get_or_create_item(model=Actor, actor_name=name)
                 self.logger.info("Actor created: %s" % item.__repr__)
+
+            elif topic == "contact":
+                item = self.get_or_create_item(
+                    model=Contact, contact_name=name, contact_email=email
+                )
+                self.logger.info("Contact created: %s" % item.__repr__)
 
             elif topic == "cluster":
                 item = self.get_or_create_item(
@@ -257,15 +267,15 @@ class DataStore:
 
                 self.logger.info("Cluster Process created: %s" % item.__repr__)
 
+            elif topic == "error type":
+                item = self.get_or_create_item(model=ErrorType, error_type_name=name)
+                self.logger.info("Error Type created: %s" % item.__repr__)
+
             elif topic == "extract status":
                 item = self.get_or_create_item(
                     model=ExtractStatus, extract_status_name=name
                 )
                 self.logger.info("Extract Status created: %s" % item.__repr__)
-
-            elif topic == "error type":
-                item = self.get_or_create_item(model=ErrorType, error_type_name=name)
-                self.logger.info("Error Type created: %s" % item.__repr__)
 
             elif topic == "process dependency":
                 parent_process = self.get_or_create_item(
@@ -283,17 +293,17 @@ class DataStore:
 
                 self.logger.info("Process Dependency created: %s" % item.__repr__)
 
-            elif topic == "process type":
-                item = self.get_or_create_item(
-                    model=ProcessType, process_type_name=name
-                )
-                self.logger.info("Process Type created: %s" % item.__repr__)
-
             elif topic == "process status":
                 item = self.get_or_create_item(
                     model=ProcessStatus, process_status_name=name
                 )
                 self.logger.info("Process Status created: %s" % item.__repr__)
+
+            elif topic == "process type":
+                item = self.get_or_create_item(
+                    model=ProcessType, process_type_name=name
+                )
+                self.logger.info("Process Type created: %s" % item.__repr__)
 
             elif topic == "source":
                 item = self.get_or_create_item(model=Source, source_name=name)
@@ -337,6 +347,13 @@ class DataStore:
             if topic == "actor":
                 item_delete = True
                 self.session.query(Actor).filter(Actor.actor_name == name).delete()
+                self.logger.info("%s %s deleted." % (topic, name))
+
+            elif topic == "contact":
+                item_delete = True
+                self.session.query(Contact).filter(
+                    Contact.contact_name == name
+                ).delete()
                 self.logger.info("%s %s deleted." % (topic, name))
 
             elif topic == "cluster":
@@ -448,6 +465,7 @@ class DataStore:
         processing_unit=None,
         max_memory=None,
         memory_unit=None,
+        email=None,
     ):
         """
         For the command line tool, validate that the topic name is not a default value and if not, update it.
@@ -465,6 +483,8 @@ class DataStore:
         :type processing_unit: string
         :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
         :type memory_unit: string
+        :param email: For contacts, the contact's email address
+        :type email: string
         :return:
         """
         if self.topic_validator(topic=topic):
@@ -473,6 +493,17 @@ class DataStore:
                     model=Actor, create=False, actor_name=initial_name
                 )
                 item.actor_name = name
+                self.logger.info("%s %s updated." % (topic, name))
+
+            elif topic == "contact":
+                item = self.get_or_create_item(
+                    model=Contact, create=False, contact_name=initial_name
+                )
+
+                item.contact_name = name
+
+                if email is not None:
+                    item.contact_email = email
                 self.logger.info("%s %s updated." % (topic, name))
 
             elif topic == "cluster":
@@ -615,6 +646,7 @@ class DataStore:
             "actor",
             "cluster",
             "cluster process",
+            "contact",
             "error type",
             "extract status",
             "process dependency",
@@ -622,6 +654,7 @@ class DataStore:
             "process status",
             "process type",
             "source",
+            "source contact",
             "tool",
         ]
 

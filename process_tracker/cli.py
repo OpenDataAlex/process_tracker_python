@@ -72,11 +72,12 @@ def upgrade():
     help="For clusters, the unit of processing ability (Ghz, CPU, DPU, etc.",
 )
 @click.option(
-    "--memory-unit", help="For clusters, the unit of allocated memory (MB, GB, etc."
+    "--memory-unit", help="For clusters, the unit of allocated memory (MB, GB, etc.)"
 )
 @click.option(
     "--cluster", help="For cluster/process relationships, the name of the cluster"
 )
+@click.option("--email", help="For contacts, the contact's email address.")
 def create(
     topic,
     name,
@@ -87,6 +88,7 @@ def create(
     max_memory=None,
     memory_unit=None,
     cluster=None,
+    email=None,
 ):
     """
     Create an item that is within the valid topics list.
@@ -109,6 +111,8 @@ def create(
     :type memory_unit: string
     :param cluster: For cluster/process relationships, the name of the cluster.
     :type cluster: string
+    :param email: For contacts, the contact's email address.
+    :type email: string
     """
     click.echo("Attempting to create %s with name %s" % (topic, name))
     data_store.topic_creator(
@@ -121,6 +125,7 @@ def create(
         processing_unit=processing_unit,
         memory_unit=memory_unit,
         cluster=cluster,
+        email=email,
     )
 
 
@@ -175,6 +180,7 @@ def delete(topic, name, parent=None, child=None, cluster=None):
 @click.option(
     "--memory-unit", help="For clusters, the unit of allocated memory (MB, GB, etc."
 )
+@click.option("--email", help="For contacts, the contact's email address.")
 def update(
     topic,
     name,
@@ -183,6 +189,7 @@ def update(
     max_memory=None,
     processing_unit=None,
     memory_unit=None,
+    email=None,
 ):
     """
     Update an item that is within the valid topics list and not a pre-loaded item.
@@ -200,6 +207,8 @@ def update(
     :type processing_unit: string
     :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
     :type memory_unit: string
+    :param email: For contacts, the contact's email address.
+    :type email: string
     """
     click.echo(
         "Attempting to update %s with name %s to %s" % (topic, initial_name, name)
@@ -212,6 +221,7 @@ def update(
         max_memory=max_memory,
         processing_unit=processing_unit,
         memory_unit=memory_unit,
+        email=email,
     )
 
 
