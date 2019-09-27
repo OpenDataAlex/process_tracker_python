@@ -50,7 +50,6 @@ from process_tracker.utilities import utilities
 test_bucket = "test_bucket"
 
 
-
 # @mock_s3
 class TestProcessTracker(unittest.TestCase):
     @classmethod
