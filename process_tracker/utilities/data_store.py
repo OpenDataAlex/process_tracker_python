@@ -11,6 +11,7 @@ from process_tracker.utilities.utilities import decrypt_password
 
 from process_tracker.models.model_base import Base
 from process_tracker.models.actor import Actor
+from process_tracker.models.contact import Contact
 from process_tracker.models.capacity import Cluster, ClusterProcess
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
@@ -21,7 +22,7 @@ from process_tracker.models.process import (
     ProcessType,
     ProcessStatus,
 )
-from process_tracker.models.source import Source
+from process_tracker.models.source import DatasetType, Source, SourceContact
 from process_tracker.models.system import System
 from process_tracker.models.tool import Tool
 
@@ -198,6 +199,9 @@ class DataStore:
         max_memory=None,
         memory_unit=None,
         cluster=None,
+        email=None,
+        source=None,
+        contact=None,
     ):
         """
         For the command line tool, validate the topic and create the new instance.
@@ -220,6 +224,12 @@ class DataStore:
         :type memory_unit: string
         :param cluster: For cluster/process relationships, the name of the cluster.
         :type cluster: string
+        :param email: For contacts, the contact's email address.
+        :type email: string
+        :param source: For source contact relationships, the name of the source.
+        :type source: string
+        :param contact: For source contact relationships, the name of the contact.
+        :type contact: string
         :return:
         """
         self.logger.info("Attempting to create %s item: %s" % (topic, name))
@@ -229,6 +239,11 @@ class DataStore:
             if topic == "actor":
                 item = self.get_or_create_item(model=Actor, actor_name=name)
                 self.logger.info("Actor created: %s" % item.__repr__)
+
+            elif topic == "contact":
+                item = self.get_or_create_item(
+                    model=Contact, contact_name=name, contact_email=email
+                )
 
             elif topic == "cluster":
                 item = self.get_or_create_item(
@@ -299,6 +314,23 @@ class DataStore:
                 item = self.get_or_create_item(model=Source, source_name=name)
                 self.logger.info("Source created: %s" % item.__repr__)
 
+            elif topic == "source contact":
+                source = self.get_or_create_item(
+                    model=Source, create=False, source_name=source
+                )
+
+                contact = self.get_or_create_item(
+                    model=Contact, create=False, contact_name=contact
+                )
+
+                item = self.get_or_create_item(
+                    model=SourceContact,
+                    source_id=source.source_id,
+                    contact_id=contact.contact_id,
+                )
+
+                self.logger.info("Source Contact created: %s" % item.__repr__)
+
             elif topic == "tool":
                 item = self.get_or_create_item(model=Tool, tool_name=name)
                 self.logger.info("Tool created: %s" % item.__repr__)
@@ -314,7 +346,16 @@ class DataStore:
 
         return item
 
-    def topic_deleter(self, topic, name, parent=None, child=None, cluster=None):
+    def topic_deleter(
+        self,
+        topic,
+        name,
+        parent=None,
+        child=None,
+        cluster=None,
+        source=None,
+        contact=None,
+    ):
         """
         For the command line tool, validate that the topic name is not a default value and if not, delete it.
         :param topic: The SQLAlchemy object type
@@ -326,6 +367,10 @@ class DataStore:
         :param child: The child process' name, if deleting a process dependency.  For cluster/process relationship, the name of the process.
         :type child: string
         :param cluster: For cluster/process relationship, the name of the cluster.
+        :param source: For source/contact relationships, the name of the source.
+        :type source: string
+        :param contact: For source/contact relationships, the name of the contact.
+        :type contact: string
         :return:
         """
         item_delete = False
@@ -338,6 +383,12 @@ class DataStore:
                 item_delete = True
                 self.session.query(Actor).filter(Actor.actor_name == name).delete()
                 self.logger.info("%s %s deleted." % (topic, name))
+
+            elif topic == "contact":
+                item_delete = True
+                self.session.query(Contact).filter(
+                    Contact.contact_name == name
+                ).delete()
 
             elif topic == "cluster":
                 item_delete = True
@@ -419,6 +470,29 @@ class DataStore:
                 self.session.query(Source).filter(Source.source_name == name).delete()
                 self.logger.info("%s %s deleted." % (topic, name))
 
+            elif topic == "source contact":
+                item_delete = True
+                source = self.get_or_create_item(
+                    model=Source, create=False, source_name=source
+                )
+                contact = self.get_or_create_item(
+                    model=Contact, create=False, contact_name=contact
+                )
+
+                item = self.get_or_create_item(
+                    model=SourceContact,
+                    create=False,
+                    source_id=source.source_id,
+                    contact_id=contact.contact_id,
+                )
+
+                self.session.delete(item)
+
+                self.logger.info(
+                    "%s %s - %s deleted."
+                    % (topic, source.source_name, contact.contact_name)
+                )
+
             elif topic == "tool":
                 item_delete = True
                 self.session.query(Tool).filter(Tool.tool_name == name).delete()
@@ -448,6 +522,7 @@ class DataStore:
         processing_unit=None,
         max_memory=None,
         memory_unit=None,
+        email=None,
     ):
         """
         For the command line tool, validate that the topic name is not a default value and if not, update it.
@@ -465,6 +540,8 @@ class DataStore:
         :type processing_unit: string
         :param memory_unit: For performance clusters, the unit of allocated memory to the cluster
         :type memory_unit: string
+        :param email: For contacts, the contact's email address.
+        :type email: string
         :return:
         """
         if self.topic_validator(topic=topic):
@@ -473,6 +550,18 @@ class DataStore:
                     model=Actor, create=False, actor_name=initial_name
                 )
                 item.actor_name = name
+                self.logger.info("%s %s updated." % (topic, name))
+
+            elif topic == "contact":
+                item = self.get_or_create_item(
+                    model=Contact, create=False, contact_name=initial_name
+                )
+
+                item.contact_name = name
+
+                if email is not None:
+                    item.contact_email = email
+
                 self.logger.info("%s %s updated." % (topic, name))
 
             elif topic == "cluster":
@@ -613,6 +702,7 @@ class DataStore:
         # Only data store topics that should be allowed to be created from the command line tool.
         valid_topics = [
             "actor",
+            "contact",
             "cluster",
             "cluster process",
             "error type",
@@ -622,6 +712,7 @@ class DataStore:
             "process status",
             "process type",
             "source",
+            "source contact",
             "tool",
         ]
 

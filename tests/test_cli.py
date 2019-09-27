@@ -12,6 +12,7 @@ from process_tracker.process_tracker import ProcessTracker
 from process_tracker.utilities.logging import console
 
 from process_tracker.models.actor import Actor
+from process_tracker.models.contact import Contact
 from process_tracker.models.capacity import Cluster, ClusterProcess
 from process_tracker.models.extract import ExtractStatus
 from process_tracker.models.process import (
@@ -26,7 +27,7 @@ from process_tracker.models.process import (
     ProcessStatus,
     ProcessType,
 )
-from process_tracker.models.source import Source
+from process_tracker.models.source import Source, SourceContact
 from process_tracker.models.tool import Tool
 
 
@@ -126,6 +127,38 @@ class TestCli(unittest.TestCase):
         given_name = instance.actor_name
 
         self.runner.invoke(main, ["delete", "-t", "actor", "-n", "Test Test"])
+
+        self.assertEqual("Test Test", given_name)
+        self.assertEqual(0, result.exit_code)
+
+    def test_create_contact(self):
+        """
+        Testing that when creating a contact record it is added.
+        :return:
+        """
+
+        result = self.runner.invoke(
+            main,
+            [
+                "create",
+                "-t",
+                "contact",
+                "-n",
+                "Test Test",
+                "--email",
+                "testtest@test.com",
+            ],
+        )
+
+        instance = (
+            self.session.query(Contact)
+            .filter(Contact.contact_name == "Test Test")
+            .first()
+        )
+
+        given_name = instance.contact_name
+
+        self.runner.invoke(main, ["delete", "-t", "contact", "-n", "Test Test"])
 
         self.assertEqual("Test Test", given_name)
         self.assertEqual(0, result.exit_code)
@@ -380,6 +413,33 @@ class TestCli(unittest.TestCase):
         self.assertEqual("New Source", given_name)
         self.assertEqual(0, result.exit_code)
 
+    def test_create_source_contact(self):
+        """
+        Testing that when creating a source contact record, it is created.
+        :return:
+        """
+        source = DataStore().get_or_create_item(model=Source, source_name="Test")
+        contact = DataStore().get_or_create_item(
+            model=Contact, contact_name="Test Test"
+        )
+
+        result = self.runner.invoke(
+            main, 'create -t "source contact" --source "Test" --contact "Test Test"'
+        )
+
+        instance = (
+            self.session.query(SourceContact)
+            .filter(SourceContact.source_id == source.source_id)
+            .filter(SourceContact.contact_id == contact.contact_id)
+            .first()
+        )
+
+        given_result = [instance.source_id, instance.contact_id]
+        expected_result = [source.source_id, contact.contact_id]
+
+        self.assertEqual(expected_result, given_result)
+        self.assertEqual(0, result.exit_code)
+
     def test_create_tool(self):
         """
         Testing that when creating a tool record it is added.
@@ -395,15 +455,6 @@ class TestCli(unittest.TestCase):
         self.assertEqual("New Tool", given_name)
         self.assertEqual(0, result.exit_code)
 
-    # def test_create_process_dependency(self):
-    #     """
-    #     Testing that when creating an error type record it is added.
-    #     :return:
-    #     """
-    #     result = self.runner.invoke(main, 'create -t "error type" -n "New Error Type"')
-    #
-    #     self.assertEqual(0, result.exit_code)
-
     def test_delete_actor(self):
         """
         Testing that when deleting an actor record it is deleted.
@@ -415,6 +466,38 @@ class TestCli(unittest.TestCase):
         instance = (
             self.session.query(Actor).filter(Actor.actor_name == "Test Test").first()
         )
+        self.logger.debug(result.output)
+        self.assertEqual(None, instance)
+        self.assertEqual(0, result.exit_code)
+
+    def test_delete_contact(self):
+        """
+        Testing that when deleting a contact record it is deleted.
+        :return:
+        """
+        self.runner.invoke(
+            main,
+            [
+                "create",
+                "-t",
+                "contact",
+                "-n",
+                "Test Test",
+                "--email",
+                "testtest@test.com",
+            ],
+        )
+
+        result = self.runner.invoke(
+            main, ["delete", "-t", "contact", "-n", "Test Test"]
+        )
+
+        instance = (
+            self.session.query(Contact)
+            .filter(Contact.contact_name == "Test Test")
+            .first()
+        )
+
         self.logger.debug(result.output)
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
@@ -715,6 +798,34 @@ class TestCli(unittest.TestCase):
         self.assertEqual(None, instance)
         self.assertEqual(0, result.exit_code)
 
+    def test_delete_source_contact(self):
+        """
+        Testing that when deleting a source contact record it is deleted.
+        :return:
+        """
+        source = DataStore().get_or_create_item(model=Source, source_name="Test")
+        contact = DataStore().get_or_create_item(
+            model=Contact, contact_name="Test Test"
+        )
+
+        self.runner.invoke(
+            main, 'create -t "source contact" --source "Test" --contact "Test Test"'
+        )
+
+        result = self.runner.invoke(
+            main, 'delete -t "source contact" --source "Test" --contact "Test Test"'
+        )
+
+        instance = (
+            self.session.query(SourceContact)
+            .filter(SourceContact.source_id == source.source_id)
+            .filter(SourceContact.contact_id == contact.contact_id)
+            .first()
+        )
+
+        self.assertEqual(None, instance)
+        self.assertEqual(0, result.exit_code)
+
     def test_delete_tool(self):
         """
         Testing that when deleting a tool record not on the protected list, it is deleted.
@@ -746,6 +857,32 @@ class TestCli(unittest.TestCase):
         given_name = instance.actor_name
 
         self.runner.invoke(main, 'delete -t actor -n "Updated"')
+
+        self.assertEqual("Updated", given_name)
+        self.assertEqual(0, result.exit_code)
+
+    def test_update_contact(self):
+        """
+        Testing that when updating a contact record it is updated.
+        :return:
+        """
+        self.runner.invoke(
+            main, 'create -t contact -n "Test Test" --email "testtest@test.com"'
+        )
+
+        result = self.runner.invoke(
+            main, 'update -t contact -i "Test Test" -n "Updated"'
+        )
+
+        instance = (
+            self.session.query(Contact)
+            .filter(Contact.contact_name == "Updated")
+            .first()
+        )
+
+        given_name = instance.contact_name
+
+        self.runner.invoke(main, 'delete -t contact -n "Updated"')
 
         self.assertEqual("Updated", given_name)
         self.assertEqual(0, result.exit_code)
