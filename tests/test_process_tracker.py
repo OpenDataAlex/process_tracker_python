@@ -13,6 +13,7 @@ import botocore
 from moto import mock_s3
 from sqlalchemy.orm import aliased, Session
 
+from process_tracker.models.contact import Contact
 from process_tracker.models.extract import (
     Extract,
     ExtractDatasetType,
@@ -35,17 +36,19 @@ from process_tracker.models.process import (
 from process_tracker.models.source import (
     DatasetType,
     Source,
+    SourceContact,
     SourceDatasetType,
     SourceObject,
     SourceObjectDatasetType,
 )
 
-from process_tracker.utilities.data_store import DataStore
+from process_tracker.utilities.data_store import DataStore, ClusterProcess
 from process_tracker.extract_tracker import ExtractTracker
 from process_tracker.process_tracker import ProcessTracker
 from process_tracker.utilities import utilities
 
 test_bucket = "test_bucket"
+
 
 
 # @mock_s3
@@ -64,6 +67,7 @@ class TestProcessTracker(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.session.query(ClusterProcess).delete()
         cls.session.query(Location).delete()
         cls.session.query(DatasetType).delete()
         cls.session.query(ProcessSourceObject).delete()
@@ -655,6 +659,39 @@ class TestProcessTracker(unittest.TestCase):
         given_result = [record.full_filename for record in given_result]
 
         self.assertNotEqual(expected_result, given_result)
+
+    def test_find_process_contacts(self):
+        """
+        Testing that when passed a process_id, a list of source contacts will be returned.
+        :return:
+        """
+        contact = DataStore().get_or_create_item(
+            model=Contact,
+            contact_name="Test Contact",
+            contact_email="testcontact@test.com",
+        )
+
+        source = DataStore().get_or_create_item(model=Source, source_name="Unittests")
+
+        DataStore().get_or_create_item(
+            model=SourceContact,
+            source_id=source.source_id,
+            contact_id=contact.contact_id,
+        )
+
+        given_result = self.process_tracker.find_process_contacts(
+            process=self.process_id
+        )
+
+        expected_result = [
+            {
+                "contact_name": "Test Contact",
+                "contact_email": "testcontact@test.com",
+                "contact_type": "source",
+            }
+        ]
+
+        self.assertEqual(expected_result, given_result)
 
     def test_initializing_process_tracking(self):
         """

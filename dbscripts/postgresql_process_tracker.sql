@@ -4,6 +4,23 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
+create table process_tracker.contact_lkup
+(
+	contact_id serial not null
+		constraint contact_lkup_pk
+			primary key,
+	contact_name varchar(250) not null,
+	contact_email varchar(750)
+);
+
+alter table process_tracker.contact_lkup owner to pt_admin;
+
+create unique index contact_lkup_contact_email_uindex
+	on process_tracker.contact_lkup (contact_email);
+
+create unique index contact_lkup_contact_name_uindex
+	on process_tracker.contact_lkup (contact_name);
+
 create table process_tracker.dataset_type_lkup
 (
 	dataset_type_id serial not null
@@ -90,6 +107,20 @@ alter table source_lkup owner to pt_admin;
 
 create unique index source_lkup_udx01
 	on source_lkup (source_name);
+
+create table process_tracker.source_contact
+(
+	source_id integer not null
+		constraint source_contact_fk01
+			references process_tracker.source_lkup,
+	contact_id integer not null
+		constraint source_contact_fk02
+			references process_tracker.contact_lkup,
+	constraint source_contact_pk
+		primary key (source_id, contact_id)
+);
+
+alter table process_tracker.source_contact owner to pt_admin;
 
 create table process_status_lkup
 (

@@ -16,6 +16,7 @@ from process_tracker.utilities.settings import SettingsManager
 from process_tracker.utilities import utilities
 
 from process_tracker.models.actor import Actor
+from process_tracker.models.contact import Contact
 from process_tracker.models.extract import (
     Extract,
     ExtractProcess,
@@ -39,6 +40,7 @@ from process_tracker.models.process import (
 from process_tracker.models.source import (
     DatasetType,
     Source,
+    SourceContact,
     SourceDatasetType,
     SourceObject,
     SourceObjectDatasetType,
@@ -398,6 +400,37 @@ class ProcessTracker:
         self.logger.info("Returning extract files by process.")
 
         return process_files
+
+    def find_process_contacts(self, process):
+        """
+        Based on the process, find the process' contacts as well as the contacts for any sources used and return them
+        as a list.
+        :param process: The process' process_id
+        :type process: int
+        :return:
+        """
+        contacts = list()
+
+        result = (
+            self.session.query(Contact.contact_name, Contact.contact_email)
+            .join(SourceContact)
+            .join(Source)
+            .join(ProcessSource)
+            .join(Process)
+            .join(ProcessTracking)
+            .filter(ProcessTracking.process_id == process)
+        )
+
+        for contact in result:
+            contacts.append(
+                {
+                    "contact_name": contact.contact_name,
+                    "contact_email": contact.contact_email,
+                    "contact_type": "source",
+                }
+            )
+
+        return contacts
 
     def get_latest_tracking_record(self, process):
         """

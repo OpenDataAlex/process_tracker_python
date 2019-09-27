@@ -1,5 +1,17 @@
 USE process_tracker;
 
+create table contact_lkup
+(
+	contact_id int auto_increment
+		primary key,
+	contact_name varchar(250) not null,
+	contact_email varchar(750) null,
+	constraint contact_lkup_contact_email_uindex
+		unique (contact_email),
+	constraint contact_lkup_contact_name_uindex
+		unique (contact_name)
+);
+
 create table dataset_type_lkup
 (
 	dataset_type_id int auto_increment,
@@ -130,6 +142,17 @@ create table source_lkup
 	source_name varchar(250) not null,
 	constraint source_name
 		unique (source_name)
+);
+
+create table process_tracker.source_contact
+(
+	source_id int not null,
+	contact_id int not null,
+	primary key (source_id, contact_id),
+	constraint source_contact_fk01
+		foreign key (source_id) references process_tracker.source_lkup (source_id),
+	constraint source_contact_fk02
+		foreign key (contact_id) references process_tracker.contact_lkup (contact_id)
 );
 
 create table system_lkup
