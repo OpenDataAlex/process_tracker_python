@@ -12,12 +12,12 @@ create table process_tracker.dataset_type_lkup
 	dataset_type varchar(250)
 );
 
-comment on process_tracker.table dataset_type_lkup is 'High level of dataset type categories';
+comment on table process_tracker.dataset_type_lkup is 'High level of dataset type categories';
 
 alter table process_tracker.dataset_type_lkup owner to pt_admin;
 
 create unique index dataset_type_lkup_dataset_type_uindex
-	on process_tracker.dataset_type_lkup (dataset_type);
+	on table process_tracker.dataset_type_lkup (dataset_type);
 
 create table process_tracker.error_type_lkup
 (
@@ -27,14 +27,14 @@ create table process_tracker.error_type_lkup
 	error_type_name varchar(250) not null
 );
 
-comment on process_tracker.table error_type_lkup is 'Types of errors that are being tracked.';
+comment on table process_tracker.error_type_lkup is 'Types of errors that are being tracked.';
 
-comment on process_tracker.column error_type_lkup.error_type_name is 'Unique error type name.';
+comment on table process_tracker.column error_type_lkup.error_type_name is 'Unique error type name.';
 
 alter table process_tracker.error_type_lkup owner to pt_admin;
 
 create unique index error_type_lkup_udx01
-	on process_tracker.error_type_lkup (error_type_name);
+	on table process_tracker.error_type_lkup (error_type_name);
 
 create table process_tracker.error_tracking
 (
@@ -43,22 +43,22 @@ create table process_tracker.error_tracking
 			primary key,
 	error_type_id integer not null,
 	process_tracking_id integer not null,
-	error_description process_tracker.varchar(750),
+	error_description table process_tracker.varchar(750),
 	error_occurrence_date_time timestamp not null
 );
 
-comment on process_tracker.table error_tracking is 'Tracking of process errors';
+comment on table process_tracker.error_tracking is 'Tracking of process errors';
 
-comment on process_tracker.column error_tracking.error_type_id is 'The type of error being recorded.';
+comment on table process_tracker.column error_tracking.error_type_id is 'The type of error being recorded.';
 
-comment on process_tracker.column error_tracking.process_tracking_id is 'The specific process run that triggered the error.';
+comment on table process_tracker.column error_tracking.process_tracking_id is 'The specific process run that triggered the error.';
 
-comment on process_tracker.column error_tracking.error_occurrence_date_time is 'The timestamp when the error occurred.';
+comment on table process_tracker.column error_tracking.error_occurrence_date_time is 'The timestamp when the error occurred.';
 
 alter table process_tracker.error_tracking owner to pt_admin;
 
 create index error_tracking_idx01
-	on process_tracker.error_tracking (process_tracking_id, error_type_id);
+	on table process_tracker.error_tracking (process_tracking_id, error_type_id);
 
 create table process_tracker.tool_lkup
 (
@@ -68,12 +68,12 @@ create table process_tracker.tool_lkup
 	tool_name varchar(250) not null
 );
 
-comment on process_tracker.table tool_lkup is 'List of tools that are used to run processes';
+comment on table process_tracker.tool_lkup is 'List of tools that are used to run processes';
 
 alter table process_tracker.tool_lkup owner to pt_admin;
 
 create unique index tool_lkup_tool_udx01
-	on process_tracker.tool_lkup (tool_name);
+	on table process_tracker.tool_lkup (tool_name);
 
 create table process_tracker.source_lkup
 (
@@ -83,12 +83,12 @@ create table process_tracker.source_lkup
 	source_name varchar(250) not null
 );
 
-comment on process_tracker.table source_lkup is 'Source system where data originates.';
+comment on table process_tracker.source_lkup is 'Source system where data originates.';
 
 alter table process_tracker.source_lkup owner to pt_admin;
 
 create unique index source_lkup_udx01
-	on process_tracker.source_lkup (source_name);
+	on table process_tracker.source_lkup (source_name);
 
 create table process_tracker.process_status_lkup
 (
@@ -98,12 +98,12 @@ create table process_tracker.process_status_lkup
 	process_status_name varchar(75) not null
 );
 
-comment on process_tracker.table process_status_lkup is 'Process status states';
+comment on table process_tracker.process_status_lkup is 'Process status states';
 
 alter table process_tracker.process_status_lkup owner to pt_admin;
 
 create unique index process_status_lkup_udx01
-	on process_tracker.process_status_lkup (process_status_name);
+	on table process_tracker.process_status_lkup (process_status_name);
 
 create table process_tracker.process_type_lkup
 (
@@ -113,14 +113,14 @@ create table process_tracker.process_type_lkup
 	process_type_name varchar(250) not null
 );
 
-comment on process_tracker.table process_type_lkup is 'Valid process types for processes';
+comment on table process_tracker.process_type_lkup is 'Valid process types for processes';
 
-comment on process_tracker.column process_type_lkup.process_type_name is 'Unique process type name.';
+comment on table process_tracker.column process_type_lkup.process_type_name is 'Unique process type name.';
 
 alter table process_tracker.process_type_lkup owner to pt_admin;
 
 create unique index process_type_lkup_udx01
-	on process_tracker.process_type_lkup (process_type_name);
+	on table process_tracker.process_type_lkup (process_type_name);
 
 create table process_tracker.process
 (
@@ -138,22 +138,22 @@ create table process_tracker.process
 	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null
 );
 
-comment on process_tracker.table process is 'Processes being tracked';
+comment on table process_tracker.process is 'Processes being tracked';
 
-comment on process_tracker.column process.process_name is 'Unique name for process.';
+comment on table process_tracker.column process.process_name is 'Unique name for process.';
 
-comment on process_tracker.column process.total_record_count is 'Total number of records processed over all runs of process.';
+comment on table process_tracker.column process.total_record_count is 'Total number of records processed over all runs of process.';
 
-comment on process_tracker.column process.process_type_id is 'The type of process being tracked.';
+comment on table process_tracker.column process.process_type_id is 'The type of process being tracked.';
 
-comment on process_tracker.column process.process_tool_id is 'The type of tool used to execute the process.';
+comment on table process_tracker.column process.process_tool_id is 'The type of tool used to execute the process.';
 
-comment on process_tracker.column process.last_failed_run_date_time is 'The last time the process failed to run.';
+comment on table process_tracker.column process.last_failed_run_date_time is 'The last time the process failed to run.';
 
 alter table process_tracker.process owner to pt_admin;
 
 create unique index process_udx01
-	on process_tracker.process (process_name);
+	on table process_tracker.process (process_name);
 
 create table process_tracker.process_dependency
 (
@@ -167,11 +167,11 @@ create table process_tracker.process_dependency
 		primary key (child_process_id, parent_process_id)
 );
 
-comment on process_tracker.table process_dependency is 'Dependency tracking between processes.';
+comment on table process_tracker.process_dependency is 'Dependency tracking between processes.';
 
-comment on process_tracker.column process_dependency.parent_process_id is 'The parent process.';
+comment on table process_tracker.column process_dependency.parent_process_id is 'The parent process.';
 
-comment on process_tracker.column process_dependency.child_process_id is 'The child process.';
+comment on table process_tracker.column process_dependency.child_process_id is 'The child process.';
 
 alter table process_tracker.process_dependency owner to pt_admin;
 
@@ -183,12 +183,12 @@ create table process_tracker.actor_lkup
 	actor_name varchar(250) not null
 );
 
-comment on process_tracker.table actor_lkup is 'List of developers or applications that can run processes.';
+comment on table process_tracker.actor_lkup is 'List of developers or applications that can run processes.';
 
 alter table process_tracker.actor_lkup owner to pt_admin;
 
 create unique index actor_lkup_udx01
-	on process_tracker.actor_lkup (actor_name);
+	on table process_tracker.actor_lkup (actor_name);
 
 create table process_tracker.process_tracking
 (
@@ -213,38 +213,38 @@ create table process_tracker.process_tracking
 	is_latest_run boolean default false
 );
 
-comment on process_tracker.table process_tracking is 'Tracking table of process runs.';
+comment on table process_tracker.process_tracking is 'Tracking table of process runs.';
 
-comment on process_tracker.column process_tracking.process_id is 'The process that is being run.';
+comment on table process_tracker.column process_tracking.process_id is 'The process that is being run.';
 
-comment on process_tracker.column process_tracking.process_status_id is 'The current status of the given process run.';
+comment on table process_tracker.column process_tracking.process_status_id is 'The current status of the given process run.';
 
-comment on process_tracker.column process_tracking.process_run_id is 'The unique run identifier for the process.  Sequential to the unique process.';
+comment on table process_tracker.column process_tracking.process_run_id is 'The unique run identifier for the process.  Sequential to the unique process.';
 
-comment on process_tracker.column process_tracking.process_run_low_date_time is 'The lowest datetime provided by the extract dataset being processed.';
+comment on table process_tracker.column process_tracking.process_run_low_date_time is 'The lowest datetime provided by the extract dataset being processed.';
 
-comment on process_tracker.column process_tracking.process_run_high_date_time is 'The highest datetime provided by the extract dataset being processed.';
+comment on table process_tracker.column process_tracking.process_run_high_date_time is 'The highest datetime provided by the extract dataset being processed.';
 
-comment on process_tracker.column process_tracking.process_run_start_date_time is 'The datetime which the process run kicked off.';
+comment on table process_tracker.column process_tracking.process_run_start_date_time is 'The datetime which the process run kicked off.';
 
-comment on process_tracker.column process_tracking.process_run_end_date_time is 'The datetime which the process run ended (either in failure or success).';
+comment on table process_tracker.column process_tracking.process_run_end_date_time is 'The datetime which the process run ended (either in failure or success).';
 
-comment on process_tracker.column process_tracking.process_run_record_count is 'The number of unique records processed by the run.';
+comment on table process_tracker.column process_tracking.process_run_record_count is 'The number of unique records processed by the run.';
 
-comment on process_tracker.column process_tracking.process_run_actor_id is 'The actor who kicked the process run off.';
+comment on table process_tracker.column process_tracking.process_run_actor_id is 'The actor who kicked the process run off.';
 
-comment on process_tracker.column process_tracking.is_latest_run is 'Flag for determining if the run record is the latest for a given process.';
+comment on table process_tracker.column process_tracking.is_latest_run is 'Flag for determining if the run record is the latest for a given process.';
 
 alter table process_tracker.process_tracking owner to pt_admin;
 
 create index process_tracking_idx01
-	on process_tracker.process_tracking (process_id, process_status_id);
+	on table process_tracker.process_tracking (process_id, process_status_id);
 
 create index process_tracking_idx02
-	on process_tracker.process_tracking (process_run_start_date_time, process_run_end_date_time);
+	on table process_tracker.process_tracking (process_run_start_date_time, process_run_end_date_time);
 
 create index process_tracking_idx03
-	on process_tracker.process_tracking (process_run_low_date_time, process_run_high_date_time);
+	on table process_tracker.process_tracking (process_run_low_date_time, process_run_high_date_time);
 
 create table process_tracker.extract_status_lkup
 (
@@ -254,12 +254,12 @@ create table process_tracker.extract_status_lkup
 	extract_status_name varchar(75) not null
 );
 
-comment on process_tracker.table extract_status_lkup is 'List of valid extract processing statuses.';
+comment on table process_tracker.extract_status_lkup is 'List of valid extract processing statuses.';
 
 alter table process_tracker.extract_status_lkup owner to pt_admin;
 
 create unique index extract_status_lkup_extract_status_name_uindex
-	on process_tracker.extract_status_lkup (extract_status_name);
+	on table process_tracker.extract_status_lkup (extract_status_name);
 
 create table process_tracker.location_type_lkup
 (
@@ -269,12 +269,12 @@ create table process_tracker.location_type_lkup
 	location_type_name varchar(25) not null
 );
 
-comment on process_tracker.table location_type_lkup is 'Listing of location process_tracker.types';
+comment on table process_tracker.location_type_lkup is 'Listing of location table process_tracker.types';
 
 alter table process_tracker.location_type_lkup owner to pt_admin;
 
 create unique index location_type_lkup_udx01
-	on process_tracker.location_type_lkup (location_type_name);
+	on table process_tracker.location_type_lkup (location_type_name);
 
 create table process_tracker.location_lkup
 (
@@ -290,15 +290,15 @@ create table process_tracker.location_lkup
 	location_bucket_name varchar(750)
 );
 
-comment on process_tracker.table location_lkup is 'Locations where files are located.';
+comment on table process_tracker.location_lkup is 'Locations where files are located.';
 
 alter table process_tracker.location_lkup owner to pt_admin;
 
 create unique index location_lkup_udx01
-	on process_tracker.location_lkup (location_name);
+	on table process_tracker.location_lkup (location_name);
 
 create unique index location_lkup_udx02
-	on process_tracker.location_lkup (location_path);
+	on table process_tracker.location_lkup (location_path);
 
 create table process_tracker.process_source
 (
@@ -312,7 +312,7 @@ create table process_tracker.process_source
 		primary key (source_id, process_id)
 );
 
-comment on process_tracker.table process_source is 'List of sources for given processes';
+comment on table process_tracker.process_source is 'List of sources for given processes';
 
 alter table process_tracker.process_source owner to pt_admin;
 
@@ -328,7 +328,7 @@ create table process_tracker.process_target
 		primary key (target_source_id, process_id)
 );
 
-comment on process_tracker.table process_target is 'List of targets for given processes';
+comment on table process_tracker.process_target is 'List of targets for given processes';
 
 alter table process_tracker.process_target owner to pt_admin;
 
@@ -341,12 +341,12 @@ create table process_tracker.system_lkup
 	system_value varchar(250) not null
 );
 
-comment on process_tracker.table system_lkup is 'ProcessTracker system information';
+comment on table process_tracker.system_lkup is 'ProcessTracker system information';
 
 alter table process_tracker.system_lkup owner to pt_admin;
 
 create unique index system_lkup_system_key_uindex
-	on process_tracker.system_lkup (system_key);
+	on table process_tracker.system_lkup (system_key);
 
 create table process_tracker.cluster_tracking
 (
@@ -362,12 +362,12 @@ create table process_tracker.cluster_tracking
 	cluster_current_process_usage integer
 );
 
-comment on process_tracker.table cluster_tracking is 'Capacity cluster tracking';
+comment on table process_tracker.cluster_tracking is 'Capacity cluster tracking';
 
 alter table process_tracker.cluster_tracking owner to pt_admin;
 
 create unique index cluster_tracking_cluster_name_uindex
-	on process_tracker.cluster_tracking (cluster_name);
+	on table process_tracker.cluster_tracking (cluster_name);
 
 create table process_tracker.cluster_process
 (
@@ -381,7 +381,7 @@ create table process_tracker.cluster_process
 		primary key (cluster_id, process_id)
 );
 
-comment on process_tracker.table cluster_process is 'Relationship tracking between processes and performance clusters.';
+comment on table process_tracker.cluster_process is 'Relationship tracking between processes and performance clusters.';
 
 alter table process_tracker.cluster_process owner to pt_admin;
 
@@ -396,12 +396,12 @@ create table process_tracker.source_object_lkup
 	source_object_name varchar(250)
 );
 
-comment on process_tracker.table source_object_lkup is 'Reference table for source/target objects.';
+comment on table process_tracker.source_object_lkup is 'Reference table for source/target objects.';
 
 alter table process_tracker.source_object_lkup owner to pt_admin;
 
 create unique index source_object_lkup_udx01
-	on process_tracker.source_object_lkup (source_id, source_object_name);
+	on table process_tracker.source_object_lkup (source_id, source_object_name);
 
 create table process_tracker.process_target_object
 (
@@ -415,7 +415,7 @@ create table process_tracker.process_target_object
 		primary key (process_id, target_object_id)
 );
 
-comment on process_tracker.table process_target_object is 'Relationship between processes and target objects';
+comment on table process_tracker.process_target_object is 'Relationship between processes and target objects';
 
 alter table process_tracker.process_target_object owner to pt_admin;
 
@@ -431,7 +431,7 @@ create table process_tracker.process_source_object
 		primary key (process_id, source_object_id)
 );
 
-comment on process_tracker.table process_source_object is 'Relationship between processes and source objects';
+comment on table process_tracker.process_source_object is 'Relationship between processes and source objects';
 
 alter table process_tracker.process_source_object owner to pt_admin;
 
@@ -447,7 +447,7 @@ create table process_tracker.process_dataset_type
 		primary key (process_id, dataset_type_id)
 );
 
-comment on process_tracker.table process_dataset_type is 'Relationship between process and dataset type';
+comment on table process_tracker.process_dataset_type is 'Relationship between process and dataset type';
 
 alter table process_tracker.process_dataset_type owner to pt_admin;
 
@@ -463,7 +463,7 @@ create table process_tracker.source_dataset_type
 		primary key (source_id, dataset_type_id)
 );
 
-comment on process_tracker.table source_dataset_type is 'Relationship between source and dataset type';
+comment on table process_tracker.source_dataset_type is 'Relationship between source and dataset type';
 
 alter table process_tracker.source_dataset_type owner to pt_admin;
 
@@ -479,7 +479,7 @@ create table process_tracker.source_object_dataset_type
 		primary key (source_object_id, dataset_type_id)
 );
 
-comment on process_tracker.table source_object_dataset_type is 'Relationship between source object and dataset type';
+comment on table process_tracker.source_object_dataset_type is 'Relationship between source object and dataset type';
 
 alter table process_tracker.source_object_dataset_type owner to pt_admin;
 
@@ -495,10 +495,10 @@ create table process_tracker.contact_lkup
 alter table process_tracker.contact_lkup owner to pt_admin;
 
 create unique index contact_lkup_contact_email_uindex
-	on process_tracker.contact_lkup (contact_email);
+	on table process_tracker.contact_lkup (contact_email);
 
 create unique index contact_lkup_contact_name_uindex
-	on process_tracker.contact_lkup (contact_name);
+	on table process_tracker.contact_lkup (contact_name);
 
 create table process_tracker.source_contact
 (
@@ -539,7 +539,7 @@ create table process_tracker.extract_compression_type_lkup
 alter table process_tracker.extract_compression_type_lkup owner to pt_admin;
 
 create unique index extract_compression_type_lkup_extract_compression_type_uindex
-	on process_tracker.extract_compression_type_lkup (extract_compression_type);
+	on table process_tracker.extract_compression_type_lkup (extract_compression_type);
 
 create table process_tracker.extract_filetype_lkup
 (
@@ -585,29 +585,29 @@ create table process_tracker.extract_tracking
 			references extract_filetype_lkup
 );
 
-comment on process_tracker.table extract_tracking is 'Tracking table for all extract/staging data files.';
+comment on table process_tracker.extract_tracking is 'Tracking table for all extract/staging data files.';
 
-comment on process_tracker.column extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
+comment on table process_tracker.column extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
 
-comment on process_tracker.column extract_tracking.extract_location_id is 'The location process_tracker.where the given extract can be found.';
+comment on table process_tracker.column extract_tracking.extract_location_id is 'The location table process_tracker.where the given extract can be found.';
 
-comment on process_tracker.column extract_tracking.extract_process_run_id is 'The process that registered or created the extract file.';
+comment on table process_tracker.column extract_tracking.extract_process_run_id is 'The process that registered or created the extract file.';
 
-comment on process_tracker.column extract_tracking.extract_status_id is 'The status of the extract.';
+comment on table process_tracker.column extract_tracking.extract_status_id is 'The status of the extract.';
 
-comment on process_tracker.column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
+comment on table process_tracker.column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
 
-comment on process_tracker.column extract_tracking.extract_write_low_date_time is 'The lowest datetime of the data set as noted when writing the data file.';
+comment on table process_tracker.column extract_tracking.extract_write_low_date_time is 'The lowest datetime of the data set as noted when writing the data file.';
 
-comment on process_tracker.column extract_tracking.extract_write_high_date_time is 'The highest datetime of the data set as noted when writing the data file.';
+comment on table process_tracker.column extract_tracking.extract_write_high_date_time is 'The highest datetime of the data set as noted when writing the data file.';
 
-comment on process_tracker.column extract_tracking.extract_write_record_count is 'The record count of the data set as noted when writing the data file.';
+comment on table process_tracker.column extract_tracking.extract_write_record_count is 'The record count of the data set as noted when writing the data file.';
 
-comment on process_tracker.column extract_tracking.extract_load_low_date_time is 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.';
+comment on table process_tracker.column extract_tracking.extract_load_low_date_time is 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.';
 
-comment on process_tracker.column extract_tracking.extract_load_high_date_time is 'The highest datetime of the data set as noted when loading the data file.';
+comment on table process_tracker.column extract_tracking.extract_load_high_date_time is 'The highest datetime of the data set as noted when loading the data file.';
 
-comment on process_tracker.column extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
+comment on table process_tracker.column extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
 
 alter table process_tracker.extract_tracking owner to pt_admin;
 
@@ -627,7 +627,7 @@ create table process_tracker.extract_process_tracking
 		primary key (process_tracking_id, extract_tracking_id)
 );
 
-comment on process_tracker.table extract_process_tracking is 'Showing which processes have impacted which extracts';
+comment on table process_tracker.extract_process_tracking is 'Showing which processes have impacted which extracts';
 
 alter table process_tracker.extract_process_tracking owner to pt_admin;
 
@@ -643,7 +643,7 @@ create table process_tracker.extract_dependency
 		primary key (parent_extract_id, child_extract_id)
 );
 
-comment on process_tracker.table extract_dependency is 'Table tracking interdependencies between extract files.';
+comment on table process_tracker.extract_dependency is 'Table tracking interdependencies between extract files.';
 
 alter table process_tracker.extract_dependency owner to pt_admin;
 
@@ -659,10 +659,10 @@ create table process_tracker.extract_dataset_type
 		primary key (extract_id, dataset_type_id)
 );
 
-comment on process_tracker.table extract_dataset_type is 'Relationship between extract file and dataset type';
+comment on table process_tracker.extract_dataset_type is 'Relationship between extract file and dataset type';
 
 alter table process_tracker.extract_dataset_type owner to pt_admin;
 
 create unique index extract_filetype_lkup_extract_filetype_uindex
-	on process_tracker.extract_filetype_lkup (extract_filetype);
+	on table process_tracker.extract_filetype_lkup (extract_filetype);
 
