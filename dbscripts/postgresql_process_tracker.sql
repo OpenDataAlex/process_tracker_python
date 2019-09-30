@@ -108,34 +108,6 @@ alter table source_lkup owner to pt_admin;
 create unique index source_lkup_udx01
 	on source_lkup (source_name);
 
-create table source_contact
-(
-	source_id integer not null
-		constraint source_contact_fk01
-			references source_lkup,
-	contact_id integer not null
-		constraint source_contact_fk02
-			references contact_lkup,
-	constraint source_contact_pk
-		primary key (source_id, contact_id)
-);
-
-alter table source_contact owner to pt_admin;
-
-create table process_contact
-(
-	process_id integer not null
-		constraint process_contact_fk01
-			references process,
-	contact_id integer not null
-		constraint process_contact_fk02
-			references contact_lkup,
-	constraint process_contact_pk
-		primary key (process_id, contact_id)
-);
-
-alter table process_contact owner to pt_admin;
-
 create table process_status_lkup
 (
 	process_status_id serial not null
@@ -631,3 +603,31 @@ comment on table process_tracker.source_object_dataset_type is 'Relationship bet
 
 alter table process_tracker.source_object_dataset_type owner to pt_admin;
 
+
+create table source_contact
+(
+	source_id integer not null
+		constraint source_contact_fk01
+			references source_lkup,
+	contact_id integer not null
+		constraint source_contact_fk02
+			references contact_lkup,
+	constraint source_contact_pk
+		primary key (source_id, contact_id)
+);
+
+alter table source_contact owner to pt_admin;
+
+create table process_contact
+(
+	process_id integer not null
+		constraint process_contact_fk01
+			references process,
+	contact_id integer not null
+		constraint process_contact_fk02
+			references contact_lkup,
+	constraint process_contact_pk
+		primary key (process_id, contact_id)
+);
+
+alter table process_contact owner to pt_admin;
