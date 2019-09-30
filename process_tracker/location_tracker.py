@@ -2,7 +2,6 @@
 # For processes dealing with Extract Locations.
 import logging
 from pathlib import PurePath
-from os.path import basename, dirname, join, isdir, normpath
 
 from process_tracker.utilities.aws_utilities import AwsUtilities
 from process_tracker.utilities.logging import console

@@ -41,6 +41,52 @@ class ExtractStatus(Base):
         )
 
 
+class ExtractCompressionType(Base):
+
+    __tablename__ = "extract_compression_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_compression_type_id = Column(
+        Integer,
+        Sequence(
+            "extract_compression_type_extract_compression_type_id",
+            schema="process_tracker",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    extract_compression_type = Column(String(25), unique=True, nullable=False)
+
+    def __repr__(self):
+
+        return "<Extract Compression Type name=%s>" % (self.extract_compression_type)
+
+
+class ExtractFileType(Base):
+
+    __tablename__ = "extract_filetype_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_filetype_id = Column(
+        Integer,
+        Sequence("extract_filetype_extract_filetype_id_seq", schema="process_tracker"),
+        primary_key=True,
+        nullable=False,
+    )
+    extract_filetype_code = Column(String(5), nullable=False)
+    extract_filetype = Column(String(75), nullable=False, unique=True)
+    delimiter_char = Column(String(1), nullable=True)
+    quote_char = Column(String(1), nullable=True)
+    escape_char = Column(String(1), nullable=True)
+
+    def __repr__(self):
+
+        return "<Extract Filetype code=%s, name=%s>" % (
+            self.extract_filetype_code,
+            self.extract_filetype,
+        )
+
+
 class Extract(Base):
 
     __tablename__ = "extract_tracking"
@@ -70,6 +116,18 @@ class Extract(Base):
     extract_load_low_date_time = Column(DateTime, nullable=True)
     extract_load_high_date_time = Column(DateTime, nullable=True)
     extract_load_record_count = Column(Integer, nullable=True)
+    extract_compression_type_id = Column(
+        Integer,
+        ForeignKey(
+            "process_tracker.extract_compression_type_lkup.extract_compression_type_id"
+        ),
+        nullable=True,
+    )
+    extract_filetype_id = Column(
+        Integer,
+        ForeignKey("process_tracker.extract_filetype_lkup.extract_filetype_id"),
+        nullable=True,
+    )
 
     extract_dataset_types = relationship(
         "ExtractDatasetType",

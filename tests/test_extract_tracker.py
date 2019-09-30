@@ -547,3 +547,62 @@ class TestExtractTracker(unittest.TestCase):
         return self.assertTrue(
             "blarg is not a valid audit_type." in str(context.exception)
         )
+
+    def test_set_compression_type(self):
+        """Testing that when an extract is created with a compression type, the type is associated correctly."""
+
+        extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Compression Type File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+            compression_type="zip",
+        )
+
+        given_result = extract.compression_type.extract_compression_type
+        expected_result = "zip"
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_compression_type_invalid(self):
+        """Testing that when an extract is created with an invalid compression type, an error is thrown."""
+
+        with self.assertRaises(Exception) as context:
+            ExtractTracker(
+                process_run=self.process_run,
+                filename="Compression Type File.csv",
+                location_name="Test Location",
+                location_path="/home/test/extract_dir",
+                compression_type="zap",
+            )
+
+        self.assertTrue("zap is not a valid compression type" in str(context.exception))
+
+    def test_set_file_type(self):
+        """Testing that when an extract is create with a valid file type, the type is associated correctly."""
+        extract = ExtractTracker(
+            process_run=self.process_run,
+            filename="Compression Type File.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+            filetype="Comma Separated Values",
+        )
+
+        given_result = extract.filetype.extract_filetype_code
+        expected_result = "csv"
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_set_file_type_invalid(self):
+        """Testing that when an extract is created with an invalid file type, an error is thrown."""
+
+        with self.assertRaises(Exception) as context:
+            ExtractTracker(
+                process_run=self.process_run,
+                filename="Compression Type File.csv",
+                location_name="Test Location",
+                location_path="/home/test/extract_dir",
+                filetype="zap",
+            )
+
+        self.assertTrue("zap is not a valid file type" in str(context.exception))
