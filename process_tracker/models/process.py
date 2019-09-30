@@ -164,6 +164,37 @@ class Process(Base):
         )
 
 
+class ProcessContact(Base):
+
+    __tablename__ = "process_contact"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    contact_id = Column(
+        Integer,
+        ForeignKey("process_tracker.contact_lkup.contact_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    UniqueConstraint(process_id, contact_id)
+
+    processes = relationship("Process")
+    contacts = relationship("Contact")
+
+    def __repr__(self):
+
+        return "<ProcessContact process=%s, contact=%s>" % (
+            self.process_id,
+            self.contact_id,
+        )
+
+
 class ProcessDatasetType(Base):
 
     __tablename__ = "process_dataset_type"

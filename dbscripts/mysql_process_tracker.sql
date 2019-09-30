@@ -144,15 +144,26 @@ create table source_lkup
 		unique (source_name)
 );
 
-create table process_tracker.source_contact
+create table source_contact
 (
 	source_id int not null,
 	contact_id int not null,
 	primary key (source_id, contact_id),
 	constraint source_contact_fk01
-		foreign key (source_id) references process_tracker.source_lkup (source_id),
+		foreign key (source_id) references source_lkup (source_id),
 	constraint source_contact_fk02
-		foreign key (contact_id) references process_tracker.contact_lkup (contact_id)
+		foreign key (contact_id) references contact_lkup (contact_id)
+);
+
+create table process_contact
+(
+	process_id int not null,
+	contact_id int not null,
+	primary key (process_id, contact_id),
+	constraint process_contact_fk01
+		foreign key (process_id) references process (process_id),
+	constraint process_contact_fk02
+		foreign key (contact_id) references contact_lkup (contact_id)
 );
 
 create table system_lkup

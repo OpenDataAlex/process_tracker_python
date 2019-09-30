@@ -27,6 +27,7 @@ from process_tracker.models.process import (
     ErrorTracking,
     ErrorType,
     Process,
+    ProcessContact,
     ProcessDatasetType,
     ProcessDependency,
     ProcessTracking,
@@ -417,8 +418,7 @@ class ProcessTracker:
             .join(Source)
             .join(ProcessSource)
             .join(Process)
-            .join(ProcessTracking)
-            .filter(ProcessTracking.process_id == process)
+            .filter(Process.process_id == process)
         )
 
         for contact in result:
@@ -427,6 +427,22 @@ class ProcessTracker:
                     "contact_name": contact.contact_name,
                     "contact_email": contact.contact_email,
                     "contact_type": "source",
+                }
+            )
+
+        result = (
+            self.session.query(Contact.contact_name, Contact.contact_email)
+            .join(ProcessContact)
+            .join(Process)
+            .filter(Process.process_id == process)
+        )
+
+        for contact in result:
+            contacts.append(
+                {
+                    "contact_name": contact.contact_name,
+                    "contact_email": contact.contact_email,
+                    "contact_type": "process",
                 }
             )
 

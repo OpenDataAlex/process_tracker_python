@@ -25,6 +25,7 @@ from process_tracker.models.process import (
     ErrorType,
     ErrorTracking,
     Process,
+    ProcessContact,
     ProcessDatasetType,
     ProcessDependency,
     ProcessSource,
@@ -67,6 +68,7 @@ class TestProcessTracker(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.session.query(ClusterProcess).delete()
+        cls.session.query(ProcessContact).delete()
         cls.session.query(Location).delete()
         cls.session.query(DatasetType).delete()
         cls.session.query(ProcessSourceObject).delete()
@@ -661,13 +663,19 @@ class TestProcessTracker(unittest.TestCase):
 
     def test_find_process_contacts(self):
         """
-        Testing that when passed a process_id, a list of source contacts will be returned.
+        Testing that when passed a process_id, a list of source and process contacts will be returned.
         :return:
         """
-        contact = DataStore().get_or_create_item(
+        source_contact = DataStore().get_or_create_item(
             model=Contact,
             contact_name="Test Contact",
             contact_email="testcontact@test.com",
+        )
+
+        process_contact = DataStore().get_or_create_item(
+            model=Contact,
+            contact_name="Process Contact",
+            contact_email="processcontact@test.com",
         )
 
         source = DataStore().get_or_create_item(model=Source, source_name="Unittests")
@@ -675,7 +683,13 @@ class TestProcessTracker(unittest.TestCase):
         DataStore().get_or_create_item(
             model=SourceContact,
             source_id=source.source_id,
-            contact_id=contact.contact_id,
+            contact_id=source_contact.contact_id,
+        )
+
+        DataStore().get_or_create_item(
+            model=ProcessContact,
+            process_id=self.process_id,
+            contact_id=process_contact.contact_id,
         )
 
         given_result = self.process_tracker.find_process_contacts(
@@ -687,7 +701,12 @@ class TestProcessTracker(unittest.TestCase):
                 "contact_name": "Test Contact",
                 "contact_email": "testcontact@test.com",
                 "contact_type": "source",
-            }
+            },
+            {
+                "contact_name": "Process Contact",
+                "contact_email": "processcontact@test.com",
+                "contact_type": "process",
+            },
         ]
 
         self.assertEqual(expected_result, given_result)

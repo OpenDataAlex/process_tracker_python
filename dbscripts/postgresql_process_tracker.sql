@@ -122,6 +122,20 @@ create table process_tracker.source_contact
 
 alter table process_tracker.source_contact owner to pt_admin;
 
+create table process_tracker.process_contact
+(
+	process_id integer not null
+		constraint process_contact_fk01
+			references process_tracker.process,
+	contact_id integer not null
+		constraint process_contact_fk02
+			references process_tracker.contact_lkup,
+	constraint process_contact_pk
+		primary key (process_id, contact_id)
+);
+
+alter table process_tracker.process_contact owner to pt_admin;
+
 create table process_status_lkup
 (
 	process_status_id serial not null
