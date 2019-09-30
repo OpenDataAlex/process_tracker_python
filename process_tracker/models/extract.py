@@ -119,17 +119,13 @@ class Extract(Base):
     extract_compression_type_id = Column(
         Integer,
         ForeignKey(
-            "process_tracker.extract_compression_type_lkup.extract_compression_type_id",
-            schema="process_tracker",
+            "process_tracker.extract_compression_type_lkup.extract_compression_type_id"
         ),
         nullable=True,
     )
     extract_filetype_id = Column(
         Integer,
-        ForeignKey(
-            "process_tracker.extract_filetype.extract_filetype_id",
-            schema="process_tracker",
-        ),
+        ForeignKey("process_tracker.extract_filetype_lkup.extract_filetype_id"),
         nullable=True,
     )
 

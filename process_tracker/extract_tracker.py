@@ -2,6 +2,7 @@
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
 import logging
+import os
 from pathlib import Path
 
 from sqlalchemy.orm import aliased
@@ -11,6 +12,8 @@ from process_tracker.utilities.settings import SettingsManager
 from process_tracker.utilities import utilities
 from process_tracker.models.extract import (
     Extract,
+    ExtractCompressionType,
+    ExtractFileType,
     ExtractDatasetType,
     ExtractDependency,
     ExtractProcess,
@@ -27,6 +30,8 @@ class ExtractTracker:
         location_name=None,
         location_path=None,
         status=None,
+        compression_type=None,
+        filetype=None,
         config_location=None,
     ):
         """
@@ -44,6 +49,10 @@ class ExtractTracker:
         :type location_name: string
         :param status: Optional if status does not need to be 'initializing', which is default.
         :type status: string
+        :param compression_type: Optional compression format of the extract.
+        :type compression_type: String
+        :param filetype: Optional file type of the extract. Will try to be derived from the filename if not provided.
+        :type filetype: string
         :param config_location: Optional location for the process_tracker configuration file.
         :type config_location: string
         """
@@ -74,12 +83,54 @@ class ExtractTracker:
         else:
             raise Exception("A location object or location_path must be provided.")
 
+        if compression_type is not None:
+            self.logger.info("Finding compression type.")
+            try:
+                self.compression_type = self.data_store.get_or_create_item(
+                    model=ExtractCompressionType,
+                    create=False,
+                    extract_compression_type=compression_type,
+                )
+            except Exception:
+                error_msg = "%s is not a valid compression type." % compression_type
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
+
+            self.compression_type_id = self.compression_type.extract_compression_type_id
+        else:
+            self.compression_type_id = None
+
+        if filetype is not None:
+            self.logger.info("File type provided.  Verifying it is a valid filetype.")
+            try:
+                self.filetype = self.data_store.get_or_create_item(
+                    model=ExtractFileType, create=False, extract_filetype=filetype
+                )
+            except Exception:
+                error_msg = "%s is not a valid file type." % filetype
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
+        else:
+            # Need to try to determine the filetype based on the extension of the filename.
+            file_extension = os.path.splitext(filename)[1]
+            file_extension = file_extension.replace(".", "")
+            self.logger.info(
+                "Trying to find record for file extension: %s" % file_extension
+            )
+            self.filetype = self.data_store.get_or_create_item(
+                model=ExtractFileType,
+                create=False,
+                extract_filetype_code=file_extension,
+            )
+
         self.logger.info("Registering extract.")
 
         self.extract = self.data_store.get_or_create_item(
             model=Extract,
             extract_filename=filename,
             extract_location_id=self.location.location.location_id,
+            extract_compression_type_id=self.compression_type_id,
+            extract_filetype_id=self.filetype.extract_filetype_id,
         )
 
         if location_path is not None:
