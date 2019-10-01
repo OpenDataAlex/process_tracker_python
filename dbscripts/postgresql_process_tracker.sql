@@ -4,7 +4,6 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
-create table process_tracker.data_type_lkup
 (
 	data_type_id serial not null
 		constraint data_type_lkup_pk
@@ -13,6 +12,26 @@ create table process_tracker.data_type_lkup
 );
 
 alter table process_tracker.data_type_lkup owner to pt_admin;
+
+create table process_tracker.extract_filetype_lkup
+(
+	extract_filetype_id serial not null
+		constraint extract_filetype_lkup_pk
+			primary key,
+	extract_filetype_code varchar(5) not null,
+	extract_filetype varchar(75) not null,
+	delimiter_char char,
+	quote_char char,
+	escape_char char
+);
+
+alter table process_tracker.extract_filetype_lkup owner to pt_admin;
+
+create unique index extract_filetype_lkup_extract_filetype_uindex
+	on process_tracker.extract_filetype_lkup (extract_filetype);
+
+
+
 
 create unique index data_type_lkup_data_type_uindex
 	on process_tracker.data_type_lkup (data_type);
@@ -354,7 +373,13 @@ create table extract_tracking
 	extract_write_record_count integer,
 	extract_load_low_date_time timestamp,
 	extract_load_high_date_time timestamp,
-	extract_load_record_count integer
+	extract_load_record_count integer,
+	extract_compression_type_id integer
+		constraint extract_tracking_fk04
+			references extract_compression_type_lkup,
+	extract_filetype_id integer
+		constraint extract_tracking_fk05
+			references extract_filetype_lkup
 );
 
 comment on table extract_tracking is 'Tracking table for all extract/staging data files.';

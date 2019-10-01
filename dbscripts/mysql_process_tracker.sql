@@ -43,6 +43,19 @@ create table actor_lkup
 	constraint actor_name
 		unique (actor_name)
 );
+create table extract_filetype_lkup
+(
+	extract_filetype_id int auto_increment
+		primary key,
+	extract_filetype_code varchar(5) not null,
+	extract_filetype varchar(75) not null,
+	delimiter_char char null,
+	quote_char char null,
+	escape_char char null,
+	constraint extract_filetype_lkup_extract_filetype_uindex
+		unique (extract_filetype)
+);
+
 
 create table error_type_lkup
 (
