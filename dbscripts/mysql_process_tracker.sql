@@ -1,5 +1,14 @@
 USE process_tracker;
 
+create table schedule_frequency_lkup
+(
+	schedule_frequency_id int auto_increment
+		primary key,
+	schedule_frequency_name varchar(25) not null,
+	constraint schedule_frequency_lkup_schedule_frequency_name_uindex
+		unique (schedule_frequency_name)
+);
+
 create table data_type_lkup
 (
 	data_type_id int auto_increment
@@ -210,13 +219,22 @@ create table process
 	process_type_id int null,
 	process_tool_id int null,
 	last_failed_run_date_time datetime not null,
+	schedule_frequency_id int default 0 not null,
 	constraint process_name
 		unique (process_name),
+	constraint process_fk03
+		foreign key (schedule_frequency_id) references schedule_frequency_lkup (schedule_frequency_id),
 	constraint process_ibfk_1
 		foreign key (process_type_id) references process_type_lkup (process_type_id),
 	constraint process_ibfk_2
 		foreign key (process_tool_id) references tool_lkup (tool_id)
 );
+
+create index process_tool_id
+	on process_tracker.process (process_tool_id);
+
+create index process_type_id
+	on process_tracker.process (process_type_id);
 
 create index process_tool_id
 	on process (process_tool_id);

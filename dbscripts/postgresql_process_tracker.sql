@@ -4,6 +4,19 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
+create table schedule_frequency_lkup
+(
+	schedule_frequency_id serial not null
+		constraint schedule_frequency_lkup_pk
+			primary key,
+	schedule_frequency_name varchar(25) not null
+);
+
+alter table schedule_frequency_lkup owner to pt_admin;
+
+create unique index schedule_frequency_lkup_schedule_frequency_name_uindex
+	on schedule_frequency_lkup (schedule_frequency_name);
+
 create table data_type_lkup
 (
 	data_type_id serial not null
@@ -180,38 +193,41 @@ alter table process_type_lkup owner to pt_admin;
 create unique index process_type_lkup_udx01
 	on process_type_lkup (process_type_name);
 
-create table process
+create table process_tracker.process
 (
 	process_id serial not null
 		constraint process_pk
 			primary key,
 	process_name varchar(250) not null,
 	total_record_count integer default 0 not null,
-	process_type_id integer null
+	process_type_id integer
 		constraint process_fk02
-			references process_type_lkup,
-	process_tool_id integer null
+			references process_tracker.process_type_lkup,
+	process_tool_id integer
 		constraint process_fk03
-			references tool_lkup,
-	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null
+			references process_tracker.tool_lkup,
+	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
+	schedule_frequency_id integer default 0 not null
+		constraint process_fk04
+			references process_tracker.schedule_frequency_lkup
 );
 
-comment on table process is 'Processes being tracked';
+comment on table process_tracker.process is 'Processes being tracked';
 
-comment on column process.process_name is 'Unique name for process.';
+comment on column process_tracker.process.process_name is 'Unique name for process.';
 
-comment on column process.total_record_count is 'Total number of records processed over all runs of process.';
+comment on column process_tracker.process.total_record_count is 'Total number of records processed over all runs of process.';
 
-comment on column process.process_type_id is 'The type of process being tracked.';
+comment on column process_tracker.process.process_type_id is 'The type of process being tracked.';
 
-comment on column process.process_tool_id is 'The type of tool used to execute the process.';
+comment on column process_tracker.process.process_tool_id is 'The type of tool used to execute the process.';
 
-comment on column process.last_failed_run_date_time is 'The last time the process failed to run.';
+comment on column process_tracker.process.last_failed_run_date_time is 'The last time the process failed to run.';
 
-alter table process owner to pt_admin;
+alter table process_tracker.process owner to pt_admin;
 
 create unique index process_udx01
-	on process (process_name);
+	on process_tracker.process (process_name);
 
 create table process_dependency
 (

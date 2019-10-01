@@ -40,6 +40,7 @@ from process_tracker.models.process import (
     ProcessTargetObjectAttribute,
     ProcessType,
 )
+from process_tracker.models.schedule import ScheduleFrequency
 from process_tracker.models.source import (
     DatasetType,
     Source,
@@ -67,6 +68,7 @@ class ProcessTracker:
         target_object_attributes=None,
         config_location=None,
         dataset_types=None,
+        schedule_frequency=None,
     ):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
@@ -92,6 +94,8 @@ class ProcessTracker:
         :type config_location: file path
         :param dataset_types: A single dataset category type or list of dataset category types for the given process.
         :type dataset_types: list
+        :param schedule_frequency: The general scheduling frequency for the process (i.e. hourly)
+        :type schedule_frequency: string
         """
         self.config_location = config_location
         self.config = SettingsManager(config_location=self.config_location)
@@ -112,11 +116,21 @@ class ProcessTracker:
         )
         self.tool = self.data_store.get_or_create_item(model=Tool, tool_name=tool_name)
 
+        if schedule_frequency is None:
+            self.schedule_frequency = self.data_store.get_or_create_item(
+                model=ScheduleFrequency, schedule_frequency_name="unscheduled"
+            )
+        else:
+            self.schedule_frequency = self.data_store.get_or_create_item(
+                model=ScheduleFrequency, schedule_frequency_name=schedule_frequency
+            )
+
         self.process = self.data_store.get_or_create_item(
             model=Process,
             process_name=process_name,
             process_type_id=self.process_type.process_type_id,
             process_tool_id=self.tool.tool_id,
+            schedule_frequency_id=self.schedule_frequency.schedule_frequency_id,
         )
 
         # Dataset types should be loaded before source and target because they are also used there.
@@ -464,6 +478,25 @@ class ProcessTracker:
             )
 
         return contacts
+
+    def find_process_by_schedule_frequency(self, frequency="daily"):
+        """
+        For the given schedule frequency, find the processed on that schedule frequency.
+        :param frequency: The desired frequency with which to retrieve processes.
+        :return:
+        """
+        process_list = list()
+
+        processes = (
+            self.data_store.session.query(Process.process_id)
+            .join(ScheduleFrequency)
+            .filter(ScheduleFrequency.schedule_frequency_name == frequency)
+        )
+
+        for process in processes:
+            process_list.append(process.process_id)
+
+        return process_list
 
     def get_latest_tracking_record(self, process):
         """

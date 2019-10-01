@@ -22,6 +22,7 @@ from process_tracker.models.process import (
     ProcessType,
     ProcessStatus,
 )
+from process_tracker.models.schedule import ScheduleFrequency
 from process_tracker.models.source import Source
 from process_tracker.models.system import System
 from process_tracker.models.tool import Tool
@@ -38,7 +39,16 @@ preload_extract_status_types = [
 ]
 preload_process_status_types = ["running", "completed", "failed", "on hold"]
 preload_process_types = ["extract", "load"]
-preload_system_keys = [{"version", "0.6.0"}]
+preload_schedule_frequencies = [
+    "unscheduled",
+    "hourly",
+    "daily",
+    "weekly",
+    "monthly",
+    "quarterly",
+    "annually",
+]
+preload_system_keys = [{"version", "0.7.0"}]
 
 supported_data_stores = ["postgresql", "mysql", "oracle", "mssql", "snowflake"]
 
@@ -183,6 +193,13 @@ class DataStore:
         for key, value in preload_system_keys:
             self.logger.info("Adding %s" % key)
             self.get_or_create_item(model=System, system_key=key, system_value=value)
+
+        self.logger.info("Adding schedule frequencies...")
+        for frequency in preload_schedule_frequencies:
+            self.logger.info("Adding %s" % frequency)
+            self.get_or_create_item(
+                model=ScheduleFrequency, schedule_frequency_name=frequency
+            )
 
         self.session.commit()
 

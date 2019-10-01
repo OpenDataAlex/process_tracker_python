@@ -147,6 +147,12 @@ class Process(Base):
     last_failed_run_date_time = Column(
         DateTime(timezone=True), nullable=False, default=default_date
     )
+    schedule_frequency_id = Column(
+        Integer,
+        ForeignKey("process_tracker.schedule_frequency_lkup.schedule_frequency_id"),
+        nullable=False,
+        default=0,
+    )
 
     cluster_processes = relationship("ClusterProcess", passive_deletes="all")
     process_tracking = relationship("ProcessTracking", passive_deletes="all")

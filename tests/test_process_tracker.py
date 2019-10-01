@@ -1954,3 +1954,23 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertEqual(source_expected_result, source_given_result)
         self.assertEqual(object_expected_result, object_given_result)
+
+    def test_find_process_by_schedule_frequency(self):
+        """Testing that when querying based on a given frequency, the process id(s) associated with that frequency are returned."""
+
+        process = ProcessTracker(
+            process_name="Testing Register Target Object Dataset Type",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            source_objects={"Unittests": ["Table1"]},
+            target_objects={"Unittest Target": ["Table1"]},
+            dataset_types="Category 1",
+            schedule_frequency="hourly",
+        )
+
+        given_result = process.find_process_by_schedule_frequency(frequency="hourly")
+
+        expected_result = [process.process.process_id]
+
+        self.assertEqual(expected_result, given_result)

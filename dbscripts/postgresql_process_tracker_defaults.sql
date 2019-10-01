@@ -26,3 +26,11 @@ INSERT INTO process_tracker.system_lkup (system_id, system_key, system_value) VA
 INSERT INTO process_tracker.extract_compression_type_lkup (extract_compression_type_id, extract_compression_type) VALUES (1, 'zip');
 
 INSERT INTO process_tracker.extract_filetype_lkup (extract_filetype_id, extract_filetype_code, extract_filetype, delimiter_char, quote_char, escape_char) VALUES (1, 'csv', 'Comma Separated Values', ',', '"', '/');
+
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (0, 'unscheduled');
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (1, 'hourly');
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (2, 'daily');
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (3, 'weekly');
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (4, 'monthly');
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (5, 'quarterly');
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (6, 'annually');
