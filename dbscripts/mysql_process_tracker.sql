@@ -1,6 +1,6 @@
 USE process_tracker;
 
-create table process_tracker.data_type_lkup
+create table data_type_lkup
 (
 	data_type_id int auto_increment
 		primary key,
@@ -56,7 +56,7 @@ create table extract_filetype_lkup
 		unique (extract_filetype)
 );
 
-create table process_tracker.extract_compression_type_lkup
+create table extract_compression_type_lkup
 (
 	extract_compression_type_id int auto_increment
 		primary key,
@@ -109,7 +109,7 @@ create table location_lkup
 		foreign key (location_type_id) references location_type_lkup (location_type_id)
 );
 
-create table process_tracker.extract_tracking
+create table extract_tracking
 (
 	extract_id int auto_increment
 		primary key,
@@ -126,16 +126,16 @@ create table process_tracker.extract_tracking
 	constraint extract_filename
 		unique (extract_filename),
 	constraint extract_tracking_ibfk_1
-		foreign key (extract_location_id) references process_tracker.location_lkup (location_id),
+		foreign key (extract_location_id) references location_lkup (location_id),
 	constraint extract_tracking_ibfk_2
-		foreign key (extract_status_id) references process_tracker.extract_status_lkup (extract_status_id)
+		foreign key (extract_status_id) references extract_status_lkup (extract_status_id)
 );
 
 create index extract_location_id
-	on process_tracker.extract_tracking (extract_location_id);
+	on extract_tracking (extract_location_id);
 
 create index extract_status_id
-	on process_tracker.extract_tracking (extract_status_id);
+	on extract_tracking (extract_status_id);
 
 create table process_tracker.extract_dependency
 (
@@ -143,9 +143,9 @@ create table process_tracker.extract_dependency
 	child_extract_id int not null,
 	primary key (parent_extract_id, child_extract_id),
 	constraint extract_dependency_fk01
-		foreign key (parent_extract_id) references process_tracker.extract_tracking (extract_id),
+		foreign key (parent_extract_id) references extract_tracking (extract_id),
 	constraint extract_dependency_fk02
-		foreign key (child_extract_id) references process_tracker.extract_tracking (extract_id)
+		foreign key (child_extract_id) references extract_tracking (extract_id)
 )
 comment 'Table tracking interdependencies between extract files.';
 
