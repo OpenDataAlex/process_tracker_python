@@ -1,5 +1,14 @@
 USE process_tracker;
 
+create table process_tracker.data_type_lkup
+(
+	data_type_id int auto_increment
+		primary key,
+	data_type varchar(75) not null,
+	constraint data_type_lkup_data_type_uindex
+		unique (data_type)
+);
+
 create table contact_lkup
 (
 	contact_id int auto_increment
@@ -439,3 +448,49 @@ create table process_contact
 		foreign key (contact_id) references contact_lkup (contact_id)
 );
 
+create table source_object_attribute
+(
+	source_object_attribute_id int auto_increment
+		primary key,
+	source_object_attribute_name varchar(250) not null,
+	source_object_id int not null,
+	attribute_path varchar(750) null,
+	data_type_id int null,
+	data_length int null,
+	data_decimal int null,
+	is_pii tinyint(1) default 0 not null,
+	default_value_string varchar(250) null,
+	default_value_number decimal null,
+	constraint source_object_attribute_udx01
+		unique (source_object_id, source_object_attribute_name),
+	constraint source_object_attribute_fk01
+		foreign key (source_object_id) references source_object_lkup (source_object_id),
+	constraint source_object_attribute_fk02
+		foreign key (data_type_id) references data_type_lkup (data_type_id)
+);
+
+create table process_source_object_attribute
+(
+	process_id int not null,
+	source_object_attribute_id int not null,
+	source_object_attribute_alias varchar(250) null,
+	source_object_attribute_expression varchar(250) null,
+	primary key (process_id, source_object_attribute_id),
+	constraint process_source_object_attribute_fk01
+		foreign key (process_id) references process (process_id),
+	constraint process_source_object_attribute_fk02
+		foreign key (source_object_attribute_id) references source_object_attribute (source_object_attribute_id)
+);
+
+create table if not exists process_target_object_attribute
+(
+	process_id int not null,
+	target_object_attribute_id int not null,
+	target_object_attribute_alias varchar(250) null,
+	target_object_attribute_expression varchar(250) null,
+	primary key (process_id, target_object_attribute_id),
+	constraint process_target_object_attribute_fk01
+		foreign key (process_id) references process (process_id),
+	constraint process_target_object_attribute_fk02
+		foreign key (target_object_attribute_id) references source_object_attribute (source_object_attribute_id)
+);

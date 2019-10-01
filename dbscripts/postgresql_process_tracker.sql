@@ -4,6 +4,21 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
+create table process_tracker.data_type_lkup
+(
+	data_type_id serial not null
+		constraint data_type_lkup_pk
+			primary key,
+	data_type varchar(75) not null
+);
+
+alter table process_tracker.data_type_lkup owner to pt_admin;
+
+create unique index data_type_lkup_data_type_uindex
+	on process_tracker.data_type_lkup (data_type);
+
+
+
 create table process_tracker.contact_lkup
 (
 	contact_id serial not null
@@ -631,3 +646,61 @@ create table process_contact
 );
 
 alter table process_contact owner to pt_admin;
+
+create table process_tracker.source_object_attribute
+(
+	source_object_attribute_id serial not null
+		constraint source_object_attribute_pk
+			primary key,
+	source_object_attribute_name varchar(250) not null,
+	source_object_id integer
+		constraint source_object_attribute_fk01
+			references process_tracker.source_object_lkup,
+	attribute_path varchar(750),
+	data_type_id integer
+		constraint source_object_attribute_fk02
+			references process_tracker.data_type_lkup,
+	data_length integer,
+	data_decimal integer,
+	is_pii boolean default false not null,
+	default_value_string varchar(250),
+	default_value_number numeric
+);
+
+alter table process_tracker.source_object_attribute owner to pt_admin;
+
+create unique index source_object_attribute_udx01
+	on process_tracker.source_object_attribute (source_object_id, source_object_attribute_name);
+
+create table process_tracker.process_target_object_attribute
+(
+	process_id integer not null
+		constraint process_target_object_attribute_fk01
+			references process_tracker.process,
+	target_object_attribute_id integer not null
+		constraint process_target_object_attribute_fk02
+			references process_tracker.source_object_attribute,
+	target_object_attribute_alias varchar(250),
+	target_object_attribute_expression varchar(250),
+	constraint process_target_object_attribute_pk
+		primary key (process_id, target_object_attribute_id)
+);
+
+alter table process_tracker.process_target_object_attribute owner to pt_admin;
+
+create table process_tracker.process_source_object_attribute
+(
+	process_id integer not null
+		constraint process_source_object_attribute_fk01
+			references process_tracker.process,
+	source_object_attribute_id integer not null
+		constraint process_source_object_attribute_fk02
+			references process_tracker.source_object_attribute,
+	source_object_attribute_alias varchar(250),
+	source_object_attribute_expression varchar(250),
+	constraint process_source_object_attribute_pk
+		primary key (process_id, source_object_attribute_id)
+);
+
+alter table process_tracker.process_source_object_attribute owner to pt_admin;
+
