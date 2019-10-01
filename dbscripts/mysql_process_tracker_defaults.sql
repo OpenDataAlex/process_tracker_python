@@ -26,10 +26,12 @@ INSERT INTO process_tracker.extract_compression_type_lkup (extract_compression_t
 
 INSERT INTO process_tracker.extract_filetype_lkup (extract_filetype_id, extract_filetype_code, extract_filetype, delimiter_char, quote_char, escape_char) VALUES (1, 'csv', 'Comma Separated Values', ',', '"', '/');
 
+INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (0, 'unscheduled');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (7, 'annually');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (3, 'daily');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (2, 'hourly');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (5, 'monthly');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (6, 'quarterly');
-INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (0, 'unscheduled');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (4, 'weekly');
+
+UPDATE process_tracker.schedule_frequency_lkup SET schedule_frequency_id = 0 WHERE schedule_frequency_name = 'unscheduled';
