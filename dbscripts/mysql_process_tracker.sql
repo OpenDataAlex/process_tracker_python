@@ -231,12 +231,6 @@ create table process
 );
 
 create index process_tool_id
-	on process_tracker.process (process_tool_id);
-
-create index process_type_id
-	on process_tracker.process (process_type_id);
-
-create index process_tool_id
 	on process (process_tool_id);
 
 create index process_type_id

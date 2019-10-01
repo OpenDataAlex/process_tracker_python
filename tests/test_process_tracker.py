@@ -1959,7 +1959,7 @@ class TestProcessTracker(unittest.TestCase):
         """Testing that when querying based on a given frequency, the process id(s) associated with that frequency are returned."""
 
         process = ProcessTracker(
-            process_name="Testing Register Target Object Dataset Type",
+            process_name="Testing Schedule Frequency Hourly",
             process_type="Extract",
             actor_name="UnitTesting",
             tool_name="Spark",
