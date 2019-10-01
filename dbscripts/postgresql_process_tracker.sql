@@ -358,6 +358,21 @@ create unique index location_lkup_udx01
 create unique index location_lkup_udx02
 	on location_lkup (location_path);
 
+create table process_tracker.extract_compression_type_lkup
+(
+	extract_compression_type_id serial not null
+		constraint extract_compression_type_lkup_pk
+			primary key,
+	extract_compression_type varchar(25) not null
+);
+
+alter table process_tracker.extract_compression_type_lkup owner to pt_admin;
+
+create unique index extract_compression_type_lkup_extract_compression_type_uindex
+	on process_tracker.extract_compression_type_lkup (extract_compression_type);
+
+
+
 create table extract_tracking
 (
 	extract_id serial not null
