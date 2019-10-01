@@ -56,6 +56,14 @@ create table extract_filetype_lkup
 		unique (extract_filetype)
 );
 
+create table process_tracker.extract_compression_type_lkup
+(
+	extract_compression_type_id int auto_increment
+		primary key,
+	extract_compression_type varchar(25) not null,
+	constraint extract_compression_type_extract_compression_type_uindex
+		unique (extract_compression_type)
+);
 
 create table error_type_lkup
 (
