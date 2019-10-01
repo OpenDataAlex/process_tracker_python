@@ -282,6 +282,37 @@ class ProcessSourceObject(Base):
         )
 
 
+class ProcessSourceObjectAttribute(Base):
+    __tablename__ = "process_source_object_attribute"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    source_object_attribute_id = Column(
+        Integer,
+        ForeignKey(
+            "process_tracker.source_object_attribute.source_object_attribute_id"
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    source_object_attribute_alias = Column(String(250), nullable=True)
+    source_object_attribute_expression = Column(String(250), nullable=True)
+
+    attributes = relationship("SourceObjectAttribute")
+    processes = relationship("Process")
+
+    def __repr__(self):
+        return "<ProcessSourceObjectAttribute process_id=%s, attribute_id=%s>" % (
+            self.process_id,
+            self.source_object_attribute_id,
+        )
+
+
 class ProcessTarget(Base):
     __tablename__ = "process_target"
     __table_args__ = {"schema": "process_tracker"}
@@ -334,6 +365,37 @@ class ProcessTargetObject(Base):
         return "<ProcessTargetObject (process_id=%s, target_object=%s)>" % (
             self.process_id,
             self.target_object_id,
+        )
+
+
+class ProcessTargetObjectAttribute(Base):
+    __tablename__ = "process_target_object_attribute"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_id = Column(
+        Integer,
+        ForeignKey("process_tracker.process.process_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    target_object_attribute_id = Column(
+        Integer,
+        ForeignKey(
+            "process_tracker.source_object_attribute.source_object_attribute_id"
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    target_object_attribute_alias = Column(String(250), nullable=True)
+    target_object_attribute_expression = Column(String(250), nullable=True)
+
+    attributes = relationship("SourceObjectAttribute")
+    processes = relationship("Process")
+
+    def __repr__(self):
+        return "<ProcessTargetObjectAttribute process_id=%s, attribute_id=%s>" % (
+            self.process_id,
+            self.source_object_attribute_id,
         )
 
 

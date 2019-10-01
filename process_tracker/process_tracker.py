@@ -34,8 +34,10 @@ from process_tracker.models.process import (
     ProcessStatus,
     ProcessSource,
     ProcessSourceObject,
+    ProcessSourceObjectAttribute,
     ProcessTarget,
     ProcessTargetObject,
+    ProcessTargetObjectAttribute,
     ProcessType,
 )
 from process_tracker.models.source import (
@@ -44,6 +46,7 @@ from process_tracker.models.source import (
     SourceContact,
     SourceDatasetType,
     SourceObject,
+    SourceObjectAttribute,
     SourceObjectDatasetType,
 )
 from process_tracker.models.tool import Tool
@@ -60,6 +63,8 @@ class ProcessTracker:
         targets=None,
         source_objects=None,
         target_objects=None,
+        source_object_attributes=None,
+        target_object_attributes=None,
         config_location=None,
         dataset_types=None,
     ):
@@ -78,6 +83,10 @@ class ProcessTracker:
         :type source_objects: dict of lists
         :param target_objects: Finer grained list of targets, including target objects (i.e. tables). Optional.
         :type target_objects: dict of lists
+        :param source_object_attributes: Even finer grained list of sources, including source objects (i.e. tables) and their attributes.  Optional.
+        :type source_object_attributes: dict of lists
+        :param target_object_attributes: Even finer grained list of targets, including target objects (i.e. tables) and their attributes.  Optional.
+        :type target_object_attributes: dict of lists
         :param config_location: Location where Process Tracker configuration file is. If not set, will use local home
                                 directory.
         :type config_location: file path
@@ -119,18 +128,26 @@ class ProcessTracker:
         else:
             self.dataset_types = None
 
-        # Either sources or source_objects should be set, not both.  Always go with lower grain if possible.
+        # sources, source_objects, or source_object_attributes should be set, not multiple.  Always go with lower grain if possible.
 
-        if source_objects is not None:
+        if source_object_attributes is not None:
+            self.sources = self.register_process_sources(
+                source_object_attributes=source_object_attributes
+            )
+        elif source_objects is not None:
             self.sources = self.register_process_sources(source_objects=source_objects)
         elif sources is not None:
             self.sources = self.register_process_sources(sources=sources)
         else:
             self.sources = None
 
-        # Either targets or target_objects should be set, not both.  Always go with lower grain if possible.
+        # targets, target_objects, or target_object_attributes should be set, not multiple.  Always go with lower grain if possible.
 
-        if target_objects is not None:
+        if target_object_attributes is not None:
+            self.targets = self.register_process_targets(
+                target_object_attributes=target_object_attributes
+            )
+        elif target_objects is not None:
             self.targets = self.register_process_targets(target_objects=target_objects)
         elif targets is not None:
             self.targets = self.register_process_targets(targets=targets)
@@ -686,18 +703,65 @@ class ProcessTracker:
 
         return dataset_type_list
 
-    def register_process_sources(self, sources=None, source_objects=None):
+    def register_process_sources(
+        self, sources=None, source_objects=None, source_object_attributes=None
+    ):
         """
         Register source(s) to a given process.
         :param sources: List of source name(s)  If source_objects is set, sources is ignored.
         :type sources: list
         :param source_objects: Finer grained list of source name(s) and their objects used in this process.
         :type source_objects: dict of lists
-        :return: List of source or source object SQLAlchemy objects.
+        :param source_object_attributes: Even finer grained list of source name(s), their objects, and their attributes used in this process.
+        :return: List of source, source object, or source object attribute SQLAlchemy objects.
         """
         source_list = list()
 
-        if source_objects is not None:
+        if source_object_attributes is not None:
+            if isinstance(source_object_attributes, dict):
+                for source, objects in source_object_attributes.items():
+                    self.logger.debug("Working on source %s" % source)
+                    source = self.data_store.get_or_create_item(
+                        model=Source, source_name=source
+                    )
+
+                    for source_object, attributes in objects.items():
+                        self.logger.debug("Working on object %s" % source_object)
+                        source_object = self.data_store.get_or_create_item(
+                            model=SourceObject,
+                            source_id=source.source_id,
+                            source_object_name=source_object,
+                        )
+
+                        for attribute in attributes:
+                            self.logger.debug("Working on attribute %s" % attribute)
+                            object_attribute = self.data_store.get_or_create_item(
+                                model=SourceObjectAttribute,
+                                source_object_id=source_object.source_object_id,
+                                source_object_attribute_name=attribute,
+                            )
+
+                            self.logger.debug(
+                                "Associating process %s with %s"
+                                % (
+                                    self.process.process_name,
+                                    object_attribute.source_object_attribute_name,
+                                )
+                            )
+
+                            self.data_store.get_or_create_item(
+                                model=ProcessSourceObjectAttribute,
+                                source_object_attribute_id=object_attribute.source_object_attribute_id,
+                                process_id=self.process.process_id,
+                            )
+
+                            source_list.append(object_attribute)
+            else:
+                error_msg = "source_object_attributes is not a dictionary."
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
+
+        elif source_objects is not None:
             if isinstance(source_objects, dict):
                 for source, objects in source_objects.items():
 
@@ -773,18 +837,65 @@ class ProcessTracker:
 
         return source_list
 
-    def register_process_targets(self, targets=None, target_objects=None):
+    def register_process_targets(
+        self, targets=None, target_objects=None, target_object_attributes=None
+    ):
         """
         Register target source(s) to a given process.
         :param targets: List of source name(s).  If target_objects is set, targets is ignored.
         :type targets: list
         :param target_objects: Finer grained list of target name(s) and their objects used in this process.
         :type target_objects: dict of lists
+        :param target_object_attributes: Even finer grained list of target name(s), their objects, and their attributes used in this process.
+        :type target_object_attributes: dict of lists
         :return: List of source or source object SQLAlchemy objects.
         """
         target_list = list()
+        if target_object_attributes is not None:
+            if isinstance(target_object_attributes, dict):
+                for target, objects in target_object_attributes.items():
+                    self.logger.debug("Working on source %s" % target)
+                    source = self.data_store.get_or_create_item(
+                        model=Source, source_name=target
+                    )
 
-        if target_objects is not None:
+                    for target_object, attributes in objects.items():
+                        self.logger.debug("Working on object %s" % target_object)
+                        source_object = self.data_store.get_or_create_item(
+                            model=SourceObject,
+                            source_id=source.source_id,
+                            source_object_name=target_object,
+                        )
+
+                        for attribute in attributes:
+                            self.logger.debug("Working on attribute %s" % attribute)
+                            object_attribute = self.data_store.get_or_create_item(
+                                model=SourceObjectAttribute,
+                                source_object_id=source_object.source_object_id,
+                                source_object_attribute_name=attribute,
+                            )
+
+                            self.logger.debug(
+                                "Associating process %s with %s"
+                                % (
+                                    self.process.process_name,
+                                    object_attribute.source_object_attribute_name,
+                                )
+                            )
+
+                            self.data_store.get_or_create_item(
+                                model=ProcessTargetObjectAttribute,
+                                target_object_attribute_id=object_attribute.source_object_attribute_id,
+                                process_id=self.process.process_id,
+                            )
+
+                            target_list.append(object_attribute)
+            else:
+                error_msg = "target_object_attributes is not a dictionary."
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
+
+        elif target_objects is not None:
             if isinstance(target_objects, dict):
                 for target, objects in target_objects.items():
 

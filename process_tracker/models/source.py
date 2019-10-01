@@ -1,10 +1,37 @@
 # SQLAlchemy Models
 # Models for Source entities
 
-from sqlalchemy import Column, ForeignKey, Integer, Sequence, String, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    Numeric,
+    Sequence,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from process_tracker.models.model_base import Base
+
+
+class DataType(Base):
+
+    __tablename__ = "data_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    data_type_id = Column(
+        Integer,
+        Sequence("data_type_lkup_data_type_id", schema="process_tracker"),
+        primary_key=True,
+        nullable=False,
+    )
+    data_type = Column(String(75), unique=True, nullable=False)
+
+    def __repr__(self):
+
+        return "<DataType id=%s, name=%s>" % (self.data_type_id, self.data_type)
 
 
 class DatasetType(Base):
@@ -140,6 +167,49 @@ class SourceObject(Base):
         return "<SourceObject (source_id=%s, source_object_name=%s)>" % (
             self.source_id,
             self.source_object_name,
+        )
+
+
+class SourceObjectAttribute(Base):
+
+    __tablename__ = "source_object_attribute"
+    __table_args__ = {"schema": "process_tracker"}
+
+    source_object_attribute_id = Column(
+        Integer,
+        Sequence(
+            "source_object_attribute_source_object_attribute_id_seq",
+            schema="process_tracker",
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    source_object_attribute_name = Column(String(250), nullable=False)
+    source_object_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_object_lkup.source_object_id"),
+        nullable=False,
+    )
+    attribute_path = Column(String(750), nullable=True)
+    data_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.data_type_lkup.data_type_id"),
+        nullable=True,
+    )
+    data_length = Column(Integer, nullable=True)
+    data_decimal = Column(Integer, nullable=True)
+    is_pii = Column(Boolean, nullable=False, default=False)
+    default_value_string = Column(String(250), nullable=True)
+    default_value_number = Column(Numeric, nullable=True)
+
+    UniqueConstraint(source_object_id, source_object_attribute_name)
+
+    def __repr__(self):
+
+        return "<Source Object Attribute id=%s, name=%s, source_object=%s>" % (
+            self.source_object_attribute_id,
+            self.source_object_attribute_name,
+            self.source_object_id,
         )
 
 

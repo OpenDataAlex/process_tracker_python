@@ -30,8 +30,10 @@ from process_tracker.models.process import (
     ProcessDependency,
     ProcessSource,
     ProcessSourceObject,
+    ProcessSourceObjectAttribute,
     ProcessTarget,
     ProcessTargetObject,
+    ProcessTargetObjectAttribute,
     ProcessTracking,
 )
 from process_tracker.models.source import (
@@ -40,6 +42,7 @@ from process_tracker.models.source import (
     SourceContact,
     SourceDatasetType,
     SourceObject,
+    SourceObjectAttribute,
     SourceObjectDatasetType,
 )
 
@@ -71,6 +74,8 @@ class TestProcessTracker(unittest.TestCase):
         cls.session.query(ProcessContact).delete()
         cls.session.query(Location).delete()
         cls.session.query(DatasetType).delete()
+        cls.session.query(ProcessSourceObjectAttribute).delete()
+        cls.session.query(ProcessTargetObjectAttribute).delete()
         cls.session.query(ProcessSourceObject).delete()
         cls.session.query(ProcessTargetObject).delete()
         cls.session.query(ProcessSource).delete()
@@ -1337,6 +1342,34 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_register_process_source_object_attributes(self):
+        """Testing that when a new process is registered with source object attributes, those attributes are registered as well."""
+
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Source Object Attributes",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            targets="Unittests",
+            source_object_attributes={
+                "source": {
+                    "source_table": ["attr_1", "attr_2"],
+                    "source_table2": ["attr_3", "attr_4"],
+                }
+            },
+        )
+
+        given_result = (
+            self.session.query(ProcessSourceObjectAttribute)
+            .join(Process)
+            .filter(Process.process_name == "Loading Source Object Attributes")
+            .count()
+        )
+
+        expected_result = 4
+
+        self.assertEqual(expected_result, given_result)
+
     def test_register_process_targets_one_target(self):
         """
         Testing that when a new process is registered, a target registered as well.
@@ -1481,6 +1514,34 @@ class TestProcessTracker(unittest.TestCase):
         )
 
         expected_result = 3
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_process_target_object_attributes(self):
+        """Testing that when a new process is registered with target object attributes, those attributes are registered as well."""
+
+        self.process_tracker = ProcessTracker(
+            process_name="Loading Target Object Attributes",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            targets="Unittests",
+            target_object_attributes={
+                "target": {
+                    "target_table": ["attr_1", "attr_2"],
+                    "target_table2": ["attr_3", "attr_4"],
+                }
+            },
+        )
+
+        given_result = (
+            self.session.query(ProcessTargetObjectAttribute)
+            .join(Process)
+            .filter(Process.process_name == "Loading Target Object Attributes")
+            .count()
+        )
+
+        expected_result = 4
 
         self.assertEqual(expected_result, given_result)
 
