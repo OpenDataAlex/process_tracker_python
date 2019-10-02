@@ -523,7 +523,7 @@ class ProcessTracker:
             .join(Source)
             .join(FilterType)
             .filter(ProcessFilter.process_id == process)
-            .orderby(
+            .order_by(
                 Source.source_name,
                 SourceObject.source_object_name,
                 SourceObjectAttribute.source_object_attribute_name,
