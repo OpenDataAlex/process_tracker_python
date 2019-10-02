@@ -59,6 +59,28 @@ class DatasetType(Base):
         return "<DatasetType %s>" % self.dataset_type
 
 
+class FilterType(Base):
+
+    __tablename__ = "filter_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    filter_type_id = Column(
+        Integer,
+        Sequence("filter_type_lkup_filter_type_id_seq", schema="process_tracker"),
+        primary_key=True,
+        nullable=False,
+    )
+    filter_type_code = Column(String(3), nullable=False, unique=True)
+    filter_type_name = Column(String(75), nullable=False, unique=True)
+
+    def __repr__(self):
+
+        return "<FilterType code=%s, name=%s>" % (
+            self.filter_type_code,
+            self.filter_type_name,
+        )
+
+
 class Source(Base):
 
     __tablename__ = "source_lkup"
@@ -162,6 +184,8 @@ class SourceObject(Base):
         passive_deletes="all",
     )
 
+    sources = relationship("Source")
+
     def __repr__(self):
 
         return "<SourceObject (source_id=%s, source_object_name=%s)>" % (
@@ -203,6 +227,8 @@ class SourceObjectAttribute(Base):
     default_value_number = Column(Numeric, nullable=True)
 
     UniqueConstraint(source_object_id, source_object_attribute_name)
+
+    source_objects = relationship("SourceObject")
 
     def __repr__(self):
 

@@ -193,6 +193,47 @@ alter table process_type_lkup owner to pt_admin;
 create unique index process_type_lkup_udx01
 	on process_type_lkup (process_type_name);
 
+create table process_tracker.filter_type_lkup
+(
+	filter_type_id serial not null
+		constraint filter_type_lkup_pk
+			primary key,
+	filter_type_code varchar(3) not null,
+	filter_type_name varchar(75) not null
+);
+
+alter table process_tracker.filter_type_lkup owner to pt_admin;
+
+create unique index filter_type_lkup_filter_type_code_uindex
+	on process_tracker.filter_type_lkup (filter_type_code);
+
+create unique index filter_type_lkup_filter_type_name_uindex
+	on process_tracker.filter_type_lkup (filter_type_name);
+
+create table process_tracker.process_filter
+(
+	process_filter_id serial not null
+		constraint process_filter_pk
+			primary key,
+	process_id integer not null
+		constraint process_filter_fk01
+			references process_tracker.process,
+	source_object_attribute_id integer not null
+		constraint process_filter_fk02
+			references process_tracker.source_object_attribute,
+	filter_type_id integer not null
+		constraint process_filter_fk03
+			references process_tracker.filter_type_lkup,
+	filter_value_string varchar(250),
+	filter_value_numeric numeric
+);
+
+alter table process_tracker.process_filter owner to pt_admin;
+
+create unique index process_filter_udx01
+	on process_tracker.process_filter (process_id, source_object_attribute_id, filter_type_id);
+
+
 create table process_tracker.process
 (
 	process_id serial not null

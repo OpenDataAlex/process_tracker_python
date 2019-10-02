@@ -535,3 +535,37 @@ create table if not exists process_target_object_attribute
 	constraint process_target_object_attribute_fk02
 		foreign key (target_object_attribute_id) references source_object_attribute (source_object_attribute_id)
 );
+
+create table filter_type_lkup
+(
+	filter_type_id int auto_increment
+		primary key,
+	filter_type_code varchar(3) not null,
+	filter_type_name varchar(75) not null,
+	constraint filter_type_lkup_filter_type_code_uindex
+		unique (filter_type_code),
+	constraint filter_type_lkup_filter_type_name_uindex
+		unique (filter_type_name)
+);
+
+create table process_filter
+(
+	process_filter_id int auto_increment
+		primary key,
+	process_id int not null,
+	source_object_attribute_id int not null,
+	filter_type_id int not null,
+	filter_value_string varchar(250) null,
+	filter_value_numeric decimal null,
+	constraint process_filter_udx
+		unique (process_id, source_object_attribute_id, filter_type_id),
+	constraint process_filter_fk01
+		foreign key (process_id) references process (process_id),
+	constraint process_filter_fk02
+		foreign key (source_object_attribute_id) references source_object_attribute (source_object_attribute_id),
+	constraint process_filter_fk03
+		foreign key (filter_type_id) references filter_type_lkup (filter_type_id)
+);
+
+
+

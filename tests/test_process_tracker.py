@@ -28,6 +28,7 @@ from process_tracker.models.process import (
     ProcessContact,
     ProcessDatasetType,
     ProcessDependency,
+    ProcessFilter,
     ProcessSource,
     ProcessSourceObject,
     ProcessSourceObjectAttribute,
@@ -38,6 +39,7 @@ from process_tracker.models.process import (
 )
 from process_tracker.models.source import (
     DatasetType,
+    FilterType,
     Source,
     SourceContact,
     SourceDatasetType,
@@ -72,6 +74,7 @@ class TestProcessTracker(unittest.TestCase):
     def tearDownClass(cls):
         cls.session.query(ClusterProcess).delete()
         cls.session.query(ProcessContact).delete()
+        cls.session.query(ProcessFilter).delete()
         cls.session.query(Location).delete()
         cls.session.query(DatasetType).delete()
         cls.session.query(ProcessSourceObjectAttribute).delete()
@@ -1974,3 +1977,117 @@ class TestProcessTracker(unittest.TestCase):
         expected_result = [process.process.process_id]
 
         self.assertEqual(expected_result, given_result)
+
+    def test_find_process_filters(self):
+        """
+        Testing that when querying based on a given process, the process' filters are provided.
+        :return:
+        """
+
+        process = ProcessTracker(
+            process_name="Testing Process Filters",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            source_object_attributes={"source": {"source_table": ["attr_1", "attr_2"]}},
+        )
+
+        filter_type = process.data_store.get_or_create_item(
+            model=FilterType, create=False, filter_type_code="eq"
+        )
+        source = process.data_store.get_or_create_item(
+            model=Source, create=False, source_name="source"
+        )
+        source_object = process.data_store.get_or_create_item(
+            model=SourceObject,
+            create=False,
+            source_id=source.source_id,
+            source_object_name="source_table",
+        )
+        source_object_attribute = process.data_store.get_or_create_item(
+            model=SourceObjectAttribute,
+            create=False,
+            source_object_id=source_object.source_object_id,
+            source_object_attribute_name="attr_1",
+        )
+
+        process_filter = process.data_store.get_or_create_item(
+            model=ProcessFilter,
+            process_id=process.process.process_id,
+            source_object_attribute_id=source_object_attribute.source_object_attribute_id,
+            filter_type_id=filter_type.filter_type_id,
+            filter_value_string="testing",
+        )
+
+        given_result = process.find_process_filters(process=process.process.process_id)
+
+        expected_result = [
+            {
+                "source_name": "source",
+                "source_object_name": "source_table",
+                "source_object_attribute_name": "attr_1",
+                "filter_type_code": "eq",
+                "filter_value_numeric": None,
+                "filter_value_string": "testing",
+            }
+        ]
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_find_process_source_attributes(self):
+        """Testing that when querying based on a given process, that process' source attributes are returned."""
+        process = ProcessTracker(
+            process_name="Testing Source Attributes",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            source_object_attributes={"source": {"source_table": ["attr_1", "attr_2"]}},
+        )
+
+        given_result = process.find_process_source_attributes(
+            process=process.process.process_id
+        )
+
+        expected_result = [
+            {
+                "source_name": "source",
+                "source_object_name": "source_table",
+                "source_object_attribute_name": "attr_1",
+            },
+            {
+                "source_name": "source",
+                "source_object_name": "source_table",
+                "source_object_attribute_name": "attr_2",
+            },
+        ]
+
+        return self.assertListEqual(expected_result, given_result)
+
+    def test_find_process_target_attributes(self):
+        """Testing that when querying based on a given process, that process' target attributes are returned."""
+        process = ProcessTracker(
+            process_name="Testing Source Attributes",
+            process_type="Extract",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            target_object_attributes={"target": {"target_table": ["attr_1", "attr_2"]}},
+        )
+
+        given_result = process.find_process_target_attributes(
+            process=process.process.process_id
+        )
+
+        expected_result = [
+            {
+                "target_name": "target",
+                "target_object_name": "target_table",
+                "target_object_attribute_name": "attr_1",
+            },
+            {
+                "target_name": "target",
+                "target_object_name": "target_table",
+                "target_object_attribute_name": "attr_2",
+            },
+        ]
+
+        return self.assertListEqual(expected_result, given_result)

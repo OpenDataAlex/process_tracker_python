@@ -30,6 +30,7 @@ from process_tracker.models.process import (
     ProcessContact,
     ProcessDatasetType,
     ProcessDependency,
+    ProcessFilter,
     ProcessTracking,
     ProcessStatus,
     ProcessSource,
@@ -43,6 +44,7 @@ from process_tracker.models.process import (
 from process_tracker.models.schedule import ScheduleFrequency
 from process_tracker.models.source import (
     DatasetType,
+    FilterType,
     Source,
     SourceContact,
     SourceDatasetType,
@@ -497,6 +499,124 @@ class ProcessTracker:
             process_list.append(process.process_id)
 
         return process_list
+
+    def find_process_filters(self, process):
+        """
+        For the given process, find the filters required for querying the source system.
+        :param process: The process' process id.
+        :type process: integer
+        """
+
+        filter_list = list()
+
+        filters = (
+            self.session.query(
+                Source.source_name,
+                SourceObject.source_object_name,
+                SourceObjectAttribute.source_object_attribute_name,
+                FilterType.filter_type_code,
+                ProcessFilter.filter_value_numeric,
+                ProcessFilter.filter_value_string,
+            )
+            .join(SourceObjectAttribute, ProcessFilter.attributes)
+            .join(SourceObject, SourceObjectAttribute.source_objects)
+            .join(Source)
+            .join(FilterType)
+            .filter(ProcessFilter.process_id == process)
+            .orderby(
+                Source.source_name,
+                SourceObject.source_object_name,
+                SourceObjectAttribute.source_object_attribute_name,
+            )
+        )
+
+        for filter in filters:
+            filter_list.append(
+                {
+                    "source_name": filter.source_name,
+                    "source_object_name": filter.source_object_name,
+                    "source_object_attribute_name": filter.source_object_attribute_name,
+                    "filter_type_code": filter.filter_type_code,
+                    "filter_value_numeric": filter.filter_value_numeric,
+                    "filter_value_string": filter.filter_value_string,
+                }
+            )
+
+        return filter_list
+
+    def find_process_source_attributes(self, process):
+        """
+        For the given process, find the attributes used for process sources.
+        :param process:
+        :return:
+        """
+
+        source_attribute_list = list()
+
+        source_attributes = (
+            self.session.query(
+                Source.source_name,
+                SourceObject.source_object_name,
+                SourceObjectAttribute.source_object_attribute_name,
+            )
+            .join(SourceObject, SourceObjectAttribute.source_objects)
+            .join(Source, SourceObject.sources)
+            .join(ProcessSourceObjectAttribute)
+            .filter(ProcessSourceObjectAttribute.process_id == process)
+            .order_by(
+                Source.source_name,
+                SourceObject.source_object_name,
+                SourceObjectAttribute.source_object_attribute_name,
+            )
+        )
+
+        for attribute in source_attributes:
+            source_attribute_list.append(
+                {
+                    "source_name": attribute.source_name,
+                    "source_object_name": attribute.source_object_name,
+                    "source_object_attribute_name": attribute.source_object_attribute_name,
+                }
+            )
+
+        return source_attribute_list
+
+    def find_process_target_attributes(self, process):
+        """
+        For the given process, find the attributes used for process targets.
+        :param process:
+        :return:
+        """
+
+        target_attribute_list = list()
+
+        source_attributes = (
+            self.session.query(
+                Source.source_name,
+                SourceObject.source_object_name,
+                SourceObjectAttribute.source_object_attribute_name,
+            )
+            .join(SourceObject, SourceObjectAttribute.source_objects)
+            .join(Source, SourceObject.sources)
+            .join(ProcessTargetObjectAttribute)
+            .filter(ProcessTargetObjectAttribute.process_id == process)
+            .order_by(
+                Source.source_name,
+                SourceObject.source_object_name,
+                SourceObjectAttribute.source_object_attribute_name,
+            )
+        )
+
+        for attribute in source_attributes:
+            target_attribute_list.append(
+                {
+                    "target_name": attribute.source_name,
+                    "target_object_name": attribute.source_object_name,
+                    "target_object_attribute_name": attribute.source_object_attribute_name,
+                }
+            )
+
+        return target_attribute_list
 
     def get_latest_tracking_record(self, process):
         """

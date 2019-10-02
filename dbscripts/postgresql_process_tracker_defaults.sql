@@ -34,3 +34,12 @@ INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, sche
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (4, 'monthly');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (5, 'quarterly');
 INSERT INTO process_tracker.schedule_frequency_lkup (schedule_frequency_id, schedule_frequency_name) VALUES (6, 'annually');
+
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (1, 'eq', 'equal to');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (2, 'lt', 'less than');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (3, 'gt', 'greater than');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (4, 'lte', 'less than or equal');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (5, 'gte', 'greater than or equal');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (6, 'not', 'not equal');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (7, 'lke', 'like');
+INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (8, 'in', 'in set');
