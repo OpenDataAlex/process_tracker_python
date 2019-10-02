@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    Numeric,
     Sequence,
     String,
     UniqueConstraint,
@@ -147,6 +148,12 @@ class Process(Base):
     last_failed_run_date_time = Column(
         DateTime(timezone=True), nullable=False, default=default_date
     )
+    schedule_frequency_id = Column(
+        Integer,
+        ForeignKey("process_tracker.schedule_frequency_lkup.schedule_frequency_id"),
+        nullable=False,
+        default=0,
+    )
 
     cluster_processes = relationship("ClusterProcess", passive_deletes="all")
     process_tracking = relationship("ProcessTracking", passive_deletes="all")
@@ -223,6 +230,48 @@ class ProcessDatasetType(Base):
         return "<ProcessDatasetType process_id=%s, dataset_type_id=%s>" % (
             self.process_id,
             self.dataset_type_id,
+        )
+
+
+class ProcessFilter(Base):
+
+    __tablename__ = "process_filter"
+    __table_args__ = {"schema": "process_tracker"}
+
+    process_filter_id = Column(
+        Integer,
+        Sequence("process_filter_process_filter_id_seq", schema="process_tracker"),
+        primary_key=True,
+        nullable=False,
+    )
+    process_id = Column(
+        Integer, ForeignKey("process_tracker.process.process_id"), nullable=False
+    )
+    source_object_attribute_id = Column(
+        Integer,
+        ForeignKey(
+            "process_tracker.source_object_attribute.source_object_attribute_id"
+        ),
+        nullable=False,
+    )
+    filter_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.filter_type_lkup.filter_type_id"),
+        nullable=False,
+    )
+    filter_value_string = Column(String(250), nullable=True)
+    filter_value_numeric = Column(Numeric, nullable=True)
+
+    attributes = relationship("SourceObjectAttribute")
+
+    UniqueConstraint = (process_id, source_object_attribute_id, filter_type_id)
+
+    def __repr__(self):
+
+        return "<ProcessFilter process=%s, attribute=%s, filter_type=%s>" % (
+            self.process_id,
+            self.source_object_attribute_id,
+            self.filter_type_id,
         )
 
 
