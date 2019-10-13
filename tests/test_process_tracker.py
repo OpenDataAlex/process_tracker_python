@@ -1356,8 +1356,11 @@ class TestProcessTracker(unittest.TestCase):
             targets="Unittests",
             source_object_attributes={
                 "source": {
-                    "source_table": ["attr_1", "attr_2"],
-                    "source_table2": ["attr_3", "attr_4"],
+                    "type": "Database",
+                    "objects": {
+                        "source_table": ["attr_1", "attr_2"],
+                        "source_table2": ["attr_3", "attr_4"],
+                    },
                 }
             },
         )

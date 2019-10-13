@@ -51,6 +51,7 @@ from process_tracker.models.source import (
     SourceObject,
     SourceObjectAttribute,
     SourceObjectDatasetType,
+    SourceType,
 )
 from process_tracker.models.tool import Tool
 
@@ -874,8 +875,14 @@ class ProcessTracker:
             if isinstance(source_object_attributes, dict):
                 for source, objects in source_object_attributes.items():
                     self.logger.debug("Working on source %s" % source)
+                    source_type = self.data_store.get_or_create_item(
+                        model=SourceType, source_type_name=source_type
+                    )
+
                     source = self.data_store.get_or_create_item(
-                        model=Source, source_name=source
+                        model=Source,
+                        source_name=source,
+                        source_type_id=source_type.source_type_id,
                     )
 
                     for source_object, attributes in objects.items():

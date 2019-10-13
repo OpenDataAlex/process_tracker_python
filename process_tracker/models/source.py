@@ -93,6 +93,11 @@ class Source(Base):
         nullable=False,
     )
     source_name = Column(String(250), nullable=False, unique=True)
+    source_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_type_lkup.source_type_id"),
+        nullable=False,
+    )
 
     def __repr__(self):
 
@@ -195,7 +200,6 @@ class SourceObject(Base):
 
 
 class SourceObjectAttribute(Base):
-
     __tablename__ = "source_object_attribute"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -267,4 +271,20 @@ class SourceObjectDatasetType(Base):
         return "<SourceObjectDatasetType source_object_id=%s, dataset_type_id=%s>" % (
             self.source_object_id,
             self.dataset_type_id,
+        )
+
+
+class SourceType(Base):
+
+    __tablename__ = "source_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    source_type_id = Column(Integer, nullable=False, primary_key=True)
+    source_type_name = Column(String(75), nullable=False, unique=True)
+
+    def __repr__(self):
+
+        return "<SourceType id=%s, name=%s>" % (
+            self.source_type_id,
+            self.source_type_name,
         )
