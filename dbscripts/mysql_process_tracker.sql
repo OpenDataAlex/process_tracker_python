@@ -187,6 +187,7 @@ create table source_lkup
 	source_id int auto_increment
 		primary key,
 	source_name varchar(250) not null,
+	source_type_id integer null,
 	constraint source_name
 		unique (source_name)
 );
@@ -503,6 +504,7 @@ create table source_object_attribute
 	default_value_string varchar(250) null,
 	default_value_number decimal null,
 	is_key boolean default FALSE not null,
+	is_filter boolean default FALSE not null,
 	is_filter boolean default FALSE not null,
 	constraint source_object_attribute_udx01
 		unique (source_object_id, source_object_attribute_name),

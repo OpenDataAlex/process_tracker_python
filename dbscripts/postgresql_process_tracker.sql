@@ -151,7 +151,8 @@ create table source_lkup
 	source_id serial not null
 		constraint source_lkup_pk
 			primary key,
-	source_name varchar(250) not null
+	source_name varchar(250) not null,
+    source_type_id integer null
 );
 
 comment on table source_lkup is 'Source system where data originates.';
