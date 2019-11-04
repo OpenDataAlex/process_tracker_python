@@ -64,6 +64,7 @@ class SettingsManager:
                 path=self.config_path
             ) and self.aws_utils.determine_s3_file_exists(path=self.config_file):
                 file_type = "aws"
+                cloud = True
                 exists = True
 
         if exists:

@@ -2056,11 +2056,15 @@ class TestProcessTracker(unittest.TestCase):
                 "source_name": "source",
                 "source_object_name": "source_table",
                 "source_object_attribute_name": "attr_1",
+                "is_key": False,
+                "is_filter": False,
             },
             {
                 "source_name": "source",
                 "source_object_name": "source_table",
                 "source_object_attribute_name": "attr_2",
+                "is_key": False,
+                "is_filter": False,
             },
         ]
 
@@ -2085,11 +2089,15 @@ class TestProcessTracker(unittest.TestCase):
                 "target_name": "target",
                 "target_object_name": "target_table",
                 "target_object_attribute_name": "attr_1",
+                "is_key": False,
+                "is_filter": False,
             },
             {
                 "target_name": "target",
                 "target_object_name": "target_table",
                 "target_object_attribute_name": "attr_2",
+                "is_key": False,
+                "is_filter": False,
             },
         ]
 
