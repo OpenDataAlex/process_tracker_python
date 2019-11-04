@@ -93,11 +93,11 @@ class Source(Base):
         nullable=False,
     )
     source_name = Column(String(250), nullable=False, unique=True)
-    source_type_id = Column(
-        Integer,
-        ForeignKey("process_tracker.source_type_lkup.source_type_id"),
-        nullable=False,
-    )
+    # source_type_id = Column(
+    #     Integer,
+    #     ForeignKey("process_tracker.source_type_lkup.source_type_id"),
+    #     nullable=False,
+    # )
 
     def __repr__(self):
 
