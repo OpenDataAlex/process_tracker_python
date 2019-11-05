@@ -559,6 +559,8 @@ class ProcessTracker:
                 Source.source_name,
                 SourceObject.source_object_name,
                 SourceObjectAttribute.source_object_attribute_name,
+                SourceObjectAttribute.is_key,
+                SourceObjectAttribute.is_filter,
             )
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source, SourceObject.sources)
@@ -577,6 +579,8 @@ class ProcessTracker:
                     "source_name": attribute.source_name,
                     "source_object_name": attribute.source_object_name,
                     "source_object_attribute_name": attribute.source_object_attribute_name,
+                    "is_key": attribute.is_key,
+                    "is_filter": attribute.is_filter,
                 }
             )
 
@@ -596,6 +600,8 @@ class ProcessTracker:
                 Source.source_name,
                 SourceObject.source_object_name,
                 SourceObjectAttribute.source_object_attribute_name,
+                SourceObjectAttribute.is_key,
+                SourceObjectAttribute.is_filter,
             )
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source, SourceObject.sources)
@@ -614,6 +620,8 @@ class ProcessTracker:
                     "target_name": attribute.source_name,
                     "target_object_name": attribute.source_object_name,
                     "target_object_attribute_name": attribute.source_object_attribute_name,
+                    "is_key": attribute.is_key,
+                    "is_filter": attribute.is_filter,
                 }
             )
 
