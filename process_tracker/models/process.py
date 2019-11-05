@@ -250,7 +250,7 @@ class ProcessFilter(Base):
     source_object_attribute_id = Column(
         Integer,
         ForeignKey(
-            "process_tracker.source_object_attribute.source_object_attribute_id"
+            "process_tracker.source_object_attribute_lkup.source_object_attribute_id"
         ),
         nullable=False,
     )
@@ -344,7 +344,7 @@ class ProcessSourceObjectAttribute(Base):
     source_object_attribute_id = Column(
         Integer,
         ForeignKey(
-            "process_tracker.source_object_attribute.source_object_attribute_id"
+            "process_tracker.source_object_attribute_lkup.source_object_attribute_id"
         ),
         primary_key=True,
         nullable=False,
@@ -430,7 +430,7 @@ class ProcessTargetObjectAttribute(Base):
     target_object_attribute_id = Column(
         Integer,
         ForeignKey(
-            "process_tracker.source_object_attribute.source_object_attribute_id"
+            "process_tracker.source_object_attribute_lkup.source_object_attribute_id"
         ),
         primary_key=True,
         nullable=False,

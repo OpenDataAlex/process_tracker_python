@@ -196,7 +196,7 @@ class SourceObject(Base):
 
 class SourceObjectAttribute(Base):
 
-    __tablename__ = "source_object_attribute"
+    __tablename__ = "source_object_attribute_lkup"
     __table_args__ = {"schema": "process_tracker"}
 
     source_object_attribute_id = Column(
