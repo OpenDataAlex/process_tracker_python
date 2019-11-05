@@ -252,6 +252,26 @@ class ExtractProcess(Base):
         )
 
 
+class ExtractSource(Base):
+
+    __tablename__ = "extract_source"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_id = Column(Integer, ForeignKey("process_tracker.extract_tracking.extract_tracking_id"), primary_key=True, nullable=False)
+    source_id = Column(Integer, ForeignKey("process_tracker.source_lkup.source_id"), primary_key=True, nullable=False)
+
+    UniqueConstraint(extract_id, source_id)
+
+    extracts = relationship("Extract")
+    sources = relationship("Source")
+
+    def __repr__(self):
+
+        return "<ExtractSource extract_id=%s, source_id=%s>" % (self.extract_id, self.source_id)
+
+class ExtractSourceObject(Base):
+
+
 class LocationType(Base):
 
     __tablename__ = "location_type_lkup"
