@@ -225,6 +225,8 @@ class SourceObjectAttribute(Base):
     is_pii = Column(Boolean, nullable=False, default=False)
     default_value_string = Column(String(250), nullable=True)
     default_value_number = Column(Numeric, nullable=True)
+    is_key = Column(Boolean, nullable=False, default=False)
+    is_filter = Column(Boolean, nullable=False, default=False)
 
     UniqueConstraint(source_object_id, source_object_attribute_name)
 
