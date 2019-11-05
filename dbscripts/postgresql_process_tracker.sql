@@ -744,7 +744,9 @@ create table process_tracker.source_object_attribute
 	data_decimal integer,
 	is_pii boolean default false not null,
 	default_value_string varchar(250),
-	default_value_number numeric
+	default_value_number numeric,
+	is_key boolean default false not null,
+	is_filter boolean default false not null
 );
 
 alter table process_tracker.source_object_attribute owner to pt_admin;
