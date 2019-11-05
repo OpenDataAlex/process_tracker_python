@@ -810,7 +810,7 @@ class ProcessTracker:
                 last_run_id=last_run.process_run_id,
             ):
                 self.logger.error(
-                    "Process is on hold due to number of concurrent failures or previous run is in on hold status."
+                    "Process is on hold due to number of concurrent failures or previous run is in on-hold status."
                 )
                 new_run_flag = False
 
@@ -833,7 +833,8 @@ class ProcessTracker:
 
         else:
             raise Exception(
-                "The process %s is currently running or on hold." % self.process_name
+                "The process %s is currently %s."
+                % (self.process_name, last_run.status.process_status_name)
             )
 
     def register_process_dataset_types(self, dataset_types):

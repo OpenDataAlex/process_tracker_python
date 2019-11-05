@@ -727,18 +727,18 @@ create table process_contact
 
 alter table process_contact owner to pt_admin;
 
-create table process_tracker.source_object_attribute
+create table process_tracker.source_object_attribute_lkup
 (
 	source_object_attribute_id serial not null
-		constraint source_object_attribute_pk
+		constraint source_object_attribute_lkup_pk
 			primary key,
 	source_object_attribute_name varchar(250) not null,
 	source_object_id integer
-		constraint source_object_attribute_fk01
+		constraint source_object_attribute_lkup_fk01
 			references process_tracker.source_object_lkup,
 	attribute_path varchar(750),
 	data_type_id integer
-		constraint source_object_attribute_fk02
+		constraint source_object_attribute_lkup_fk02
 			references process_tracker.data_type_lkup,
 	data_length integer,
 	data_decimal integer,
@@ -749,10 +749,10 @@ create table process_tracker.source_object_attribute
 	is_filter boolean default false not null
 );
 
-alter table process_tracker.source_object_attribute owner to pt_admin;
+alter table process_tracker.source_object_attribute_lkup owner to pt_admin;
 
-create unique index source_object_attribute_udx01
-	on process_tracker.source_object_attribute (source_object_id, source_object_attribute_name);
+create unique index source_object_attribute_lkup_udx01
+	on process_tracker.source_object_attribute_lkup (source_object_id, source_object_attribute_name);
 
 create table process_tracker.process_target_object_attribute
 (
@@ -761,7 +761,7 @@ create table process_tracker.process_target_object_attribute
 			references process_tracker.process,
 	target_object_attribute_id integer not null
 		constraint process_target_object_attribute_fk02
-			references process_tracker.source_object_attribute,
+			references process_tracker.source_object_attribute_lkup,
 	target_object_attribute_alias varchar(250),
 	target_object_attribute_expression varchar(250),
 	constraint process_target_object_attribute_pk
@@ -777,7 +777,7 @@ create table process_tracker.process_source_object_attribute
 			references process_tracker.process,
 	source_object_attribute_id integer not null
 		constraint process_source_object_attribute_fk02
-			references process_tracker.source_object_attribute,
+			references process_tracker.source_object_attribute_lkup,
 	source_object_attribute_alias varchar(250),
 	source_object_attribute_expression varchar(250),
 	constraint process_source_object_attribute_pk
@@ -797,7 +797,7 @@ create table process_tracker.process_filter
 			references process_tracker.process,
 	source_object_attribute_id integer not null
 		constraint process_filter_fk02
-			references process_tracker.source_object_attribute,
+			references process_tracker.source_object_attribute_lkup,
 	filter_type_id integer not null
 		constraint process_filter_fk03
 			references process_tracker.filter_type_lkup,

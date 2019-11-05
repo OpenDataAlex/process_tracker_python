@@ -750,7 +750,7 @@ class TestProcessTracker(unittest.TestCase):
             )
 
         self.assertTrue(
-            "The process On Hold Max Failures Test is currently running or on_hold."
+            "The process On Hold Max Failures Test is currently on hold."
             in str(context.exception)
         )
 
@@ -809,7 +809,7 @@ class TestProcessTracker(unittest.TestCase):
             )
 
         self.assertTrue(
-            "The process On Hold Previous Run Test is currently running or on hold."
+            "The process On Hold Previous Run Test is currently on hold."
             in str(context.exception)
         )
 
@@ -903,6 +903,7 @@ class TestProcessTracker(unittest.TestCase):
         "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true",
         "Skipping this test on Travis CI.",
     )
+    @unittest.skip("Issue with hanging queries on database.")
     @mock_s3
     def test_register_extracts_by_location_s3(self):
         """
@@ -1034,7 +1035,7 @@ class TestProcessTracker(unittest.TestCase):
             self.process_tracker.register_new_process_run()
 
         return self.assertTrue(
-            "The process Testing Process Tracking Initialization is currently running or on hold."
+            "The process Testing Process Tracking Initialization is currently running."
             in str(context.exception)
         )
 

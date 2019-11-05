@@ -489,7 +489,7 @@ create table process_contact
 		foreign key (contact_id) references contact_lkup (contact_id)
 );
 
-create table source_object_attribute
+create table source_object_attribute_lkup
 (
 	source_object_attribute_id int auto_increment
 		primary key,
@@ -504,11 +504,11 @@ create table source_object_attribute
 	default_value_number decimal null,
 	is_key boolean default FALSE not null,
 	is_filter boolean default FALSE not null,
-	constraint source_object_attribute_udx01
+	constraint source_object_attribute_lkup_udx01
 		unique (source_object_id, source_object_attribute_name),
-	constraint source_object_attribute_fk01
+	constraint source_object_attribute_lkup_fk01
 		foreign key (source_object_id) references source_object_lkup (source_object_id),
-	constraint source_object_attribute_fk02
+	constraint source_object_attribute_lkup_fk02
 		foreign key (data_type_id) references data_type_lkup (data_type_id)
 );
 
@@ -522,7 +522,7 @@ create table process_source_object_attribute
 	constraint process_source_object_attribute_fk01
 		foreign key (process_id) references process (process_id),
 	constraint process_source_object_attribute_fk02
-		foreign key (source_object_attribute_id) references source_object_attribute (source_object_attribute_id)
+		foreign key (source_object_attribute_id) references source_object_attribute_lkup (source_object_attribute_id)
 );
 
 create table if not exists process_target_object_attribute
@@ -535,7 +535,7 @@ create table if not exists process_target_object_attribute
 	constraint process_target_object_attribute_fk01
 		foreign key (process_id) references process (process_id),
 	constraint process_target_object_attribute_fk02
-		foreign key (target_object_attribute_id) references source_object_attribute (source_object_attribute_id)
+		foreign key (target_object_attribute_id) references source_object_attribute_lkup (source_object_attribute_id)
 );
 
 create table filter_type_lkup
@@ -564,7 +564,7 @@ create table process_filter
 	constraint process_filter_fk01
 		foreign key (process_id) references process (process_id),
 	constraint process_filter_fk02
-		foreign key (source_object_attribute_id) references source_object_attribute (source_object_attribute_id),
+		foreign key (source_object_attribute_id) references source_object_attribute_lkup (source_object_attribute_id),
 	constraint process_filter_fk03
 		foreign key (filter_type_id) references filter_type_lkup (filter_type_id)
 );
