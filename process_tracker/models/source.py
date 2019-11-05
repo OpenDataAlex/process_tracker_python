@@ -202,7 +202,7 @@ class SourceObjectAttribute(Base):
     source_object_attribute_id = Column(
         Integer,
         Sequence(
-            "source_object_attribute_source_object_attribute_lkup_id_seq",
+            "source_object_attribute_lkup_source_object_attribute_id_seq",
             schema="process_tracker",
         ),
         primary_key=True,
