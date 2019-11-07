@@ -809,3 +809,60 @@ alter table process_tracker.process_filter owner to pt_admin;
 
 create unique index process_filter_udx01
 	on process_tracker.process_filter (process_id, source_object_attribute_id, filter_type_id);
+
+create table process_tracker.extract_source
+(
+	extract_id integer not null
+		constraint extract_source_fk02
+			references process_tracker.extract_tracking,
+	source_id integer not null
+		constraint extract_source_fk01
+			references process_tracker.source_lkup,
+	constraint extract_source_pk
+		primary key (extract_id, source_id)
+);
+
+alter table process_tracker.extract_source owner to pt_admin;
+
+create table process_tracker.extract_source_object
+(
+	extract_id integer not null
+		constraint extract_source_object_fk01
+			references process_tracker.extract_tracking,
+	source_object_id integer not null
+		constraint extract_source_object_fk02
+			references process_tracker.source_object_lkup,
+	constraint extract_source_object_pk
+		primary key (extract_id, source_object_id)
+);
+
+alter table process_tracker.extract_source_object owner to pt_admin;
+
+create table process_tracker.source_location
+(
+	source_id integer not null
+		constraint source_location_fk01
+			references process_tracker.source_lkup,
+	location_id integer not null
+		constraint source_location_fk02
+			references process_tracker.location_lkup,
+	constraint source_location_pk
+		primary key (source_id, location_id)
+);
+
+alter table process_tracker.source_location owner to pt_admin;
+
+create table process_tracker.source_object_location
+(
+	source_object_id integer not null
+		constraint source_object_location_fk01
+			references process_tracker.source_object_lkup,
+	location_id integer not null
+		constraint source_object_location_fk02
+			references process_tracker.location_lkup,
+	constraint source_object_location_pk
+		primary key (source_object_id, location_id)
+);
+
+alter table process_tracker.source_object_location owner to pt_admin;
+

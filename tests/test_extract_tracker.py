@@ -8,6 +8,8 @@ from process_tracker.models.extract import (
     Extract,
     ExtractDatasetType,
     ExtractProcess,
+    ExtractSource,
+    ExtractSourceObject,
     Location,
 )
 from process_tracker.models.process import (
@@ -78,6 +80,8 @@ class TestExtractTracker(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
+        self.session.query(ExtractSource).delete()
+        self.session.query(ExtractSourceObject).delete()
         self.session.query(ExtractDatasetType).delete()
         self.session.query(ExtractDependency).delete()
         self.session.query(ExtractProcess).delete()
@@ -412,6 +416,23 @@ class TestExtractTracker(unittest.TestCase):
 
         given_result = (
             self.session.query(ExtractDatasetType)
+            .join(Extract)
+            .filter(Extract.extract_filename == self.extract.extract.extract_filename)
+            .count()
+        )
+
+        expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_register_extract_sources(self):
+        """
+        Testing that sources that are part of the process are also registering to the extract.
+        :return:
+        """
+
+        given_result = (
+            self.session.query(ExtractSource)
             .join(Extract)
             .filter(Extract.extract_filename == self.extract.extract.extract_filename)
             .count()

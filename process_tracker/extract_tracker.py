@@ -17,6 +17,7 @@ from process_tracker.models.extract import (
     ExtractDatasetType,
     ExtractDependency,
     ExtractProcess,
+    ExtractSource,
     ExtractStatus,
 )
 
@@ -155,6 +156,12 @@ class ExtractTracker:
             )
         else:
             self.dataset_types = None
+
+        if self.process_run.process.sources is not None:
+            self.logger.info("Associating source system(s) with extract.")
+            self.sources = self.register_extract_sources(
+                sources=self.process_run.process.sources
+            )
 
         # Getting all status types in the event there are custom status types added later.
         self.extract_status_types = self.get_extract_status_types()
@@ -359,6 +366,22 @@ class ExtractTracker:
             )
 
         return dataset_types
+
+    def register_extract_sources(self, sources):
+        """
+        For the provided sources from process_run instance, associate with given Extract instance.
+        :param sources: List of sources from process_run record.
+        :return:
+        """
+
+        for source in sources:
+            self.data_store.get_or_create_item(
+                model=ExtractSource,
+                extract_id=self.extract.extract_id,
+                source_id=source.source_id,
+            )
+
+        return sources
 
     def retrieve_extract_process(self):
         """

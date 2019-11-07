@@ -257,8 +257,18 @@ class ExtractSource(Base):
     __tablename__ = "extract_source"
     __table_args__ = {"schema": "process_tracker"}
 
-    extract_id = Column(Integer, ForeignKey("process_tracker.extract_tracking.extract_tracking_id"), primary_key=True, nullable=False)
-    source_id = Column(Integer, ForeignKey("process_tracker.source_lkup.source_id"), primary_key=True, nullable=False)
+    extract_id = Column(
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    source_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_lkup.source_id"),
+        primary_key=True,
+        nullable=False,
+    )
 
     UniqueConstraint(extract_id, source_id)
 
@@ -267,9 +277,41 @@ class ExtractSource(Base):
 
     def __repr__(self):
 
-        return "<ExtractSource extract_id=%s, source_id=%s>" % (self.extract_id, self.source_id)
+        return "<ExtractSource extract_id=%s, source_id=%s>" % (
+            self.extract_id,
+            self.source_id,
+        )
+
 
 class ExtractSourceObject(Base):
+
+    __tablename__ = "extract_source_object"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_id = Column(
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    source_object_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_object_lkup.source_object_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    UniqueConstraint(extract_id, source_object_id)
+
+    extracts = relationship("Extract")
+    source_objects = relationship("SourceObject")
+
+    def __repr__(self):
+
+        return "<ExtractSourceObject extract_id=%s, source_object_id=%s>" % (
+            self.extract_id,
+            self.source_object_id,
+        )
 
 
 class LocationType(Base):
