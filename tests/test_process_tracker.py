@@ -2100,3 +2100,72 @@ class TestProcessTracker(unittest.TestCase):
         ]
 
         return self.assertListEqual(expected_result, given_result)
+
+    def test_process_tracker_with_process_run_id(self):
+        """
+        Testing that when providing a process_id to ProcessTracker, the instance is returned instead of a new instance
+        being created.
+        :return:
+        """
+        process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
+
+        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+
+        expected_process_name_result = self.process_tracker.process_name
+        given_process_name_result = new_process_tracker.process_name
+
+        expected_actor_result = self.process_tracker.actor.actor_name
+        given_actor_result = new_process_tracker.actor.actor_name
+
+        expected_process_type_result = (
+            self.process_tracker.process_type.process_type_name
+        )
+        given_process_type_result = new_process_tracker.process_type.process_type_name
+
+        expected_tool_result = self.process_tracker.tool.tool_name
+        given_tool_result = new_process_tracker.tool.tool_name
+
+        expected_schedule_frequency_result = (
+            self.process_tracker.schedule_frequency.schedule_frequency_name
+        )
+        given_schedule_frequency_result = (
+            new_process_tracker.schedule_frequency.schedule_frequency_name
+        )
+
+        self.assertEqual(expected_process_name_result, given_process_name_result)
+        self.assertEqual(expected_actor_result, given_actor_result)
+        self.assertEqual(expected_process_type_result, given_process_type_result)
+        self.assertEqual(expected_tool_result, given_tool_result)
+        self.assertEqual(
+            expected_schedule_frequency_result, given_schedule_frequency_result
+        )
+
+    def test_determine_process_sources(self):
+        """
+        When provided an existing process run id, determine which level of source is needed and provide the details.
+        Should return the lowest grain possible (i.e. attribute)
+        :return:
+        """
+        process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
+
+        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+
+        given_sources = new_process_tracker.sources
+        expected_sources = self.process_tracker.sources
+
+        return expected_sources == given_sources
+
+    def test_determine_process_targets(self):
+        """
+        When provided an existing process run id, determine which level of source targets is needed and provide the details.
+        Should return the lowest grain possible (i.e. attribute)
+        :return:
+        """
+        process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
+
+        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+
+        given_targets = new_process_tracker.targets
+        expected_targets = self.process_tracker.targets
+
+        return expected_targets == given_targets
