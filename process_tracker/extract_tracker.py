@@ -18,7 +18,13 @@ from process_tracker.models.extract import (
     ExtractDependency,
     ExtractProcess,
     ExtractSource,
+    ExtractSourceObject,
     ExtractStatus,
+)
+from process_tracker.models.source import (
+    SourceLocation,
+    SourceObjectAttribute,
+    SourceObjectLocation,
 )
 
 
@@ -158,10 +164,13 @@ class ExtractTracker:
             self.dataset_types = None
 
         if self.process_run.process.sources is not None:
-            self.logger.info("Associating source system(s) with extract.")
+            self.logger.info("Associating source system(s) with extract and location.")
             self.sources = self.register_extract_sources(
                 sources=self.process_run.process.sources
             )
+        else:
+            self.logger.info("No source system(s) to associate to.")
+            self.sources = None
 
         # Getting all status types in the event there are custom status types added later.
         self.extract_status_types = self.get_extract_status_types()
@@ -375,11 +384,47 @@ class ExtractTracker:
         """
 
         for source in sources:
-            self.data_store.get_or_create_item(
-                model=ExtractSource,
-                extract_id=self.extract.extract_id,
-                source_id=source.source_id,
-            )
+            source_type = source.__tablename__
+
+            self.logger.debug("Referencing %s to extract." % source_type)
+
+            if source_type == "process_source_object":
+                self.logger.debug("Source type is of type source object.")
+                self.logger.debug(
+                    "Associating extract %s to source object %s."
+                    % (self.extract.extract_id, source.source_object_id)
+                )
+                self.data_store.get_or_create_item(
+                    model=ExtractSourceObject,
+                    extract_id=self.extract.extract_id,
+                    source_object_id=source.source_object_id,
+                )
+
+                self.data_store.get_or_create_item(
+                    model=SourceObjectLocation,
+                    source_object_id=source.source_object_id,
+                    location_id=self.extract.extract_location_id,
+                )
+
+            elif source_type == "process_source":
+                self.logger.debug("Source is of type source.")
+                self.logger.debug(
+                    "Associating extract %s to source %s."
+                    % (self.extract.extract_id, source.source_id)
+                )
+                extract_source = self.data_store.get_or_create_item(
+                    model=ExtractSource,
+                    extract_id=self.extract.extract_id,
+                    source_id=source.source_id,
+                )
+
+                self.logger.debug("Extract source record created. %s" % extract_source)
+
+                self.data_store.get_or_create_item(
+                    model=SourceLocation,
+                    source_id=source.source_id,
+                    location_id=self.extract.extract_location_id,
+                )
 
         return sources
 

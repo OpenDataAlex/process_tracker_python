@@ -123,7 +123,7 @@ class DataStore:
         :param kwargs: The filter criteria required to find the specific entity instance.
         :return:
         """
-        self.logger.debug("Attempting to obtain record.")
+        self.logger.debug("Attempting to obtain record for model type %s." % model)
         instance = self.session.query(model).filter_by(**kwargs).first()
 
         if instance is None:
