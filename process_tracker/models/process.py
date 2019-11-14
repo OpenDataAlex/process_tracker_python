@@ -156,8 +156,10 @@ class Process(Base):
     )
 
     cluster_processes = relationship("ClusterProcess", passive_deletes="all")
+    dataset_types = relationship("ProcessDatasetType")
     process_tracking = relationship("ProcessTracking", passive_deletes="all")
     process_type = relationship("ProcessType", back_populates="processes")
+    schedule_frequency = relationship("ScheduleFrequency")
     sources = relationship("ProcessSource", passive_deletes="all")
     targets = relationship("ProcessTarget", passive_deletes="all")
     tool = relationship("Tool")
@@ -505,6 +507,7 @@ class ProcessTracking(Base):
     )
     is_latest_run = Column(Boolean, nullable=False, default=False)
 
+    actor = relationship("Actor")
     errors = relationship(
         "ErrorTracking", back_populates="error_tracking", passive_deletes="all"
     )
