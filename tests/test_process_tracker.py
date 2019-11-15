@@ -1674,9 +1674,6 @@ class TestProcessTracker(unittest.TestCase):
             fail_date,
         ]
 
-        print(self.provided_end_date)
-        print(process[0].last_failed_run_date_time)
-
         expected_result = [
             self.process_tracker.process_status_failed,
             self.provided_end_date,
@@ -2169,3 +2166,19 @@ class TestProcessTracker(unittest.TestCase):
         expected_targets = self.process_tracker.targets
 
         return expected_targets == given_targets
+
+    def test_ensure_nulls_caught_on_instantiation(self):
+        """
+        With the adding of the ability of have a process_tracking_id we have to allow for nulled values for process_name
+        and process_type.  If ProcessTracker is instantiated with either (or both) being null, an exception should be
+        raised.
+        :return:
+        """
+
+        with self.assertRaises(Exception) as context:
+
+            ProcessTracker()
+
+        return self.assertTrue(
+            "process_name and process_type must be set." in str(context.exception)
+        )
