@@ -153,6 +153,10 @@ class ProcessTracker:
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
         else:
+            if process_name is None or process_type is None:
+                error_msg = "process_name and process_type must be set."
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
 
             self.actor = self.data_store.get_or_create_item(
                 model=Actor, actor_name=actor_name

@@ -129,6 +129,8 @@ class Extract(Base):
         nullable=True,
     )
 
+    compression_type = relationship("ExtractCompressionType")
+    extract_filetype = relationship("ExtractFileType")
     extract_dataset_types = relationship(
         "ExtractDatasetType",
         back_populates="dataset_type_extracts",

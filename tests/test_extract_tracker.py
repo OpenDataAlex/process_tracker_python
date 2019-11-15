@@ -606,3 +606,57 @@ class TestExtractTracker(unittest.TestCase):
             )
 
         self.assertTrue("zap is not a valid file type" in str(context.exception))
+
+    def test_extract_tracker_with_extract_id(self):
+        """
+        Testing that when providing a extract_id to ExtractTracker, the instance is returned instead of being created.
+        :return:
+        """
+
+        extract_id = self.extract.extract.extract_id
+
+        new_extract_tracker = ExtractTracker(
+            extract_id=extract_id, process_run=self.process_run
+        )
+
+        expected_filename = self.extract.extract.extract_filename
+        given_filename = new_extract_tracker.extract.extract_filename
+
+        expected_location = self.extract.location.location_name
+        given_location = new_extract_tracker.location.location_name
+
+        expected_compression_type = self.extract.compression_type_id
+        given_compression_type = new_extract_tracker.compression_type_id
+
+        expected_filetype = self.extract.extract.extract_filetype
+        given_filetype = new_extract_tracker.extract.extract_filetype
+
+        expected_full_filename = self.extract.full_filename
+        given_full_filename = new_extract_tracker.full_filename
+
+        expected_dataset_types = self.extract.dataset_types
+        given_dataset_types = new_extract_tracker.dataset_types
+
+        expected_process = self.extract.extract_process.process_tracking_id
+        given_process = new_extract_tracker.extract_process.process_tracking_id
+
+        self.assertEqual(expected_filename, given_filename)
+        self.assertEqual(expected_location, given_location)
+        self.assertEqual(expected_compression_type, given_compression_type)
+        self.assertEqual(expected_filetype, given_filetype)
+        self.assertEqual(expected_full_filename, given_full_filename)
+        self.assertEqual(expected_dataset_types, given_dataset_types)
+        self.assertEqual(expected_process, given_process)
+
+    def test_ensure_nulls_caught_on_instantiation(self):
+        """
+        With the adding of the ability of having a extract_id we have to allow for filename to
+        be nullable.  If ExtractTracker is instantiated without filename provided an error should
+        be raised.
+        :return:
+        """
+        with self.assertRaises(Exception) as context:
+
+            ExtractTracker(process_run=self.extract.process_run)
+
+        return self.assertTrue("Filename must be provided." in str(context.exception))

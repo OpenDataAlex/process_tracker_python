@@ -19,13 +19,14 @@ from process_tracker.models.extract import (
     ExtractProcess,
     ExtractStatus,
 )
+from process_tracker.models.source import DatasetType
 
 
 class ExtractTracker:
     def __init__(
         self,
         process_run,
-        filename,
+        filename=None,
         location=None,
         location_name=None,
         location_path=None,
@@ -33,6 +34,7 @@ class ExtractTracker:
         compression_type=None,
         filetype=None,
         config_location=None,
+        extract_id=None,
     ):
         """
         ExtractTracker is the primary engine for tracking data extracts
@@ -55,6 +57,9 @@ class ExtractTracker:
         :type filetype: string
         :param config_location: Optional location for the process_tracker configuration file.
         :type config_location: string
+        :param extract_id: If trying to work with a specific extract that's in process, provide the id and it will be
+        reconstructed.
+        :type extract_id: int
         """
         log_level = SettingsManager(
             config_location=config_location
@@ -67,94 +72,6 @@ class ExtractTracker:
 
         self.data_store = self.process_run.data_store
         self.session = self.process_run.session
-
-        self.filename = filename
-
-        if location is not None:
-            self.logger.info("Location object provided.")
-            self.location = location
-        elif location_path is not None:
-            self.logger.info("Location path provided.  Creating Location object.")
-            self.location = LocationTracker(
-                location_name=location_name,
-                location_path=location_path,
-                data_store=self.data_store,
-            )
-        else:
-            raise Exception("A location object or location_path must be provided.")
-
-        if compression_type is not None:
-            self.logger.info("Finding compression type.")
-            try:
-                self.compression_type = self.data_store.get_or_create_item(
-                    model=ExtractCompressionType,
-                    create=False,
-                    extract_compression_type=compression_type,
-                )
-            except Exception:
-                error_msg = "%s is not a valid compression type." % compression_type
-                self.logger.error(error_msg)
-                raise Exception(error_msg)
-
-            self.compression_type_id = self.compression_type.extract_compression_type_id
-        else:
-            self.compression_type_id = None
-
-        if filetype is not None:
-            self.logger.info("File type provided.  Verifying it is a valid filetype.")
-            try:
-                self.filetype = self.data_store.get_or_create_item(
-                    model=ExtractFileType, create=False, extract_filetype=filetype
-                )
-            except Exception:
-                error_msg = "%s is not a valid file type." % filetype
-                self.logger.error(error_msg)
-                raise Exception(error_msg)
-        else:
-            # Need to try to determine the filetype based on the extension of the filename.
-            file_extension = os.path.splitext(filename)[1]
-            file_extension = file_extension.replace(".", "")
-            self.logger.info(
-                "Trying to find record for file extension: %s" % file_extension
-            )
-            self.filetype = self.data_store.get_or_create_item(
-                model=ExtractFileType,
-                create=False,
-                extract_filetype_code=file_extension,
-            )
-
-        self.logger.info("Registering extract.")
-
-        self.extract = self.data_store.get_or_create_item(
-            model=Extract,
-            extract_filename=filename,
-            extract_location_id=self.location.location.location_id,
-            extract_compression_type_id=self.compression_type_id,
-            extract_filetype_id=self.filetype.extract_filetype_id,
-        )
-
-        if location_path is not None:
-            self.logger.info(
-                "Location path was provided so building file path from it."
-            )
-
-            self.full_filename = str(Path(location_path).joinpath(filename))
-        else:
-            self.logger.info("Location provided so building file path from it.")
-
-            self.full_filename = str(
-                Path(self.location.location_path).joinpath(
-                    self.extract.extract_filename
-                )
-            )
-
-        if self.process_run.dataset_types is not None:
-            self.logger.info("Associating dataset type(s) with extract.")
-            self.dataset_types = self.register_extract_dataset_types(
-                dataset_types=self.process_run.dataset_types
-            )
-        else:
-            self.dataset_types = None
 
         # Getting all status types in the event there are custom status types added later.
         self.extract_status_types = self.get_extract_status_types()
@@ -169,16 +86,120 @@ class ExtractTracker:
         self.extract_status_deleted = self.extract_status_types["deleted"]
         self.extract_status_error = self.extract_status_types["error"]
 
-        self.extract_process = self.retrieve_extract_process()
+        if extract_id is not None:
+            self.logger.info("Extract id provided.  Attempting to reconstruct.")
 
-        if status is not None:
-            self.logger.info("Status was provided by user.")
-            self.change_extract_status(new_status=status)
+            extract = self.data_store.get_or_create_item(
+                model=Extract, extract_id=extract_id, create=False
+            )
+            self.filename = extract.extract_filename
+            self.location = extract.locations
+            self.compression_type = extract.compression_type
+            if self.compression_type is None:
+                self.compression_type_id = None
+            else:
+                self.compression_type_id = self.compression_type.compression_type_id
+            self.filetype = extract.extract_filetype
+            self.extract = extract
+            self.full_filename = self.get_full_filename()
+            self.dataset_types = self.get_dataset_types()
+            self.extract_process = self.retrieve_extract_process()
+
         else:
-            self.logger.info("Status was not provided.  Initializing.")
-            self.extract.extract_status_id = self.extract_status_initializing
+            if filename is None:
+                error_msg = "Filename must be provided."
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
 
-        self.session.commit()
+            self.filename = filename
+
+            if location is not None:
+                self.logger.info("Location object provided.")
+                self.location = location
+            elif location_path is not None:
+                self.logger.info("Location path provided.  Creating Location object.")
+                self.location = LocationTracker(
+                    location_name=location_name,
+                    location_path=location_path,
+                    data_store=self.data_store,
+                )
+            else:
+                raise Exception("A location object or location_path must be provided.")
+
+            if compression_type is not None:
+                self.logger.info("Finding compression type.")
+                try:
+                    self.compression_type = self.data_store.get_or_create_item(
+                        model=ExtractCompressionType,
+                        create=False,
+                        extract_compression_type=compression_type,
+                    )
+                except Exception:
+                    error_msg = "%s is not a valid compression type." % compression_type
+                    self.logger.error(error_msg)
+                    raise Exception(error_msg)
+
+                self.compression_type_id = (
+                    self.compression_type.extract_compression_type_id
+                )
+            else:
+                self.compression_type_id = None
+
+            if filetype is not None:
+                self.logger.info(
+                    "File type provided.  Verifying it is a valid filetype."
+                )
+                try:
+                    self.filetype = self.data_store.get_or_create_item(
+                        model=ExtractFileType, create=False, extract_filetype=filetype
+                    )
+                except Exception:
+                    error_msg = "%s is not a valid file type." % filetype
+                    self.logger.error(error_msg)
+                    raise Exception(error_msg)
+            else:
+                # Need to try to determine the filetype based on the extension of the filename.
+                file_extension = os.path.splitext(filename)[1]
+                file_extension = file_extension.replace(".", "")
+                self.logger.info(
+                    "Trying to find record for file extension: %s" % file_extension
+                )
+                self.filetype = self.data_store.get_or_create_item(
+                    model=ExtractFileType,
+                    create=False,
+                    extract_filetype_code=file_extension,
+                )
+
+            self.logger.info("Registering extract.")
+
+            self.extract = self.data_store.get_or_create_item(
+                model=Extract,
+                extract_filename=filename,
+                extract_location_id=self.location.location.location_id,
+                extract_compression_type_id=self.compression_type_id,
+                extract_filetype_id=self.filetype.extract_filetype_id,
+            )
+
+            self.full_filename = self.get_full_filename(location_path=location_path)
+
+            if self.process_run.dataset_types is not None:
+                self.logger.info("Associating dataset type(s) with extract.")
+                self.dataset_types = self.register_extract_dataset_types(
+                    dataset_types=self.process_run.dataset_types
+                )
+            else:
+                self.dataset_types = None
+
+            self.extract_process = self.retrieve_extract_process()
+
+            if status is not None:
+                self.logger.info("Status was provided by user.")
+                self.change_extract_status(new_status=status)
+            else:
+                self.logger.info("Status was not provided.  Initializing.")
+                self.extract.extract_status_id = self.extract_status_initializing
+
+            self.session.commit()
 
     def add_dependency(self, dependency_type, dependency):
         """
@@ -330,6 +351,21 @@ class ExtractTracker:
         else:
             return False
 
+    def get_dataset_types(self):
+        """
+        Get list of dataset types associated to extract and return list.
+        :return:
+        """
+        dataset_types = list()
+
+        for type in self.extract.extract_dataset_types:
+            dataset_type = self.data_store.get_or_create_item(
+                model=DatasetType, dataset_type_id=type.dataset_type_id
+            )
+            dataset_types.append(dataset_type)
+
+        return dataset_types
+
     def get_extract_status_types(self):
         """
         Get list of process status types and return dictionary.
@@ -343,6 +379,32 @@ class ExtractTracker:
             status_types[record.extract_status_name] = record.extract_status_id
 
         return status_types
+
+    def get_full_filename(self, location_path=None):
+        """
+        Build full filepath to file based on location's path and the filename.
+        :param location_path: If provided, will use for filepath, otherwise will attempt to obtain
+        from extract location.
+        :type location_path: str
+        :return: full filepath as string
+        """
+
+        if location_path is not None:
+            self.logger.info(
+                "Location path was provided so building file path from it."
+            )
+
+            full_filename = str(Path(location_path).joinpath(self.filename))
+        else:
+            self.logger.info("Location provided so building file path from it.")
+
+            full_filename = str(
+                Path(self.location.location_path).joinpath(
+                    self.extract.extract_filename
+                )
+            )
+
+        return full_filename
 
     def register_extract_dataset_types(self, dataset_types):
         """
