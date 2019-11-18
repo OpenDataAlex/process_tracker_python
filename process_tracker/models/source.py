@@ -153,6 +153,37 @@ class SourceDatasetType(Base):
         )
 
 
+class SourceLocation(Base):
+
+    __tablename__ = "source_location"
+    __table_args__ = {"schema": "process_tracker"}
+
+    source_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_lkup.source_id"),
+        nullable=False,
+        primary_key=True,
+    )
+    location_id = Column(
+        Integer,
+        ForeignKey("process_tracker.location_lkup.location_id"),
+        nullable=False,
+        primary_key=True,
+    )
+
+    UniqueConstraint(source_id, location_id)
+
+    sources = relationship("Source")
+    locations = relationship("Location")
+
+    def __repr__(self):
+
+        return "<SourceLocation source_id=%s, location_id=%s>" % (
+            self.source_id,
+            self.location_id,
+        )
+
+
 class SourceObject(Base):
 
     __tablename__ = "source_object_lkup"
@@ -191,6 +222,35 @@ class SourceObject(Base):
         return "<SourceObject (source_id=%s, source_object_name=%s)>" % (
             self.source_id,
             self.source_object_name,
+        )
+
+
+class SourceObjectLocation(Base):
+    __tablename__ = "source_object_location"
+    __table_args__ = {"schema": "process_tracker"}
+
+    source_object_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_object_lkup.source_object_id"),
+        nullable=False,
+        primary_key=True,
+    )
+    location_id = Column(
+        Integer,
+        ForeignKey("process_tracker.location_lkup.location_id"),
+        nullable=False,
+        primary_key=True,
+    )
+
+    UniqueConstraint(source_object_id, location_id)
+
+    source_objects = relationship("SourceObject")
+    locations = relationship("Location")
+
+    def __repr__(self):
+        return "<SourceObjectLocation source_object_id=%s, location_id=%s>" % (
+            self.source_object_id,
+            self.location_id,
         )
 
 

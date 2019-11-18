@@ -196,14 +196,19 @@ class ProcessTracker:
 
             # sources, source_objects, or source_object_attributes should be set, not multiple.  Always go with lower grain if possible.
 
+            self.source_object_attributes = None
+            self.source_objects = None
+
             if source_object_attributes is not None:
-                self.sources = self.register_process_sources(
+                self.source_object_attributes = self.register_process_sources(
                     source_object_attributes=source_object_attributes
                 )
+                self.sources = self.source_object_attributes
             elif source_objects is not None:
-                self.sources = self.register_process_sources(
+                self.source_objects = self.register_process_sources(
                     source_objects=source_objects
                 )
+                self.sources = self.source_objects
             elif sources is not None:
                 self.sources = self.register_process_sources(sources=sources)
             else:

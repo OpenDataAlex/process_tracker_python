@@ -569,5 +569,49 @@ create table process_filter
 		foreign key (filter_type_id) references filter_type_lkup (filter_type_id)
 );
 
+create table process_tracker.extract_source
+(
+	extract_id int not null,
+	source_id int not null,
+	primary key (extract_id, source_id),
+	constraint extract_source_fk01
+		foreign key (extract_id) references process_tracker.extract_tracking (extract_id),
+	constraint extract_source_fk02
+		foreign key (source_id) references process_tracker.source_lkup (source_id)
+);
+
+create table process_tracker.extract_source_object
+(
+	extract_id int not null,
+	source_object_id int not null,
+	primary key (extract_id, source_object_id),
+	constraint extract_source_object_fk01
+		foreign key (extract_id) references process_tracker.extract_tracking (extract_id),
+	constraint extract_source_object_fk02
+		foreign key (source_object_id) references process_tracker.source_object_lkup (source_object_id)
+);
+
+create table process_tracker.source_location
+(
+	source_id int not null,
+	location_id int not null,
+	primary key (source_id, location_id),
+	constraint source_location_fk01
+		foreign key (source_id) references process_tracker.source_lkup (source_id),
+	constraint source_location_fk02
+		foreign key (location_id) references process_tracker.location_lkup (location_id)
+);
+
+create table process_tracker.source_object_location
+(
+	source_object_id int not null,
+	location_id int not null,
+	primary key (source_object_id, location_id),
+	constraint source_object_location_fk01
+		foreign key (source_object_id) references process_tracker.source_object_lkup (source_object_id),
+	constraint source_object_location_fk02
+		foreign key (location_id) references process_tracker.location_lkup (location_id)
+);
+
 
 

@@ -8,6 +8,8 @@ from process_tracker.models.extract import (
     Extract,
     ExtractDatasetType,
     ExtractProcess,
+    ExtractSource,
+    ExtractSourceObject,
     Location,
 )
 from process_tracker.models.process import (
@@ -15,10 +17,15 @@ from process_tracker.models.process import (
     ProcessDatasetType,
     ProcessDependency,
     ProcessSource,
+    ProcessSourceObject,
     ProcessTarget,
     ProcessTracking,
 )
-from process_tracker.models.source import DatasetType
+from process_tracker.models.source import (
+    DatasetType,
+    SourceLocation,
+    SourceObjectLocation,
+)
 
 from process_tracker.extract_tracker import ExtractDependency, ExtractTracker
 from process_tracker.process_tracker import ErrorTracking, ProcessTracker
@@ -54,6 +61,7 @@ class TestExtractTracker(unittest.TestCase):
         cls.session.query(ProcessDatasetType).delete()
         cls.session.query(ProcessTracking).delete()
         cls.session.query(ProcessSource).delete()
+        cls.session.query(ProcessSourceObject).delete()
         cls.session.query(ProcessTarget).delete()
         cls.session.query(ProcessDependency).delete()
         cls.session.query(Process).delete()
@@ -78,6 +86,10 @@ class TestExtractTracker(unittest.TestCase):
         Need to clean up tables to return them to pristine state for other tests.
         :return:
         """
+        self.session.query(SourceLocation).delete()
+        self.session.query(SourceObjectLocation).delete()
+        self.session.query(ExtractSource).delete()
+        self.session.query(ExtractSourceObject).delete()
         self.session.query(ExtractDatasetType).delete()
         self.session.query(ExtractDependency).delete()
         self.session.query(ExtractProcess).delete()
@@ -421,6 +433,84 @@ class TestExtractTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_register_extract_sources(self):
+        """
+        Testing that sources that are part of the process are also registering to the extract.
+        The source is also associated to the given location of the extract.
+        :return:
+        """
+
+        given_result = (
+            self.session.query(ExtractSource)
+            .join(Extract)
+            .filter(Extract.extract_filename == self.extract.extract.extract_filename)
+            .count()
+        )
+
+        expected_result = 1
+
+        location_given_result = (
+            self.session.query(SourceLocation)
+            .filter(
+                SourceLocation.location_id == self.extract.extract.extract_location_id
+            )
+            .count()
+        )
+
+        location_expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+        self.assertEqual(location_expected_result, location_given_result)
+
+    def test_register_extract_sources_source_objects(self):
+        """
+        Testing that source objects that are part of the process are also registering to the extract.
+        The source object is also associated to the given location of the extract.
+        :return:
+        """
+        process_run = ProcessTracker(
+            process_name="Testing Extract Tracking Source Objects",
+            process_type="Load",
+            actor_name="UnitTesting",
+            tool_name="Spark",
+            source_objects={"Unittests": ["Table1"]},
+            targets="Unittests",
+            dataset_types="Category 1",
+        )
+
+        source_object_extract = ExtractTracker(
+            process_run=process_run,
+            filename="test_extract_filename.csv",
+            location_name="Test Location",
+            location_path="/home/test/extract_dir",
+        )
+
+        given_result = (
+            self.session.query(ExtractSourceObject)
+            .join(Extract)
+            .filter(
+                Extract.extract_filename
+                == source_object_extract.extract.extract_filename
+            )
+            .count()
+        )
+
+        expected_result = 1
+
+        location_given_result = (
+            self.session.query(SourceObjectLocation)
+            .filter(
+                SourceObjectLocation.location_id
+                == source_object_extract.extract.extract_location_id
+            )
+            .count()
+        )
+
+        location_expected_result = 1
+
+        self.assertEqual(expected_result, given_result)
+        self.assertEqual(location_expected_result, location_given_result)
+
     def test_set_extract_low_high_dates_write(self):
         """
         Testing that low and high dates are set for the write audit fields.
@@ -640,6 +730,9 @@ class TestExtractTracker(unittest.TestCase):
         expected_process = self.extract.extract_process.process_tracking_id
         given_process = new_extract_tracker.extract_process.process_tracking_id
 
+        expected_sources = self.extract.sources
+        given_sources = new_extract_tracker.sources
+
         self.assertEqual(expected_filename, given_filename)
         self.assertEqual(expected_location, given_location)
         self.assertEqual(expected_compression_type, given_compression_type)
@@ -647,6 +740,7 @@ class TestExtractTracker(unittest.TestCase):
         self.assertEqual(expected_full_filename, given_full_filename)
         self.assertEqual(expected_dataset_types, given_dataset_types)
         self.assertEqual(expected_process, given_process)
+        self.assertEqual(expected_sources, given_sources)
 
     def test_ensure_nulls_caught_on_instantiation(self):
         """

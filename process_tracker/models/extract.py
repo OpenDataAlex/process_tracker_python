@@ -139,6 +139,7 @@ class Extract(Base):
     extract_process = relationship(
         "ExtractProcess", back_populates="process_extracts", passive_deletes="all"
     )
+    extract_sources = relationship("ExtractSource")
     extract_status = relationship("ExtractStatus", foreign_keys=[extract_status_id])
     locations = relationship("Location", foreign_keys=[extract_location_id])
 
@@ -251,6 +252,68 @@ class ExtractProcess(Base):
             self.extract_tracking_id,
             self.process_tracking_id,
             self.extract_process_status_id,
+        )
+
+
+class ExtractSource(Base):
+
+    __tablename__ = "extract_source"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_id = Column(
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    source_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_lkup.source_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    UniqueConstraint(extract_id, source_id)
+
+    extracts = relationship("Extract")
+    sources = relationship("Source")
+
+    def __repr__(self):
+
+        return "<ExtractSource extract_id=%s, source_id=%s>" % (
+            self.extract_id,
+            self.source_id,
+        )
+
+
+class ExtractSourceObject(Base):
+
+    __tablename__ = "extract_source_object"
+    __table_args__ = {"schema": "process_tracker"}
+
+    extract_id = Column(
+        Integer,
+        ForeignKey("process_tracker.extract_tracking.extract_id"),
+        primary_key=True,
+        nullable=False,
+    )
+    source_object_id = Column(
+        Integer,
+        ForeignKey("process_tracker.source_object_lkup.source_object_id"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    UniqueConstraint(extract_id, source_object_id)
+
+    extracts = relationship("Extract")
+    source_objects = relationship("SourceObject")
+
+    def __repr__(self):
+
+        return "<ExtractSourceObject extract_id=%s, source_object_id=%s>" % (
+            self.extract_id,
+            self.source_object_id,
         )
 
 
