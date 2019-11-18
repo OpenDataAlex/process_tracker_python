@@ -1,5 +1,23 @@
 USE process_tracker;
 
+create table process_tracker.character_set_lkup
+(
+	character_set_id int auto_increment
+		primary key,
+	character_set_name int not null,
+	constraint character_set_lkup_character_set_name_uindex
+		unique (character_set_name)
+);
+
+create table process_tracker.source_type_lkup
+(
+	source_type_id int auto_increment
+		primary key,
+	source_type_name varchar(75) not null,
+	constraint source_type_lkup_source_type_name_uindex
+		unique (source_type_name)
+);
+
 create table schedule_frequency_lkup
 (
 	schedule_frequency_id int auto_increment
@@ -182,14 +200,22 @@ create table process_type_lkup
 	process_type_name varchar(250) not null
 );
 
-create table source_lkup
+create table process_tracker.source_lkup
 (
 	source_id int auto_increment
 		primary key,
 	source_name varchar(250) not null,
+	source_type_id int not null,
+	character_set_id int null,
 	constraint source_name
-		unique (source_name)
+		unique (source_name),
+	constraint source_lkup_fk01
+		foreign key (source_type_id) references process_tracker.source_type_lkup (source_type_id),
+	constraint source_lkup_fk02
+		foreign key (character_set_id) references process_tracker.character_set_lkup (character_set_id)
 );
+
+
 
 create table system_lkup
 (
@@ -380,13 +406,15 @@ comment 'Relationship tracking between processes and performance clusters.';
 
 create table process_tracker.source_object_lkup
 (
-	source_object_id int auto_increment,
+	source_object_id int auto_increment
+		primary key,
 	source_id int not null,
 	source_object_name varchar(250) null,
-	constraint source_object_lkup_pk
-		primary key (source_object_id),
+	character_set_id int null,
 	constraint source_object_lkup_udx01
 		unique (source_id, source_object_name),
+	constraint source_object_lkup_fk02
+		foreign key (character_set_id) references process_tracker.character_set_lkup (character_set_id),
 	constraint source_object_lkup_source_lkup_source_id_fk
 		foreign key (source_id) references process_tracker.source_lkup (source_id)
 );
@@ -612,6 +640,5 @@ create table process_tracker.source_object_location
 	constraint source_object_location_fk02
 		foreign key (location_id) references process_tracker.location_lkup (location_id)
 );
-
 
 
