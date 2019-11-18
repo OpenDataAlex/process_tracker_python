@@ -115,7 +115,9 @@ class Source(Base):
     )
     source_name = Column(String(250), nullable=False, unique=True)
     character_set_id = Column(
-        Integer, "process_tracker.character_set_lkup.character_set_id", nullable=True
+        Integer,
+        ForeignKey("process_tracker.character_set_lkup.character_set_id"),
+        nullable=True,
     )
 
     def __repr__(self):
@@ -224,7 +226,9 @@ class SourceObject(Base):
     )
     source_object_name = Column(String(250), nullable=False)
     character_set_id = Column(
-        Integer, "process_tracker.character_set_lkup.character_set_id", nullable=True
+        Integer,
+        ForeignKey("process_tracker.character_set_lkup.character_set_id"),
+        nullable=True,
     )
 
     UniqueConstraint(source_id, source_object_name)
