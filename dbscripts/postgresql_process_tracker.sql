@@ -561,12 +561,12 @@ create table cluster_tracking_lkup
 	cluster_current_process_usage integer
 );
 
-comment on table cluster_tracking is 'Capacity cluster tracking';
+comment on table cluster_tracking_lkup is 'Capacity cluster tracking';
 
-alter table cluster_tracking owner to pt_admin;
+alter table cluster_tracking_lkup owner to pt_admin;
 
 create unique index cluster_tracking_cluster_name_uindex
-	on cluster_tracking (cluster_name);
+	on cluster_tracking_lkup (cluster_name);
 
 create table cluster_process
 (
