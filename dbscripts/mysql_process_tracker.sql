@@ -350,7 +350,7 @@ create index process_run_actor_id
 create index process_status_id
 	on process_tracking (process_status_id);
 
-create table process_tracker.cluster_tracking
+create table process_tracker.cluster_tracking_lkup
 (
 	cluster_id int auto_increment
 		primary key,
