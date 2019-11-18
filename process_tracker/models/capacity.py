@@ -41,7 +41,7 @@ class ClusterProcess(Base):
 
     cluster_id = Column(
         Integer,
-        ForeignKey("process_tracker.cluster_tracking.cluster_id"),
+        ForeignKey("process_tracker.cluster_tracking_lkup.cluster_id"),
         primary_key=True,
         nullable=False,
     )
