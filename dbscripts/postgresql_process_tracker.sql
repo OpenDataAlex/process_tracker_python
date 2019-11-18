@@ -547,7 +547,7 @@ comment on table extract_dependency is 'Table tracking interdependencies between
 
 alter table extract_dependency owner to pt_admin;
 
-create table cluster_tracking
+create table cluster_tracking_lkup
 (
 	cluster_id serial not null
 		constraint cluster_tracking_pk
@@ -561,18 +561,18 @@ create table cluster_tracking
 	cluster_current_process_usage integer
 );
 
-comment on table cluster_tracking is 'Capacity cluster tracking';
+comment on table cluster_tracking_lkup is 'Capacity cluster tracking';
 
-alter table cluster_tracking owner to pt_admin;
+alter table cluster_tracking_lkup owner to pt_admin;
 
 create unique index cluster_tracking_cluster_name_uindex
-	on cluster_tracking (cluster_name);
+	on cluster_tracking_lkup (cluster_name);
 
 create table cluster_process
 (
 	cluster_id integer not null
 		constraint cluster_process_fk01
-			references cluster_tracking,
+			references cluster_tracking_lkup,
 	process_id integer not null
 		constraint cluster_process_fk02
 			references process,
