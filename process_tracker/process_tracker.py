@@ -1310,9 +1310,9 @@ class ProcessTracker:
         """
         process_run_records = self.process.total_record_count
 
-        if process_run_records == 0:
+        if process_run_records == 0 or process_run_records is None:
 
-            self.process.total_record_count += num_records
+            self.process.total_record_count = num_records
         else:
             self.process.total_record_count = self.process.total_record_count + (
                 num_records - process_run_records
