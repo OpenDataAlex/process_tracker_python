@@ -19,6 +19,7 @@ from process_tracker.models.extract import (
     ExtractDatasetType,
     ExtractProcess,
     ExtractStatus,
+    ExtractSource,
     Location,
 )
 from process_tracker.models.process import (
@@ -43,9 +44,11 @@ from process_tracker.models.source import (
     Source,
     SourceContact,
     SourceDatasetType,
+    SourceLocation,
     SourceObject,
     SourceObjectAttribute,
     SourceObjectDatasetType,
+    SourceObjectLocation,
 )
 
 from process_tracker.utilities.data_store import DataStore, ClusterProcess
@@ -117,12 +120,16 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
         self.session.query(ExtractProcess).delete()
+        self.session.query(ExtractSource).delete()
         self.session.query(ExtractDatasetType).delete()
         self.session.query(SourceDatasetType).delete()
         self.session.query(SourceObjectDatasetType).delete()
+        self.session.query(SourceLocation).delete()
+        self.session.query(SourceObjectLocation).delete()
         self.session.query(ProcessDatasetType).delete()
         self.session.query(ErrorTracking).delete()
         self.session.query(ProcessTracking).delete()
+        self.session.query(Process)
         self.session.query(Extract).delete()
         self.session.query(ErrorType).delete()
         self.session.commit()
