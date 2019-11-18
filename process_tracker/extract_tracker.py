@@ -17,7 +17,15 @@ from process_tracker.models.extract import (
     ExtractDatasetType,
     ExtractDependency,
     ExtractProcess,
+    ExtractSource,
+    ExtractSourceObject,
     ExtractStatus,
+)
+from process_tracker.models.source import (
+    Source,
+    SourceLocation,
+    SourceObjectAttribute,
+    SourceObjectLocation,
 )
 from process_tracker.models.source import DatasetType
 
@@ -104,6 +112,7 @@ class ExtractTracker:
             self.full_filename = self.get_full_filename()
             self.dataset_types = self.get_dataset_types()
             self.extract_process = self.retrieve_extract_process()
+            self.sources = self.extract.extract_sources
 
         else:
             if filename is None:
@@ -191,6 +200,28 @@ class ExtractTracker:
                 self.dataset_types = None
 
             self.extract_process = self.retrieve_extract_process()
+
+            if self.process_run.source_objects is not None:
+                self.logger.info(
+                    "Associating source system(s) object(s) with extract and location."
+                )
+                self.source_objects = self.register_extract_sources(
+                    source_objects=self.process_run.source_objects
+                )
+                self.sources = self.source_objects
+
+            elif self.process_run.process.sources is not None:
+                self.logger.info(
+                    "Associating source system(s) with extract and location."
+                )
+
+                self.sources = self.register_extract_sources(
+                    sources=self.process_run.sources
+                )
+
+            else:
+                self.logger.info("No source system(s) to associate to.")
+                self.sources = None
 
             if status is not None:
                 self.logger.info("Status was provided by user.")
@@ -421,6 +452,60 @@ class ExtractTracker:
             )
 
         return dataset_types
+
+    def register_extract_sources(self, sources=None, source_objects=None):
+        """
+        For the provided sources from process_run instance, associate with given Extract instance.
+        :param sources: List of sources from process_run record.
+        :param source_objects: List of sources and their objects from process_run record.
+        :return:
+        """
+        source_list = list()
+
+        if source_objects is not None:
+
+            for object in source_objects:
+                self.logger.debug(
+                    "Associating extract %s to source %s."
+                    % (self.extract.extract_id, object.source_object_id)
+                )
+
+                source_object = self.data_store.get_or_create_item(
+                    model=ExtractSourceObject,
+                    extract_id=self.extract.extract_id,
+                    source_object_id=object.source_object_id,
+                )
+                source_list.append(source_object)
+
+                self.data_store.get_or_create_item(
+                    SourceObjectLocation,
+                    source_object_id=object.source_object_id,
+                    location_id=self.extract.extract_location_id,
+                )
+
+        elif sources is not None:
+
+            for source in sources:
+
+                self.logger.debug(
+                    "Associating extract %s to source %s."
+                    % (self.extract.extract_id, source.source_id)
+                )
+                extract_source = self.data_store.get_or_create_item(
+                    model=ExtractSource,
+                    extract_id=self.extract.extract_id,
+                    source_id=source.source_id,
+                )
+                source_list.append(extract_source)
+                self.logger.debug("Extract source record created. %s" % extract_source)
+
+                self.data_store.get_or_create_item(
+                    model=SourceLocation,
+                    source_id=source.source_id,
+                    location_id=self.extract.extract_location_id,
+                )
+
+        return source_list
 
     def retrieve_extract_process(self):
         """
