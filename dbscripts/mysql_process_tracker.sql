@@ -372,7 +372,7 @@ create table process_tracker.cluster_process
 	process_id int not null,
 	primary key (cluster_id, process_id),
 	constraint cluster_process_fk01
-		foreign key (cluster_id) references process_tracker.cluster_tracking (cluster_id),
+		foreign key (cluster_id) references process_tracker.cluster_tracking_lkup (cluster_id),
 	constraint cluster_process_fk02
 		foreign key (process_id) references process_tracker.process (process_id)
 )

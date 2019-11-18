@@ -572,7 +572,7 @@ create table cluster_process
 (
 	cluster_id integer not null
 		constraint cluster_process_fk01
-			references cluster_tracking,
+			references cluster_tracking_lkup,
 	process_id integer not null
 		constraint cluster_process_fk02
 			references process,
