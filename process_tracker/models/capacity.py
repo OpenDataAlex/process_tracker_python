@@ -10,12 +10,12 @@ from process_tracker.models.model_base import Base
 
 class Cluster(Base):
 
-    __tablename__ = "cluster_tracking"
+    __tablename__ = "cluster_tracking_lkup"
     __table_args__ = {"schema": "process_tracker"}
 
     cluster_id = Column(
         Integer,
-        Sequence("cluster_tracking_cluster_id_seq", schema="process_tracker"),
+        Sequence("cluster_tracking_lkup_cluster_id_seq", schema="process_tracker"),
         primary_key=True,
         nullable=False,
     )
