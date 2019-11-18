@@ -16,6 +16,27 @@ from sqlalchemy.orm import relationship
 from process_tracker.models.model_base import Base
 
 
+class CharacterSet(Base):
+
+    __tablename__ = "character_set_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    character_set_id = Column(
+        Integer,
+        Sequence("character_set_lkup.character_set_id", schema="process_tracker"),
+        primary_key=True,
+        nullable=False,
+    )
+    character_set_name = Column(String(75), unique=True, nullable=False)
+
+    def __repr__(self):
+
+        return "<CharacterSet id=%s, name=%s>" % (
+            self.character_set_id,
+            self.character_set_name,
+        )
+
+
 class DataType(Base):
 
     __tablename__ = "data_type_lkup"
@@ -93,6 +114,11 @@ class Source(Base):
         nullable=False,
     )
     source_name = Column(String(250), nullable=False, unique=True)
+    character_set_id = Column(
+        Integer,
+        ForeignKey("process_tracker.character_set_lkup.character_set_id"),
+        nullable=True,
+    )
 
     def __repr__(self):
 
@@ -199,6 +225,11 @@ class SourceObject(Base):
         Integer, ForeignKey("process_tracker.source_lkup.source_id"), nullable=False
     )
     source_object_name = Column(String(250), nullable=False)
+    character_set_id = Column(
+        Integer,
+        ForeignKey("process_tracker.character_set_lkup.character_set_id"),
+        nullable=True,
+    )
 
     UniqueConstraint(source_id, source_object_name)
 

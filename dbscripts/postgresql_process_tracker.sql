@@ -4,6 +4,32 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
+create table process_tracker.character_set_lkup
+(
+	character_set_id serial not null
+		constraint character_set_lkup_pk
+			primary key,
+	character_set_name varchar(75) not null
+);
+
+alter table process_tracker.character_set_lkup owner to pt_admin;
+
+create unique index character_set_lkup_character_set_name_uindex
+	on process_tracker.character_set_lkup (character_set_name);
+
+create table process_tracker.source_type_lkup
+(
+	source_type_id serial not null
+		constraint source_type_lkup_pk
+			primary key,
+	source_type_name varchar(75) not null
+);
+
+alter table process_tracker.source_type_lkup owner to pt_admin;
+
+create unique index source_type_lkup_source_type_name_uindex
+	on process_tracker.source_type_lkup (source_type_name);
+
 create table schedule_frequency_lkup
 (
 	schedule_frequency_id serial not null
@@ -146,20 +172,26 @@ alter table tool_lkup owner to pt_admin;
 create unique index tool_lkup_tool_udx01
 	on tool_lkup (tool_name);
 
-create table source_lkup
+create table process_tracker.source_lkup
 (
 	source_id serial not null
 		constraint source_lkup_pk
 			primary key,
-	source_name varchar(250) not null
+	source_name varchar(250) not null,
+	source_type_id integer
+		constraint source_lkup_fk01
+			references process_tracker.source_type_lkup,
+	character_set_id integer
+		constraint source_lkup_fk02
+			references process_tracker.character_set_lkup
 );
 
-comment on table source_lkup is 'Source system where data originates.';
+comment on table process_tracker.source_lkup is 'Source system where data originates.';
 
-alter table source_lkup owner to pt_admin;
+alter table process_tracker.source_lkup owner to pt_admin;
 
 create unique index source_lkup_udx01
-	on source_lkup (source_name);
+	on process_tracker.source_lkup (source_name);
 
 create table process_status_lkup
 (
@@ -592,7 +624,10 @@ create table process_tracker.source_object_lkup
 	source_id integer not null
 		constraint source_object_lkup_fk01
 			references process_tracker.source_lkup,
-	source_object_name varchar(250)
+	source_object_name varchar(250),
+	character_set_id integer
+		constraint source_object_lkup_fk02
+			references process_tracker.character_set_lkup
 );
 
 comment on table process_tracker.source_object_lkup is 'Reference table for source/target objects.';
