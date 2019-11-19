@@ -63,10 +63,10 @@ class TestSettingsManager(unittest.TestCase):
         :return:
         """
 
-        expected_result = "/tmp/testing/process_tracker_config_dev.ini"
+        expected_result = "/home/travis/.process_tracker/process_tracker_config_dev.ini"
 
         given_result = SettingsManager(
-            config_location="/tmp/testing/process_tracker_config_dev.ini"
+            config_location="/home/travis/.process_tracker/process_tracker_config_dev.ini"
         ).config_file
 
         self.assertEqual(expected_result, given_result)
