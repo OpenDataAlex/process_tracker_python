@@ -40,7 +40,10 @@ class SettingsManager:
         else:
             self.config_path = config_location
 
-            if "process_tracker_config.ini" not in self.config_path:
+            if (
+                "process_tracker_config.ini" not in self.config_path
+                and ".ini" not in self.config_path
+            ):
                 self.logger.debug(
                     "process_tracker_config.ini not present.  Appending to %s"
                     % self.config_path

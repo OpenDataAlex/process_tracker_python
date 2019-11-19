@@ -14,6 +14,7 @@ after_success:
 before_script:
 - mkdir $HOME/.process_tracker
 - if [[ ! -z "$DB" ]]; then mv configs/${DB}_config.ini $HOME/.process_tracker/process_tracker_config.ini; fi
+- mv configs/process_tracker_config_dev.ini $HOME/.process_tracker/process_tracker_config_dev.ini
 - if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_account_create.sql -U postgres; fi
 - if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres; fi
 - if [[ "$DB" == "postgres" ]]; then psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres; fi

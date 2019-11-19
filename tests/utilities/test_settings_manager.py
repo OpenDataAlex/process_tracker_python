@@ -56,6 +56,21 @@ class TestSettingsManager(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_config_location_set_with_ini_file(self):
+        """
+        Testing that if an .ini file that is NOT named process_tracker_config.ini_in the config_location, it is accepted
+        as the config file.
+        :return:
+        """
+
+        expected_result = "/tmp/testing/process_tracker_config_dev.ini"
+
+        given_result = SettingsManager(
+            config_location="/tmp/testing/process_tracker_config_dev.ini"
+        ).config_file
+
+        self.assertEqual(expected_result, given_result)
+
     def test_config_location_s3(self):
         """
         Testing that if config_location is set and the path is an s3 file/location, use that instead of the home
