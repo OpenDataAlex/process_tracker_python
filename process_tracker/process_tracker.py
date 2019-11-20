@@ -704,6 +704,7 @@ class ProcessTracker:
                 SourceObjectAttribute.source_object_attribute_name,
                 SourceObjectAttribute.is_key,
                 SourceObjectAttribute.is_filter,
+                SourceObjectAttribute.is_partition,
             )
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source, SourceObject.sources)
@@ -724,6 +725,7 @@ class ProcessTracker:
                     "source_object_attribute_name": attribute.source_object_attribute_name,
                     "is_key": attribute.is_key,
                     "is_filter": attribute.is_filter,
+                    "is_partition": attribute.is_partition,
                 }
             )
 
@@ -745,6 +747,7 @@ class ProcessTracker:
                 SourceObjectAttribute.source_object_attribute_name,
                 SourceObjectAttribute.is_key,
                 SourceObjectAttribute.is_filter,
+                SourceObjectAttribute.is_partition,
             )
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source, SourceObject.sources)
@@ -765,6 +768,7 @@ class ProcessTracker:
                     "target_object_attribute_name": attribute.source_object_attribute_name,
                     "is_key": attribute.is_key,
                     "is_filter": attribute.is_filter,
+                    "is_partition": attribute.is_partition,
                 }
             )
 

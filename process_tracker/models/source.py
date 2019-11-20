@@ -318,6 +318,7 @@ class SourceObjectAttribute(Base):
     default_value_number = Column(Numeric, nullable=True)
     is_key = Column(Boolean, nullable=False, default=False)
     is_filter = Column(Boolean, nullable=False, default=False)
+    is_partition = Column(Boolean, nullable=False, default=False)
 
     UniqueConstraint(source_object_id, source_object_attribute_name)
 

@@ -532,6 +532,7 @@ create table source_object_attribute_lkup
 	default_value_number decimal null,
 	is_key boolean default FALSE not null,
 	is_filter boolean default FALSE not null,
+	is_partition boolean default FALSE not null,
 	constraint source_object_attribute_lkup_udx01
 		unique (source_object_id, source_object_attribute_name),
 	constraint source_object_attribute_lkup_fk01
