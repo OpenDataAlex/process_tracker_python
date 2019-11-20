@@ -781,7 +781,8 @@ create table process_tracker.source_object_attribute_lkup
 	default_value_string varchar(250),
 	default_value_number numeric,
 	is_key boolean default false not null,
-	is_filter boolean default false not null
+	is_filter boolean default false not null,
+	is_partition boolean default false not null
 );
 
 alter table process_tracker.source_object_attribute_lkup owner to pt_admin;
