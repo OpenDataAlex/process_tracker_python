@@ -754,3 +754,61 @@ class TestExtractTracker(unittest.TestCase):
             ExtractTracker(process_run=self.extract.process_run)
 
         return self.assertTrue("Filename must be provided." in str(context.exception))
+
+    def test_file_size_splitter_bytes(self):
+        """
+        Testing that if provided a file size in bytes, the file size in GB will be returned.
+        :return:
+        """
+        given_result = self.extract.file_size_splitter(file_size="1048576B")
+        given_result = {given_result[0], given_result[1]}
+        expected_result = {1, "GB"}
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_file_size_splitter_mb(self):
+        """
+        Testing that if provided a file size in MB, the file size will not be modified.
+        :return:
+        """
+        given_result = self.extract.file_size_splitter(file_size="1024MB")
+        given_result = {given_result[0], given_result[1]}
+        expected_result = {1024, "MB"}
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_file_size_splitter_gb(self):
+        """
+        Testing that if provided a file size in GB, the file size will not be modified.
+        :return:
+        """
+        given_result = self.extract.file_size_splitter(file_size="50GB")
+        given_result = {given_result[0], given_result[1]}
+        expected_result = {50, "GB"}
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_file_size_splitter_no_measure(self):
+        """
+        Testing that if provided a file size without a measure, the file size will be assumed to be bytes and returned
+        in GB.
+        :return:
+        """
+        given_result = self.extract.file_size_splitter(file_size="1048576")
+        given_result = {given_result[0], given_result[1]}
+        expected_result = {1, "GB"}
+
+        self.assertEqual(expected_result, given_result)
+
+    def test_file_size_splitter_invalid_measure(self):
+        """
+        Testing that if provided a file size with an invalid measure, an exception will be thrown.
+        :return:
+        """
+        with self.assertRaises(Exception) as context:
+            self.extract.file_size_splitter(file_size="1024ZXB")
+
+        self.assertTrue(
+            "Unsupported measure detected. Please provide file size in bytes, MB, or GB.  Measure provided was: ZXB"
+            in str(context.exception)
+        )

@@ -136,6 +136,19 @@ create table location_lkup
 		foreign key (location_type_id) references location_type_lkup (location_type_id)
 );
 
+create table process_tracker.filesize_type_lkup
+(
+	filesize_type_id int auto_increment
+		primary key,
+	filesize_type_name varchar(75) not null,
+	filesize_type_code char(2) not null,
+	constraint filesize_type_lkup_filesize_type_code_uindex
+		unique (filesize_type_code),
+	constraint filesize_type_lkup_filesize_type_name_uindex
+		unique (filesize_type_name),
+	constraint filesize_type_lkup_udx01
+		unique (filesize_type_code, filesize_type_name)
+);
 
 create table extract_tracking
 (
@@ -153,6 +166,8 @@ create table extract_tracking
 	extract_load_record_count int null comment 'The record count of the data set when loading the data file.',
 	extract_compression_type_id int null,
 	extract_filetype_id int null,
+	extract_filesize numeric null,
+	extract_filesize_type_id int null,
 	constraint extract_filename
 		unique (extract_filename),
 	constraint extract_tracking_fk03
@@ -162,7 +177,9 @@ create table extract_tracking
 	constraint extract_tracking_ibfk_1
 		foreign key (extract_location_id) references process_tracker.location_lkup (location_id),
 	constraint extract_tracking_ibfk_2
-		foreign key (extract_status_id) references process_tracker.extract_status_lkup (extract_status_id)
+		foreign key (extract_status_id) references process_tracker.extract_status_lkup (extract_status_id),
+	constraint extract_tracking_fk06
+        foreign key (extract_filesize_type_id) references process_tracker.filesize_type_lkup (filesize_type_id)
 );
 
 create index extract_location_id
