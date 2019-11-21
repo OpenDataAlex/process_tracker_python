@@ -138,22 +138,17 @@ create table location_lkup
 
 create table process_tracker.filesize_type_lkup
 (
-	filesize_type_id serial not null,
-		constraint filesize_type_lkup_pk
-			primary key,
+	filesize_type_id int auto_increment
+		primary key,
 	filesize_type_name varchar(75) not null,
-	filesize_type_code char(2) not null
+	filesize_type_code char(2) not null,
+	constraint filesize_type_lkup_filesize_type_code_uindex
+		unique (filesize_type_code),
+	constraint filesize_type_lkup_filesize_type_name_uindex
+		unique (filesize_type_name),
+	constraint filesize_type_lkup_udx01
+		unique (filesize_type_code, filesize_type_name)
 );
-
-create unique index filesize_type_lkup_filesize_type_code_uindex
-	on process_tracker.filesize_type_lkup (filesize_type_code);
-
-create unique index filesize_type_lkup_filesize_type_name_uindex
-	on process_tracker.filesize_type_lkup (filesize_type_name);
-
-create unique index filesize_type_lkup_udx03
-	on process_tracker.filesize_type_lkup (filesize_type_code, filesize_type_name);
-
 
 create table extract_tracking
 (

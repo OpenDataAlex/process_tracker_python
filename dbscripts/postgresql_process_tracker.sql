@@ -4,7 +4,7 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
-create table process_tracker.character_set_lkup
+create table character_set_lkup
 (
 	character_set_id serial not null
 		constraint character_set_lkup_pk
@@ -12,12 +12,12 @@ create table process_tracker.character_set_lkup
 	character_set_name varchar(75) not null
 );
 
-alter table process_tracker.character_set_lkup owner to pt_admin;
+alter table character_set_lkup owner to pt_admin;
 
 create unique index character_set_lkup_character_set_name_uindex
-	on process_tracker.character_set_lkup (character_set_name);
+	on character_set_lkup (character_set_name);
 
-create table process_tracker.source_type_lkup
+create table source_type_lkup
 (
 	source_type_id serial not null
 		constraint source_type_lkup_pk
@@ -25,10 +25,10 @@ create table process_tracker.source_type_lkup
 	source_type_name varchar(75) not null
 );
 
-alter table process_tracker.source_type_lkup owner to pt_admin;
+alter table source_type_lkup owner to pt_admin;
 
 create unique index source_type_lkup_source_type_name_uindex
-	on process_tracker.source_type_lkup (source_type_name);
+	on source_type_lkup (source_type_name);
 
 create table schedule_frequency_lkup
 (
@@ -58,7 +58,7 @@ create unique index data_type_lkup_data_type_uindex
 
 
 
-create table process_tracker.extract_filetype_lkup
+create table extract_filetype_lkup
 (
 	extract_filetype_id serial not null
 		constraint extract_filetype_lkup_pk
@@ -70,20 +70,20 @@ create table process_tracker.extract_filetype_lkup
 	escape_char char
 );
 
-alter table process_tracker.extract_filetype_lkup owner to pt_admin;
+alter table extract_filetype_lkup owner to pt_admin;
 
 create unique index extract_filetype_lkup_extract_filetype_uindex
-	on process_tracker.extract_filetype_lkup (extract_filetype);
+	on extract_filetype_lkup (extract_filetype);
 
 
 
 
 create unique index data_type_lkup_data_type_uindex
-	on process_tracker.data_type_lkup (data_type);
+	on data_type_lkup (data_type);
 
 
 
-create table process_tracker.contact_lkup
+create table contact_lkup
 (
 	contact_id serial not null
 		constraint contact_lkup_pk
@@ -92,15 +92,15 @@ create table process_tracker.contact_lkup
 	contact_email varchar(750)
 );
 
-alter table process_tracker.contact_lkup owner to pt_admin;
+alter table contact_lkup owner to pt_admin;
 
 create unique index contact_lkup_contact_email_uindex
-	on process_tracker.contact_lkup (contact_email);
+	on contact_lkup (contact_email);
 
 create unique index contact_lkup_contact_name_uindex
-	on process_tracker.contact_lkup (contact_name);
+	on contact_lkup (contact_name);
 
-create table process_tracker.dataset_type_lkup
+create table dataset_type_lkup
 (
 	dataset_type_id serial not null
 		constraint dataset_type_lkup_pk
@@ -108,12 +108,12 @@ create table process_tracker.dataset_type_lkup
 	dataset_type varchar(250)
 );
 
-comment on table process_tracker.dataset_type_lkup is 'High level of dataset type categories';
+comment on table dataset_type_lkup is 'High level of dataset type categories';
 
-alter table process_tracker.dataset_type_lkup owner to pt_admin;
+alter table dataset_type_lkup owner to pt_admin;
 
 create unique index dataset_type_lkup_dataset_type_uindex
-	on process_tracker.dataset_type_lkup (dataset_type);
+	on dataset_type_lkup (dataset_type);
 
 
 create table error_type_lkup
@@ -172,7 +172,7 @@ alter table tool_lkup owner to pt_admin;
 create unique index tool_lkup_tool_udx01
 	on tool_lkup (tool_name);
 
-create table process_tracker.source_lkup
+create table source_lkup
 (
 	source_id serial not null
 		constraint source_lkup_pk
@@ -180,18 +180,18 @@ create table process_tracker.source_lkup
 	source_name varchar(250) not null,
 	source_type_id integer
 		constraint source_lkup_fk01
-			references process_tracker.source_type_lkup,
+			references source_type_lkup,
 	character_set_id integer
 		constraint source_lkup_fk02
-			references process_tracker.character_set_lkup
+			references character_set_lkup
 );
 
-comment on table process_tracker.source_lkup is 'Source system where data originates.';
+comment on table source_lkup is 'Source system where data originates.';
 
-alter table process_tracker.source_lkup owner to pt_admin;
+alter table source_lkup owner to pt_admin;
 
 create unique index source_lkup_udx01
-	on process_tracker.source_lkup (source_name);
+	on source_lkup (source_name);
 
 create table process_status_lkup
 (
@@ -225,7 +225,7 @@ alter table process_type_lkup owner to pt_admin;
 create unique index process_type_lkup_udx01
 	on process_type_lkup (process_type_name);
 
-create table process_tracker.filter_type_lkup
+create table filter_type_lkup
 (
 	filter_type_id serial not null
 		constraint filter_type_lkup_pk
@@ -234,16 +234,16 @@ create table process_tracker.filter_type_lkup
 	filter_type_name varchar(75) not null
 );
 
-alter table process_tracker.filter_type_lkup owner to pt_admin;
+alter table filter_type_lkup owner to pt_admin;
 
 create unique index filter_type_lkup_filter_type_code_uindex
-	on process_tracker.filter_type_lkup (filter_type_code);
+	on filter_type_lkup (filter_type_code);
 
 create unique index filter_type_lkup_filter_type_name_uindex
-	on process_tracker.filter_type_lkup (filter_type_name);
+	on filter_type_lkup (filter_type_name);
 
 
-create table process_tracker.process
+create table process
 (
 	process_id serial not null
 		constraint process_pk
@@ -252,32 +252,32 @@ create table process_tracker.process
 	total_record_count integer default 0 not null,
 	process_type_id integer
 		constraint process_fk02
-			references process_tracker.process_type_lkup,
+			references process_type_lkup,
 	process_tool_id integer
 		constraint process_fk03
-			references process_tracker.tool_lkup,
+			references tool_lkup,
 	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
 	schedule_frequency_id integer default 0 not null
 		constraint process_fk04
-			references process_tracker.schedule_frequency_lkup
+			references schedule_frequency_lkup
 );
 
-comment on table process_tracker.process is 'Processes being tracked';
+comment on table process is 'Processes being tracked';
 
-comment on column process_tracker.process.process_name is 'Unique name for process.';
+comment on column process.process_name is 'Unique name for process.';
 
-comment on column process_tracker.process.total_record_count is 'Total number of records processed over all runs of process.';
+comment on column process.total_record_count is 'Total number of records processed over all runs of process.';
 
-comment on column process_tracker.process.process_type_id is 'The type of process being tracked.';
+comment on column process.process_type_id is 'The type of process being tracked.';
 
-comment on column process_tracker.process.process_tool_id is 'The type of tool used to execute the process.';
+comment on column process.process_tool_id is 'The type of tool used to execute the process.';
 
-comment on column process_tracker.process.last_failed_run_date_time is 'The last time the process failed to run.';
+comment on column process.last_failed_run_date_time is 'The last time the process failed to run.';
 
-alter table process_tracker.process owner to pt_admin;
+alter table process owner to pt_admin;
 
 create unique index process_udx01
-	on process_tracker.process (process_name);
+	on process (process_name);
 
 create table process_dependency
 (
@@ -424,7 +424,7 @@ create unique index location_lkup_udx01
 create unique index location_lkup_udx02
 	on location_lkup (location_path);
 
-create table process_tracker.extract_compression_type_lkup
+create table extract_compression_type_lkup
 (
 	extract_compression_type_id serial not null
 		constraint extract_compression_type_lkup_pk
@@ -432,13 +432,13 @@ create table process_tracker.extract_compression_type_lkup
 	extract_compression_type varchar(25) not null
 );
 
-alter table process_tracker.extract_compression_type_lkup owner to pt_admin;
+alter table extract_compression_type_lkup owner to pt_admin;
 
 create unique index extract_compression_type_lkup_extract_compression_type_uindex
-	on process_tracker.extract_compression_type_lkup (extract_compression_type);
+	on extract_compression_type_lkup (extract_compression_type);
 
 
-create table process_tracker.filesize_type_lkup
+create table filesize_type_lkup
 (
 	filesize_type_id serial not null
 		constraint filesize_type_lkup_pk
@@ -447,16 +447,16 @@ create table process_tracker.filesize_type_lkup
 	filesize_type_code char(2) not null
 );
 
-alter table process_tracker.filesize_type_lkup owner to pt_admin;
+alter table filesize_type_lkup owner to pt_admin;
 
 create unique index filesize_type_lkup_filesize_type_code_uindex
-	on process_tracker.filesize_type_lkup (filesize_type_code);
+	on filesize_type_lkup (filesize_type_code);
 
 create unique index filesize_type_lkup_filesize_type_name_uindex
-	on process_tracker.filesize_type_lkup (filesize_type_name);
+	on filesize_type_lkup (filesize_type_name);
 
 create unique index filesize_type_lkup_udx03
-	on process_tracker.filesize_type_lkup (filesize_type_code, filesize_type_name);
+	on filesize_type_lkup (filesize_type_code, filesize_type_name);
 
 
 create table extract_tracking
@@ -487,7 +487,7 @@ create table extract_tracking
 	extract_filesize numeric,
 	extract_filesize_type_id integer
 		constraint extract_tracking_fk06
-			references process_tracker.filesize_type_lkup,
+			references filesize_type_lkup,
 	extract_filetype_id integer
 		constraint extract_tracking_fk05
 			references extract_filetype_lkup
@@ -640,122 +640,122 @@ comment on table cluster_process is 'Relationship tracking between processes and
 
 alter table cluster_process owner to pt_admin;
 
-create table process_tracker.source_object_lkup
+create table source_object_lkup
 (
 	source_object_id serial not null
 		constraint source_object_lkup_pk
 			primary key,
 	source_id integer not null
 		constraint source_object_lkup_fk01
-			references process_tracker.source_lkup,
+			references source_lkup,
 	source_object_name varchar(250),
 	character_set_id integer
 		constraint source_object_lkup_fk02
-			references process_tracker.character_set_lkup
+			references character_set_lkup
 );
 
-comment on table process_tracker.source_object_lkup is 'Reference table for source/target objects.';
+comment on table source_object_lkup is 'Reference table for source/target objects.';
 
-alter table process_tracker.source_object_lkup owner to pt_admin;
+alter table source_object_lkup owner to pt_admin;
 
 create unique index source_object_lkup_udx01
-	on process_tracker.source_object_lkup (source_id, source_object_name);
+	on source_object_lkup (source_id, source_object_name);
 
-create table process_tracker.process_target_object
+create table process_target_object
 (
 	process_id integer not null
 		constraint process_target_object_fk01
-			references process_tracker.process,
+			references process,
 	target_object_id integer not null
 		constraint process_target_object_fk02
-			references process_tracker.source_object_lkup,
+			references source_object_lkup,
 	constraint process_target_object_pk
 		primary key (process_id, target_object_id)
 );
 
-comment on table process_tracker.process_target_object is 'Relationship between processes and target objects';
+comment on table process_target_object is 'Relationship between processes and target objects';
 
-alter table process_tracker.process_target_object owner to pt_admin;
+alter table process_target_object owner to pt_admin;
 
-create table process_tracker.process_source_object
+create table process_source_object
 (
 	process_id integer not null
 		constraint process_source_object_fk01
-			references process_tracker.process,
+			references process,
 	source_object_id integer not null
 		constraint process_source_object_fk02
-			references process_tracker.source_object_lkup,
+			references source_object_lkup,
 	constraint process_source_object_pk
 		primary key (process_id, source_object_id)
 );
 
-comment on table process_tracker.process_source_object is 'Relationship between processes and source objects';
+comment on table process_source_object is 'Relationship between processes and source objects';
 
-alter table process_tracker.process_source_object owner to pt_admin;
+alter table process_source_object owner to pt_admin;
 
-create table process_tracker.extract_dataset_type
+create table extract_dataset_type
 (
 	extract_id integer not null
 		constraint extract_dataset_type_fk01
-			references process_tracker.extract_tracking,
+			references extract_tracking,
 	dataset_type_id integer not null
 		constraint extract_dataset_type_fk02
-			references process_tracker.dataset_type_lkup,
+			references dataset_type_lkup,
 	constraint extract_dataset_type_pk
 		primary key (extract_id, dataset_type_id)
 );
 
-comment on table process_tracker.extract_dataset_type is 'Relationship between extract file and dataset type';
+comment on table extract_dataset_type is 'Relationship between extract file and dataset type';
 
-alter table process_tracker.extract_dataset_type owner to pt_admin;
+alter table extract_dataset_type owner to pt_admin;
 
-create table process_tracker.process_dataset_type
+create table process_dataset_type
 (
 	process_id integer not null
 		constraint process_dataset_type_fk01
-			references process_tracker.process,
+			references process,
 	dataset_type_id integer not null
 		constraint process_dataset_type_fk02
-			references process_tracker.dataset_type_lkup,
+			references dataset_type_lkup,
 	constraint process_dataset_type_pk
 		primary key (process_id, dataset_type_id)
 );
 
-comment on table process_tracker.process_dataset_type is 'Relationship between process and dataset type';
+comment on table process_dataset_type is 'Relationship between process and dataset type';
 
-alter table process_tracker.process_dataset_type owner to pt_admin;
+alter table process_dataset_type owner to pt_admin;
 
-create table process_tracker.source_dataset_type
+create table source_dataset_type
 (
 	source_id integer not null
 		constraint source_dataset_type_fk01
-			references process_tracker.source_lkup,
+			references source_lkup,
 	dataset_type_id integer not null
 		constraint source_dataset_type_fk02
-			references process_tracker.dataset_type_lkup,
+			references dataset_type_lkup,
 	constraint source_dataset_type_pk
 		primary key (source_id, dataset_type_id)
 );
 
-comment on table process_tracker.source_dataset_type is 'Relationship between source and dataset type';
+comment on table source_dataset_type is 'Relationship between source and dataset type';
 
-alter table process_tracker.source_dataset_type owner to pt_admin;
+alter table source_dataset_type owner to pt_admin;
 
-create table process_tracker.source_object_dataset_type
+create table source_object_dataset_type
 (
 	source_object_id integer not null
 		constraint source_object_dataset_type_fk01
-			references process_tracker.source_object_lkup,
+			references source_object_lkup,
 	dataset_type_id integer not null
 		constraint source_object_dataset_type_fk02
-			references process_tracker.dataset_type_lkup,
+			references dataset_type_lkup,
 	constraint source_object_dataset_type_pk
 		primary key (source_object_id, dataset_type_id)
 );
 
-comment on table process_tracker.source_object_dataset_type is 'Relationship between source object and dataset type';
+comment on table source_object_dataset_type is 'Relationship between source object and dataset type';
 
-alter table process_tracker.source_object_dataset_type owner to pt_admin;
+alter table source_object_dataset_type owner to pt_admin;
 
 
 create table source_contact
@@ -786,7 +786,7 @@ create table process_contact
 
 alter table process_contact owner to pt_admin;
 
-create table process_tracker.source_object_attribute_lkup
+create table source_object_attribute_lkup
 (
 	source_object_attribute_id serial not null
 		constraint source_object_attribute_lkup_pk
@@ -794,11 +794,11 @@ create table process_tracker.source_object_attribute_lkup
 	source_object_attribute_name varchar(250) not null,
 	source_object_id integer
 		constraint source_object_attribute_lkup_fk01
-			references process_tracker.source_object_lkup,
+			references source_object_lkup,
 	attribute_path varchar(750),
 	data_type_id integer
 		constraint source_object_attribute_lkup_fk02
-			references process_tracker.data_type_lkup,
+			references data_type_lkup,
 	data_length integer,
 	data_decimal integer,
 	is_pii boolean default false not null,
@@ -808,120 +808,120 @@ create table process_tracker.source_object_attribute_lkup
 	is_filter boolean default false not null
 );
 
-alter table process_tracker.source_object_attribute_lkup owner to pt_admin;
+alter table source_object_attribute_lkup owner to pt_admin;
 
 create unique index source_object_attribute_lkup_udx01
-	on process_tracker.source_object_attribute_lkup (source_object_id, source_object_attribute_name);
+	on source_object_attribute_lkup (source_object_id, source_object_attribute_name);
 
-create table process_tracker.process_target_object_attribute
+create table process_target_object_attribute
 (
 	process_id integer not null
 		constraint process_target_object_attribute_fk01
-			references process_tracker.process,
+			references process,
 	target_object_attribute_id integer not null
 		constraint process_target_object_attribute_fk02
-			references process_tracker.source_object_attribute_lkup,
+			references source_object_attribute_lkup,
 	target_object_attribute_alias varchar(250),
 	target_object_attribute_expression varchar(250),
 	constraint process_target_object_attribute_pk
 		primary key (process_id, target_object_attribute_id)
 );
 
-alter table process_tracker.process_target_object_attribute owner to pt_admin;
+alter table process_target_object_attribute owner to pt_admin;
 
-create table process_tracker.process_source_object_attribute
+create table process_source_object_attribute
 (
 	process_id integer not null
 		constraint process_source_object_attribute_fk01
-			references process_tracker.process,
+			references process,
 	source_object_attribute_id integer not null
 		constraint process_source_object_attribute_fk02
-			references process_tracker.source_object_attribute_lkup,
+			references source_object_attribute_lkup,
 	source_object_attribute_alias varchar(250),
 	source_object_attribute_expression varchar(250),
 	constraint process_source_object_attribute_pk
 		primary key (process_id, source_object_attribute_id)
 );
 
-alter table process_tracker.process_source_object_attribute owner to pt_admin;
+alter table process_source_object_attribute owner to pt_admin;
 
 
-create table process_tracker.process_filter
+create table process_filter
 (
 	process_filter_id serial not null
 		constraint process_filter_pk
 			primary key,
 	process_id integer not null
 		constraint process_filter_fk01
-			references process_tracker.process,
+			references process,
 	source_object_attribute_id integer not null
 		constraint process_filter_fk02
-			references process_tracker.source_object_attribute_lkup,
+			references source_object_attribute_lkup,
 	filter_type_id integer not null
 		constraint process_filter_fk03
-			references process_tracker.filter_type_lkup,
+			references filter_type_lkup,
 	filter_value_string varchar(250),
 	filter_value_numeric numeric
 );
 
-alter table process_tracker.process_filter owner to pt_admin;
+alter table process_filter owner to pt_admin;
 
 create unique index process_filter_udx01
-	on process_tracker.process_filter (process_id, source_object_attribute_id, filter_type_id);
+	on process_filter (process_id, source_object_attribute_id, filter_type_id);
 
-create table process_tracker.extract_source
+create table extract_source
 (
 	extract_id integer not null
 		constraint extract_source_fk02
-			references process_tracker.extract_tracking,
+			references extract_tracking,
 	source_id integer not null
 		constraint extract_source_fk01
-			references process_tracker.source_lkup,
+			references source_lkup,
 	constraint extract_source_pk
 		primary key (extract_id, source_id)
 );
 
-alter table process_tracker.extract_source owner to pt_admin;
+alter table extract_source owner to pt_admin;
 
-create table process_tracker.extract_source_object
+create table extract_source_object
 (
 	extract_id integer not null
 		constraint extract_source_object_fk01
-			references process_tracker.extract_tracking,
+			references extract_tracking,
 	source_object_id integer not null
 		constraint extract_source_object_fk02
-			references process_tracker.source_object_lkup,
+			references source_object_lkup,
 	constraint extract_source_object_pk
 		primary key (extract_id, source_object_id)
 );
 
-alter table process_tracker.extract_source_object owner to pt_admin;
+alter table extract_source_object owner to pt_admin;
 
-create table process_tracker.source_object_location
+create table source_object_location
 (
 	source_object_id integer not null
 		constraint source_object_location_fk01
-			references process_tracker.source_object_lkup,
+			references source_object_lkup,
 	location_id integer not null
 		constraint source_object_location_fk02
-			references process_tracker.location_lkup,
+			references location_lkup,
 	constraint source_object_location_pk
 		primary key (source_object_id, location_id)
 );
 
-alter table process_tracker.source_object_location owner to pt_admin;
+alter table source_object_location owner to pt_admin;
 
-create table process_tracker.source_location
+create table source_location
 (
 	source_id integer not null
 		constraint source_location_fk01
-			references process_tracker.source_lkup,
+			references source_lkup,
 	location_id integer not null
 		constraint source_location_fk02
-			references process_tracker.location_lkup,
+			references location_lkup,
 	constraint source_location_pk
 		primary key (source_id, location_id)
 );
 
-alter table process_tracker.source_location owner to pt_admin;
+alter table source_location owner to pt_admin;
 
