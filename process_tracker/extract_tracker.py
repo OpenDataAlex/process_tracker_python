@@ -1,6 +1,7 @@
 # Extract Tracking
 # Used in the creation and editing of extract records.  Used in conjunction with process tracking.
 from datetime import datetime
+import itertools
 import logging
 import os
 from pathlib import Path
@@ -43,6 +44,7 @@ class ExtractTracker:
         filetype=None,
         config_location=None,
         extract_id=None,
+        file_size=None,
     ):
         """
         ExtractTracker is the primary engine for tracking data extracts
@@ -68,6 +70,8 @@ class ExtractTracker:
         :param extract_id: If trying to work with a specific extract that's in process, provide the id and it will be
         reconstructed.
         :type extract_id: int
+        :param file_size: The size of the file (i.e. 2.21MB)
+        :type file_size: str
         """
         log_level = SettingsManager(
             config_location=config_location
@@ -113,6 +117,18 @@ class ExtractTracker:
             self.dataset_types = self.get_dataset_types()
             self.extract_process = self.retrieve_extract_process()
             self.sources = self.extract.extract_sources
+
+            if (
+                self.extract.extract_filesize is not None
+                and self.extract.extract_filesize_type is not None
+            ):
+
+                self.file_size = "%s %s" % (
+                    self.extract.extract_filesize,
+                    self.extract.extract_filesize_type,
+                )
+            else:
+                self.file_size = None
 
         else:
             if filename is None:
@@ -229,6 +245,14 @@ class ExtractTracker:
             else:
                 self.logger.info("Status was not provided.  Initializing.")
                 self.extract.extract_status_id = self.extract_status_initializing
+
+            if file_size is not None:
+                split_filesize = self.file_size_splitter(file_size=file_size)
+
+                self.extract.extract_filesize = split_filesize[0]
+                self.extract.extract_filesize_type = split_filesize[1]
+
+            self.file_size = file_size
 
             self.session.commit()
 
@@ -381,6 +405,47 @@ class ExtractTracker:
 
         else:
             return False
+
+    def file_size_splitter(self, file_size):
+        """
+        Take provided file size and split the amount from the measure.
+        :param file_size: The provided file size with measure (i.e. 2.2GB)
+        :type file_size: str
+        :return:
+        """
+        file_size_split = dict()
+
+        amount = "".join(itertools.takewhile(str.isdigit, file_size))
+        self.logger.debug("Amount is now: %s" % amount)
+        measure = "".join([i for i in file_size if not i.isdigit() and i != "."])
+        self.logger.debug("Measure is: %s" % measure)
+        amount = int(amount)
+        self.logger.debug("Amount is now: %s" % amount)
+        if (
+            measure == "bytes"
+            or measure.lower() == "b"
+            or measure == ""
+            or measure is None
+        ):
+            amount = amount / 1048576  # converting bytes to gb
+            measure = "GB"
+        elif measure.lower() == "mb":
+
+            measure = "MB"
+        elif measure.lower() == "gb":
+            measure = "GB"
+        else:
+            error_msg = (
+                "Unsupported measure detected. Please provide file size in bytes, MB, or GB.  "
+                "Measure provided was: %s" % measure
+            )
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
+
+        file_size_split[0] = amount
+        file_size_split[1] = measure
+
+        return file_size_split
 
     def get_dataset_types(self):
         """

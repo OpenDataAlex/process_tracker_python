@@ -44,3 +44,8 @@ INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, 
 INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (6, 'not', 'not equal');
 INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (7, 'lke', 'like');
 INSERT INTO process_tracker.filter_type_lkup (filter_type_id, filter_type_code, filter_type_name) VALUES (8, 'in', 'in set');
+
+INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (1, 'kilobytes', 'KB');
+INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (2, 'megabytes', 'MB');
+INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (3, 'gigabytes', 'GB');
+INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (4, 'bytes', 'B ');

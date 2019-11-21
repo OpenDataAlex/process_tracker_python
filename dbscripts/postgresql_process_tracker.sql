@@ -438,6 +438,26 @@ create unique index extract_compression_type_lkup_extract_compression_type_uinde
 	on process_tracker.extract_compression_type_lkup (extract_compression_type);
 
 
+create table process_tracker.filesize_type_lkup
+(
+	filesize_type_id serial not null
+		constraint filesize_type_lkup_pk
+			primary key,
+	filesize_type_name varchar(75) not null,
+	filesize_type_code char(2) not null
+);
+
+alter table process_tracker.filesize_type_lkup owner to pt_admin;
+
+create unique index filesize_type_lkup_filesize_type_code_uindex
+	on process_tracker.filesize_type_lkup (filesize_type_code);
+
+create unique index filesize_type_lkup_filesize_type_name_uindex
+	on process_tracker.filesize_type_lkup (filesize_type_name);
+
+create unique index filesize_type_lkup_udx03
+	on process_tracker.filesize_type_lkup (filesize_type_code, filesize_type_name);
+
 
 create table extract_tracking
 (
@@ -461,9 +481,13 @@ create table extract_tracking
 	extract_load_low_date_time timestamp,
 	extract_load_high_date_time timestamp,
 	extract_load_record_count integer,
-	extract_compression_type_id integer
+	extract_compression_type_id integer,
 		constraint extract_tracking_fk04
 			references extract_compression_type_lkup,
+	extract_filesize numeric,
+	extract_filesize_type_id integer
+		constraint extract_tracking_fk06
+			references process_tracker.filesize_type_lkup,
 	extract_filetype_id integer
 		constraint extract_tracking_fk05
 			references extract_filetype_lkup
