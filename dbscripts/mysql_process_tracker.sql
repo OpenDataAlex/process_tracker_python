@@ -179,7 +179,7 @@ create table extract_tracking
 	constraint extract_tracking_ibfk_2
 		foreign key (extract_status_id) references process_tracker.extract_status_lkup (extract_status_id),
 	constraint extract_tracking_fk06
-        foreign key (extract_filesize_type) references process_tracker.filesize_type_lkup (filesize_type_id)
+        foreign key (extract_filesize_type_id) references process_tracker.filesize_type_lkup (filesize_type_id)
 );
 
 create index extract_location_id

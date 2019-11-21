@@ -4,101 +4,9 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
-create table character_set_lkup
-(
-	character_set_id serial not null
-		constraint character_set_lkup_pk
-			primary key,
-	character_set_name varchar(75) not null
-);
+create schema process_tracker;
 
-alter table character_set_lkup owner to pt_admin;
-
-create unique index character_set_lkup_character_set_name_uindex
-	on character_set_lkup (character_set_name);
-
-create table source_type_lkup
-(
-	source_type_id serial not null
-		constraint source_type_lkup_pk
-			primary key,
-	source_type_name varchar(75) not null
-);
-
-alter table source_type_lkup owner to pt_admin;
-
-create unique index source_type_lkup_source_type_name_uindex
-	on source_type_lkup (source_type_name);
-
-create table schedule_frequency_lkup
-(
-	schedule_frequency_id serial not null
-		constraint schedule_frequency_lkup_pk
-			primary key,
-	schedule_frequency_name varchar(25) not null
-);
-
-alter table schedule_frequency_lkup owner to pt_admin;
-
-create unique index schedule_frequency_lkup_schedule_frequency_name_uindex
-	on schedule_frequency_lkup (schedule_frequency_name);
-
-create table data_type_lkup
-(
-	data_type_id serial not null
-		constraint data_type_lkup_pk
-			primary key,
-	data_type varchar(75) not null
-);
-
-alter table data_type_lkup owner to pt_admin;
-
-create unique index data_type_lkup_data_type_uindex
-	on data_type_lkup (data_type);
-
-
-
-create table extract_filetype_lkup
-(
-	extract_filetype_id serial not null
-		constraint extract_filetype_lkup_pk
-			primary key,
-	extract_filetype_code varchar(5) not null,
-	extract_filetype varchar(75) not null,
-	delimiter_char char,
-	quote_char char,
-	escape_char char
-);
-
-alter table extract_filetype_lkup owner to pt_admin;
-
-create unique index extract_filetype_lkup_extract_filetype_uindex
-	on extract_filetype_lkup (extract_filetype);
-
-
-
-
-create unique index data_type_lkup_data_type_uindex
-	on data_type_lkup (data_type);
-
-
-
-create table contact_lkup
-(
-	contact_id serial not null
-		constraint contact_lkup_pk
-			primary key,
-	contact_name varchar(250) not null,
-	contact_email varchar(750)
-);
-
-alter table contact_lkup owner to pt_admin;
-
-create unique index contact_lkup_contact_email_uindex
-	on contact_lkup (contact_email);
-
-create unique index contact_lkup_contact_name_uindex
-	on contact_lkup (contact_name);
+alter schema process_tracker owner to pt_admin;
 
 create table dataset_type_lkup
 (
@@ -114,7 +22,6 @@ alter table dataset_type_lkup owner to pt_admin;
 
 create unique index dataset_type_lkup_dataset_type_uindex
 	on dataset_type_lkup (dataset_type);
-
 
 create table error_type_lkup
 (
@@ -172,27 +79,6 @@ alter table tool_lkup owner to pt_admin;
 create unique index tool_lkup_tool_udx01
 	on tool_lkup (tool_name);
 
-create table source_lkup
-(
-	source_id serial not null
-		constraint source_lkup_pk
-			primary key,
-	source_name varchar(250) not null,
-	source_type_id integer
-		constraint source_lkup_fk01
-			references source_type_lkup,
-	character_set_id integer
-		constraint source_lkup_fk02
-			references character_set_lkup
-);
-
-comment on table source_lkup is 'Source system where data originates.';
-
-alter table source_lkup owner to pt_admin;
-
-create unique index source_lkup_udx01
-	on source_lkup (source_name);
-
 create table process_status_lkup
 (
 	process_status_id serial not null
@@ -225,23 +111,181 @@ alter table process_type_lkup owner to pt_admin;
 create unique index process_type_lkup_udx01
 	on process_type_lkup (process_type_name);
 
-create table filter_type_lkup
+create table actor_lkup
 (
-	filter_type_id serial not null
-		constraint filter_type_lkup_pk
+	actor_id serial not null
+		constraint actor_lkup_pk
 			primary key,
-	filter_type_code varchar(3) not null,
-	filter_type_name varchar(75) not null
+	actor_name varchar(250) not null
 );
 
-alter table filter_type_lkup owner to pt_admin;
+comment on table actor_lkup is 'List of developers or applications that can run processes.';
 
-create unique index filter_type_lkup_filter_type_code_uindex
-	on filter_type_lkup (filter_type_code);
+alter table actor_lkup owner to pt_admin;
 
-create unique index filter_type_lkup_filter_type_name_uindex
-	on filter_type_lkup (filter_type_name);
+create unique index actor_lkup_udx01
+	on actor_lkup (actor_name);
 
+create table extract_status_lkup
+(
+	extract_status_id serial not null
+		constraint extract_status_lkup_pk
+			primary key,
+	extract_status_name varchar(75) not null
+);
+
+comment on table extract_status_lkup is 'List of valid extract processing statuses.';
+
+alter table extract_status_lkup owner to pt_admin;
+
+create unique index extract_status_lkup_extract_status_name_uindex
+	on extract_status_lkup (extract_status_name);
+
+create table location_type_lkup
+(
+	location_type_id serial not null
+		constraint location_type_lkup_pk
+			primary key,
+	location_type_name varchar(25) not null
+);
+
+comment on table location_type_lkup is 'Listing of location types';
+
+alter table location_type_lkup owner to pt_admin;
+
+create unique index location_type_lkup_udx01
+	on location_type_lkup (location_type_name);
+
+create table location_lkup
+(
+	location_id serial not null
+		constraint location_lkup_pk
+			primary key,
+	location_name varchar(750) not null,
+	location_path varchar(750) not null,
+	location_type_id integer not null
+		constraint location_lkup_fk01
+			references location_type_lkup,
+	location_file_count integer,
+	location_bucket_name varchar(750)
+);
+
+comment on table location_lkup is 'Locations where files are located.';
+
+alter table location_lkup owner to pt_admin;
+
+create unique index location_lkup_udx01
+	on location_lkup (location_name);
+
+create unique index location_lkup_udx02
+	on location_lkup (location_path);
+
+create table system_lkup
+(
+	system_id serial not null
+		constraint system_lkup_pk
+			primary key,
+	system_key varchar(250) not null,
+	system_value varchar(250) not null
+);
+
+comment on table system_lkup is 'ProcessTracker system information';
+
+alter table system_lkup owner to pt_admin;
+
+create unique index system_lkup_system_key_uindex
+	on system_lkup (system_key);
+
+create table cluster_tracking_lkup
+(
+	cluster_id serial not null
+		constraint cluster_tracking_pk
+			primary key,
+	cluster_name varchar(250) not null,
+	cluster_max_memory integer,
+	cluster_max_memory_unit char(2),
+	cluster_max_processing integer,
+	cluster_max_processing_unit varchar(3),
+	cluster_current_memory_usage integer,
+	cluster_current_process_usage integer
+);
+
+comment on table cluster_tracking_lkup is 'Capacity cluster tracking';
+
+alter table cluster_tracking_lkup owner to pt_admin;
+
+create unique index cluster_tracking_cluster_name_uindex
+	on cluster_tracking_lkup (cluster_name);
+
+create table contact_lkup
+(
+	contact_id serial not null
+		constraint contact_lkup_pk
+			primary key,
+	contact_name varchar(250) not null,
+	contact_email varchar(750)
+);
+
+alter table contact_lkup owner to pt_admin;
+
+create unique index contact_lkup_contact_email_uindex
+	on contact_lkup (contact_email);
+
+create unique index contact_lkup_contact_name_uindex
+	on contact_lkup (contact_name);
+
+create table extract_compression_type_lkup
+(
+	extract_compression_type_id serial not null
+		constraint extract_compression_type_lkup_pk
+			primary key,
+	extract_compression_type varchar(25) not null
+);
+
+alter table extract_compression_type_lkup owner to pt_admin;
+
+create unique index extract_compression_type_lkup_extract_compression_type_uindex
+	on extract_compression_type_lkup (extract_compression_type);
+
+create table extract_filetype_lkup
+(
+	extract_filetype_id serial not null
+		constraint extract_filetype_lkup_pk
+			primary key,
+	extract_filetype_code varchar(5) not null,
+	extract_filetype varchar(75) not null,
+	delimiter_char char,
+	quote_char char,
+	escape_char char
+);
+
+alter table extract_filetype_lkup owner to pt_admin;
+
+create unique index extract_filetype_lkup_extract_filetype_uindex
+	on extract_filetype_lkup (extract_filetype);
+
+create table data_type_lkup
+(
+	data_type_id serial not null
+		constraint data_type_lkup_pk
+			primary key,
+	data_type varchar(75) not null
+);
+
+alter table data_type_lkup owner to pt_admin;
+
+create unique index data_type_lkup_data_type_uindex
+	on data_type_lkup (data_type);
+
+create table schedule_frequency_lkup
+(
+	schedule_frequency_id serial not null
+		constraint schedule_frequency_lkup_pk
+			primary key,
+	schedule_frequency_name varchar(25) not null
+);
+
+alter table schedule_frequency_lkup owner to pt_admin;
 
 create table process
 (
@@ -299,21 +343,6 @@ comment on column process_dependency.child_process_id is 'The child process.';
 
 alter table process_dependency owner to pt_admin;
 
-create table actor_lkup
-(
-	actor_id serial not null
-		constraint actor_lkup_pk
-			primary key,
-	actor_name varchar(250) not null
-);
-
-comment on table actor_lkup is 'List of developers or applications that can run processes.';
-
-alter table actor_lkup owner to pt_admin;
-
-create unique index actor_lkup_udx01
-	on actor_lkup (actor_name);
-
 create table process_tracking
 (
 	process_tracking_id serial not null
@@ -370,174 +399,115 @@ create index process_tracking_idx02
 create index process_tracking_idx03
 	on process_tracking (process_run_low_date_time, process_run_high_date_time);
 
-create table extract_status_lkup
+create table cluster_process
 (
-	extract_status_id serial not null
-		constraint extract_status_lkup_pk
+	cluster_id integer not null
+		constraint cluster_process_fk01
+			references cluster_tracking_lkup,
+	process_id integer not null
+		constraint cluster_process_fk02
+			references process,
+	constraint cluster_process_pk
+		primary key (cluster_id, process_id)
+);
+
+comment on table cluster_process is 'Relationship tracking between processes and performance clusters.';
+
+alter table cluster_process owner to pt_admin;
+
+create table process_dataset_type
+(
+	process_id integer not null
+		constraint process_dataset_type_fk01
+			references process,
+	dataset_type_id integer not null
+		constraint process_dataset_type_fk02
+			references dataset_type_lkup,
+	constraint process_dataset_type_pk
+		primary key (process_id, dataset_type_id)
+);
+
+comment on table process_dataset_type is 'Relationship between process and dataset type';
+
+alter table process_dataset_type owner to pt_admin;
+
+create table process_contact
+(
+	process_id integer not null
+		constraint process_contact_fk01
+			references process,
+	contact_id integer not null
+		constraint process_contact_fk02
+			references contact_lkup,
+	constraint process_contact_pk
+		primary key (process_id, contact_id)
+);
+
+alter table process_contact owner to pt_admin;
+
+create unique index schedule_frequency_lkup_schedule_frequency_name_uindex
+	on schedule_frequency_lkup (schedule_frequency_name);
+
+create table filter_type_lkup
+(
+	filter_type_id serial not null
+		constraint filter_type_lkup_pk
 			primary key,
-	extract_status_name varchar(75) not null
+	filter_type_code varchar(3) not null,
+	filter_type_name varchar(75) not null
 );
 
-comment on table extract_status_lkup is 'List of valid extract processing statuses.';
+alter table filter_type_lkup owner to pt_admin;
 
-alter table extract_status_lkup owner to pt_admin;
+create unique index filter_type_lkup_filter_type_code_uindex
+	on filter_type_lkup (filter_type_code);
 
-create unique index extract_status_lkup_extract_status_name_uindex
-	on extract_status_lkup (extract_status_name);
+create unique index filter_type_lkup_filter_type_name_uindex
+	on filter_type_lkup (filter_type_name);
 
-create table location_type_lkup
+create table source_type_lkup
 (
-	location_type_id serial not null
-		constraint location_type_lkup_pk
+	source_type_id serial not null
+		constraint source_type_lkup_pk
 			primary key,
-	location_type_name varchar(25) not null
+	source_type_name varchar(75) not null
 );
 
-comment on table location_type_lkup is 'Listing of location types';
+alter table source_type_lkup owner to pt_admin;
 
-alter table location_type_lkup owner to pt_admin;
+create unique index source_type_lkup_source_type_name_uindex
+	on source_type_lkup (source_type_name);
 
-create unique index location_type_lkup_udx01
-	on location_type_lkup (location_type_name);
-
-create table location_lkup
+create table character_set_lkup
 (
-	location_id serial not null
-		constraint location_lkup_pk
+	character_set_id serial not null
+		constraint character_set_lkup_pk
 			primary key,
-	location_name varchar(750) not null,
-	location_path varchar(750) not null,
-	location_type_id integer not null
-		constraint location_lkup_fk01
-			references location_type_lkup,
-	location_file_count integer null,
-    location_bucket_name varchar(750) null
+	character_set_name varchar(75) not null
 );
 
-comment on table location_lkup is 'Locations where files are located.';
+alter table character_set_lkup owner to pt_admin;
 
-alter table location_lkup owner to pt_admin;
-
-create unique index location_lkup_udx01
-	on location_lkup (location_name);
-
-create unique index location_lkup_udx02
-	on location_lkup (location_path);
-
-create table extract_compression_type_lkup
+create table source_lkup
 (
-	extract_compression_type_id serial not null
-		constraint extract_compression_type_lkup_pk
+	source_id serial not null
+		constraint source_lkup_pk
 			primary key,
-	extract_compression_type varchar(25) not null
+	source_name varchar(250) not null,
+	source_type_id integer
+		constraint source_lkup_fk01
+			references source_type_lkup,
+	character_set_id integer
+		constraint source_lkup_fk02
+			references character_set_lkup
 );
 
-alter table extract_compression_type_lkup owner to pt_admin;
+comment on table source_lkup is 'Source system where data originates.';
 
-create unique index extract_compression_type_lkup_extract_compression_type_uindex
-	on extract_compression_type_lkup (extract_compression_type);
+alter table source_lkup owner to pt_admin;
 
-
-create table filesize_type_lkup
-(
-	filesize_type_id serial not null
-		constraint filesize_type_lkup_pk
-			primary key,
-	filesize_type_name varchar(75) not null,
-	filesize_type_code char(2) not null
-);
-
-alter table filesize_type_lkup owner to pt_admin;
-
-create unique index filesize_type_lkup_filesize_type_code_uindex
-	on filesize_type_lkup (filesize_type_code);
-
-create unique index filesize_type_lkup_filesize_type_name_uindex
-	on filesize_type_lkup (filesize_type_name);
-
-create unique index filesize_type_lkup_udx03
-	on filesize_type_lkup (filesize_type_code, filesize_type_name);
-
-
-create table extract_tracking
-(
-	extract_id serial not null
-		constraint extract_tracking_pk
-			primary key,
-	extract_filename varchar(750) not null,
-	extract_location_id integer not null
-		constraint extract_tracking_fk01
-			references location_lkup,
-	extract_process_run_id integer
-		constraint extract_tracking_fk03
-			references process_tracking,
-	extract_status_id integer
-		constraint extract_tracking_fk02
-			references extract_status_lkup,
-	extract_registration_date_time timestamp not null,
-	extract_write_low_date_time timestamp,
-	extract_write_high_date_time timestamp,
-	extract_write_record_count integer,
-	extract_load_low_date_time timestamp,
-	extract_load_high_date_time timestamp,
-	extract_load_record_count integer,
-	extract_compression_type_id integer,
-		constraint extract_tracking_fk04
-			references extract_compression_type_lkup,
-	extract_filesize numeric,
-	extract_filesize_type_id integer
-		constraint extract_tracking_fk06
-			references filesize_type_lkup,
-	extract_filetype_id integer
-		constraint extract_tracking_fk05
-			references extract_filetype_lkup
-);
-
-comment on table extract_tracking is 'Tracking table for all extract/staging data files.';
-
-comment on column extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
-
-comment on column extract_tracking.extract_location_id is 'The location where the given extract can be found.';
-
-comment on column extract_tracking.extract_process_run_id is 'The process that registered or created the extract file.';
-
-comment on column extract_tracking.extract_status_id is 'The status of the extract.';
-
-comment on column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
-
-comment on column extract_tracking.extract_write_low_date_time is 'The lowest datetime of the data set as noted when writing the data file.';
-
-comment on column extract_tracking.extract_write_high_date_time is 'The highest datetime of the data set as noted when writing the data file.';
-
-comment on column extract_tracking.extract_write_record_count is 'The record count of the data set as noted when writing the data file.';
-
-comment on column extract_tracking.extract_load_low_date_time is 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.';
-
-comment on column extract_tracking.extract_load_high_date_time is 'The highest datetime of the data set as noted when loading the data file.';
-
-comment on column extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
-
-alter table extract_tracking owner to pt_admin;
-
-create table extract_process_tracking
-(
-	extract_tracking_id integer not null
-		constraint extract_process_tracking_fk01
-			references extract_tracking,
-	process_tracking_id integer not null
-		constraint extract_process_tracking_fk02
-			references process_tracking,
-	extract_process_event_date_time timestamp with time zone not null,
-	extract_process_status_id integer
-		constraint extract_process_tracking_fk03
-			references extract_status_lkup,
-	constraint extract_process_tracking_pk
-		primary key (process_tracking_id, extract_tracking_id)
-);
-
-comment on table extract_process_tracking is 'Showing which processes have impacted which extracts';
-
-alter table extract_process_tracking owner to pt_admin;
+create unique index source_lkup_udx01
+	on source_lkup (source_name);
 
 create table process_source
 (
@@ -570,75 +540,6 @@ create table process_target
 comment on table process_target is 'List of targets for given processes';
 
 alter table process_target owner to pt_admin;
-
-create table system_lkup
-(
-	system_id serial not null
-		constraint system_lkup_pk
-			primary key,
-	system_key varchar(250) not null,
-	system_value varchar(250) not null
-);
-
-comment on table system_lkup is 'ProcessTracker system information';
-
-alter table system_lkup owner to pt_admin;
-
-create unique index system_lkup_system_key_uindex
-	on system_lkup (system_key);
-
-create table extract_dependency
-(
-	parent_extract_id integer not null
-		constraint extract_dependency_fk01
-			references extract_tracking,
-	child_extract_id integer not null
-		constraint extract_dependency_fk02
-			references extract_tracking,
-	constraint extract_dependency_pk
-		primary key (parent_extract_id, child_extract_id)
-);
-
-comment on table extract_dependency is 'Table tracking interdependencies between extract files.';
-
-alter table extract_dependency owner to pt_admin;
-
-create table cluster_tracking_lkup
-(
-	cluster_id serial not null
-		constraint cluster_tracking_pk
-			primary key,
-	cluster_name varchar(250) not null,
-	cluster_max_memory integer null,
-	cluster_max_memory_unit char(2) null,
-	cluster_max_processing integer null,
-	cluster_max_processing_unit varchar(3) null,
-	cluster_current_memory_usage integer,
-	cluster_current_process_usage integer
-);
-
-comment on table cluster_tracking_lkup is 'Capacity cluster tracking';
-
-alter table cluster_tracking_lkup owner to pt_admin;
-
-create unique index cluster_tracking_cluster_name_uindex
-	on cluster_tracking_lkup (cluster_name);
-
-create table cluster_process
-(
-	cluster_id integer not null
-		constraint cluster_process_fk01
-			references cluster_tracking_lkup,
-	process_id integer not null
-		constraint cluster_process_fk02
-			references process,
-	constraint cluster_process_pk
-		primary key (cluster_id, process_id)
-);
-
-comment on table cluster_process is 'Relationship tracking between processes and performance clusters.';
-
-alter table cluster_process owner to pt_admin;
 
 create table source_object_lkup
 (
@@ -693,38 +594,6 @@ comment on table process_source_object is 'Relationship between processes and so
 
 alter table process_source_object owner to pt_admin;
 
-create table extract_dataset_type
-(
-	extract_id integer not null
-		constraint extract_dataset_type_fk01
-			references extract_tracking,
-	dataset_type_id integer not null
-		constraint extract_dataset_type_fk02
-			references dataset_type_lkup,
-	constraint extract_dataset_type_pk
-		primary key (extract_id, dataset_type_id)
-);
-
-comment on table extract_dataset_type is 'Relationship between extract file and dataset type';
-
-alter table extract_dataset_type owner to pt_admin;
-
-create table process_dataset_type
-(
-	process_id integer not null
-		constraint process_dataset_type_fk01
-			references process,
-	dataset_type_id integer not null
-		constraint process_dataset_type_fk02
-			references dataset_type_lkup,
-	constraint process_dataset_type_pk
-		primary key (process_id, dataset_type_id)
-);
-
-comment on table process_dataset_type is 'Relationship between process and dataset type';
-
-alter table process_dataset_type owner to pt_admin;
-
 create table source_dataset_type
 (
 	source_id integer not null
@@ -757,7 +626,6 @@ comment on table source_object_dataset_type is 'Relationship between source obje
 
 alter table source_object_dataset_type owner to pt_admin;
 
-
 create table source_contact
 (
 	source_id integer not null
@@ -772,32 +640,18 @@ create table source_contact
 
 alter table source_contact owner to pt_admin;
 
-create table process_contact
-(
-	process_id integer not null
-		constraint process_contact_fk01
-			references process,
-	contact_id integer not null
-		constraint process_contact_fk02
-			references contact_lkup,
-	constraint process_contact_pk
-		primary key (process_id, contact_id)
-);
-
-alter table process_contact owner to pt_admin;
-
 create table source_object_attribute_lkup
 (
 	source_object_attribute_id serial not null
-		constraint source_object_attribute_lkup_pk
+		constraint source_object_attribute_pk
 			primary key,
 	source_object_attribute_name varchar(250) not null,
 	source_object_id integer
-		constraint source_object_attribute_lkup_fk01
+		constraint source_object_attribute_fk01
 			references source_object_lkup,
 	attribute_path varchar(750),
 	data_type_id integer
-		constraint source_object_attribute_lkup_fk02
+		constraint source_object_attribute_fk02
 			references data_type_lkup,
 	data_length integer,
 	data_decimal integer,
@@ -805,29 +659,14 @@ create table source_object_attribute_lkup
 	default_value_string varchar(250),
 	default_value_number numeric,
 	is_key boolean default false not null,
-	is_filter boolean default false not null
+	is_filter boolean default false not null,
+	is_partition boolean default false not null
 );
 
 alter table source_object_attribute_lkup owner to pt_admin;
 
-create unique index source_object_attribute_lkup_udx01
+create unique index source_object_attribute_udx01
 	on source_object_attribute_lkup (source_object_id, source_object_attribute_name);
-
-create table process_target_object_attribute
-(
-	process_id integer not null
-		constraint process_target_object_attribute_fk01
-			references process,
-	target_object_attribute_id integer not null
-		constraint process_target_object_attribute_fk02
-			references source_object_attribute_lkup,
-	target_object_attribute_alias varchar(250),
-	target_object_attribute_expression varchar(250),
-	constraint process_target_object_attribute_pk
-		primary key (process_id, target_object_attribute_id)
-);
-
-alter table process_target_object_attribute owner to pt_admin;
 
 create table process_source_object_attribute
 (
@@ -845,6 +684,21 @@ create table process_source_object_attribute
 
 alter table process_source_object_attribute owner to pt_admin;
 
+create table process_target_object_attribute
+(
+	process_id integer not null
+		constraint process_target_object_attribute_fk01
+			references process,
+	target_object_attribute_id integer not null
+		constraint process_target_object_attribute_fk02
+			references source_object_attribute_lkup,
+	target_object_attribute_alias varchar(250),
+	target_object_attribute_expression varchar(250),
+	constraint process_target_object_attribute_pk
+		primary key (process_id, target_object_attribute_id)
+);
+
+alter table process_target_object_attribute owner to pt_admin;
 
 create table process_filter
 (
@@ -868,6 +722,160 @@ alter table process_filter owner to pt_admin;
 
 create unique index process_filter_udx01
 	on process_filter (process_id, source_object_attribute_id, filter_type_id);
+
+create table source_location
+(
+	source_id integer not null
+		constraint source_location_fk01
+			references source_lkup,
+	location_id integer not null
+		constraint source_location_fk02
+			references location_lkup,
+	constraint source_location_pk
+		primary key (source_id, location_id)
+);
+
+alter table source_location owner to pt_admin;
+
+create table source_object_location
+(
+	source_object_id integer not null
+		constraint source_object_location_fk01
+			references source_object_lkup,
+	location_id integer not null
+		constraint source_object_location_fk02
+			references location_lkup,
+	constraint source_object_location_pk
+		primary key (source_object_id, location_id)
+);
+
+alter table source_object_location owner to pt_admin;
+
+create unique index character_set_lkup_character_set_name_uindex
+	on character_set_lkup (character_set_name);
+
+create table filesize_type_lkup
+(
+	filesize_type_id serial not null
+		constraint filesize_type_lkup_pk
+			primary key,
+	filesize_type_name varchar(75) not null,
+	filesize_type_code char(2) not null
+);
+
+alter table filesize_type_lkup owner to pt_admin;
+
+create table extract_tracking
+(
+	extract_id serial not null
+		constraint extract_tracking_pk
+			primary key,
+	extract_filename varchar(750) not null,
+	extract_location_id integer not null
+		constraint extract_tracking_fk01
+			references location_lkup,
+	extract_process_run_id integer
+		constraint extract_tracking_fk03
+			references process_tracking,
+	extract_status_id integer
+		constraint extract_tracking_fk02
+			references extract_status_lkup,
+	extract_registration_date_time timestamp not null,
+	extract_write_low_date_time timestamp,
+	extract_write_high_date_time timestamp,
+	extract_write_record_count integer,
+	extract_load_low_date_time timestamp,
+	extract_load_high_date_time timestamp,
+	extract_load_record_count integer,
+	extract_compression_type_id integer
+		constraint extract_tracking_fk04
+			references extract_compression_type_lkup,
+	extract_filetype_id integer
+		constraint extract_tracking_fk05
+			references extract_filetype_lkup,
+	extract_filesize numeric,
+	extract_filesize_type_id integer
+		constraint extract_tracking_fk06
+			references filesize_type_lkup
+);
+
+comment on table extract_tracking is 'Tracking table for all extract/staging data files.';
+
+comment on column extract_tracking.extract_filename is 'The unique filename for a given extract from a given source.';
+
+comment on column extract_tracking.extract_location_id is 'The location where the given extract can be found.';
+
+comment on column extract_tracking.extract_process_run_id is 'The process that registered or created the extract file.';
+
+comment on column extract_tracking.extract_status_id is 'The status of the extract.';
+
+comment on column extract_tracking.extract_registration_date_time is 'The datetime that the extract was loaded into extract tracking.';
+
+comment on column extract_tracking.extract_write_low_date_time is 'The lowest datetime of the data set as noted when writing the data file.';
+
+comment on column extract_tracking.extract_write_high_date_time is 'The highest datetime of the data set as noted when writing the data file.';
+
+comment on column extract_tracking.extract_write_record_count is 'The record count of the data set as noted when writing the data file.';
+
+comment on column extract_tracking.extract_load_low_date_time is 'The lowest datetime of the data set as noted when loading the data file.  Should match the extract_write_low_date_time.';
+
+comment on column extract_tracking.extract_load_high_date_time is 'The highest datetime of the data set as noted when loading the data file.';
+
+comment on column extract_tracking.extract_load_record_count is 'The record count of the data set when loading the data file.';
+
+alter table extract_tracking owner to pt_admin;
+
+create table extract_process_tracking
+(
+	extract_tracking_id integer not null
+		constraint extract_process_tracking_fk01
+			references extract_tracking,
+	process_tracking_id integer not null
+		constraint extract_process_tracking_fk02
+			references process_tracking,
+	extract_process_event_date_time timestamp with time zone not null,
+	extract_process_status_id integer
+		constraint extract_process_tracking_fk03
+			references extract_status_lkup,
+	constraint extract_process_tracking_pk
+		primary key (process_tracking_id, extract_tracking_id)
+);
+
+comment on table extract_process_tracking is 'Showing which processes have impacted which extracts';
+
+alter table extract_process_tracking owner to pt_admin;
+
+create table extract_dependency
+(
+	parent_extract_id integer not null
+		constraint extract_dependency_fk01
+			references extract_tracking,
+	child_extract_id integer not null
+		constraint extract_dependency_fk02
+			references extract_tracking,
+	constraint extract_dependency_pk
+		primary key (parent_extract_id, child_extract_id)
+);
+
+comment on table extract_dependency is 'Table tracking interdependencies between extract files.';
+
+alter table extract_dependency owner to pt_admin;
+
+create table extract_dataset_type
+(
+	extract_id integer not null
+		constraint extract_dataset_type_fk01
+			references extract_tracking,
+	dataset_type_id integer not null
+		constraint extract_dataset_type_fk02
+			references dataset_type_lkup,
+	constraint extract_dataset_type_pk
+		primary key (extract_id, dataset_type_id)
+);
+
+comment on table extract_dataset_type is 'Relationship between extract file and dataset type';
+
+alter table extract_dataset_type owner to pt_admin;
 
 create table extract_source
 (
@@ -897,31 +905,12 @@ create table extract_source_object
 
 alter table extract_source_object owner to pt_admin;
 
-create table source_object_location
-(
-	source_object_id integer not null
-		constraint source_object_location_fk01
-			references source_object_lkup,
-	location_id integer not null
-		constraint source_object_location_fk02
-			references location_lkup,
-	constraint source_object_location_pk
-		primary key (source_object_id, location_id)
-);
+create unique index filesize_type_lkup_filesize_type_code_uindex
+	on filesize_type_lkup (filesize_type_code);
 
-alter table source_object_location owner to pt_admin;
+create unique index filesize_type_lkup_filesize_type_name_uindex
+	on filesize_type_lkup (filesize_type_name);
 
-create table source_location
-(
-	source_id integer not null
-		constraint source_location_fk01
-			references source_lkup,
-	location_id integer not null
-		constraint source_location_fk02
-			references location_lkup,
-	constraint source_location_pk
-		primary key (source_id, location_id)
-);
-
-alter table source_location owner to pt_admin;
+create unique index filesize_type_lkup_udx03
+	on filesize_type_lkup (filesize_type_code, filesize_type_name);
 
