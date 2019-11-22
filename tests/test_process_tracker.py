@@ -1591,6 +1591,7 @@ class TestProcessTracker(unittest.TestCase):
         :return:
         """
         end_date = datetime.now()
+        end_date.replace(microsecond=0)
         self.process_tracker.change_run_status(new_status="failed", end_date=end_date)
 
         run_record = (
