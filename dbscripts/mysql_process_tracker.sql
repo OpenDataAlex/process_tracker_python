@@ -222,7 +222,7 @@ create table process_tracker.source_lkup
 	source_id int auto_increment
 		primary key,
 	source_name varchar(250) not null,
-	source_type_id int null,
+	source_type_id int default 1 not null ,
 	character_set_id int null,
 	constraint source_name
 		unique (source_name),

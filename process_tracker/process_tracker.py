@@ -51,6 +51,7 @@ from process_tracker.models.source import (
     SourceObject,
     SourceObjectAttribute,
     SourceObjectDatasetType,
+    SourceType,
 )
 from process_tracker.models.tool import Tool
 
@@ -699,6 +700,7 @@ class ProcessTracker:
         source_attributes = (
             self.session.query(
                 Source.source_name,
+                SourceType.source_type_name,
                 SourceObject.source_object_name,
                 SourceObjectAttribute.source_object_attribute_name,
                 SourceObjectAttribute.is_key,
@@ -707,6 +709,7 @@ class ProcessTracker:
             )
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source, SourceObject.sources)
+            .join(SourceType)
             .join(ProcessSourceObjectAttribute)
             .filter(ProcessSourceObjectAttribute.process_id == process)
             .order_by(
@@ -720,6 +723,7 @@ class ProcessTracker:
             source_attribute_list.append(
                 {
                     "source_name": attribute.source_name,
+                    "source_type": attribute.source_type_name,
                     "source_object_name": attribute.source_object_name,
                     "source_object_attribute_name": attribute.source_object_attribute_name,
                     "is_key": attribute.is_key,
@@ -742,6 +746,7 @@ class ProcessTracker:
         source_attributes = (
             self.session.query(
                 Source.source_name,
+                SourceType.source_type_name,
                 SourceObject.source_object_name,
                 SourceObjectAttribute.source_object_attribute_name,
                 SourceObjectAttribute.is_key,
@@ -750,6 +755,7 @@ class ProcessTracker:
             )
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source, SourceObject.sources)
+            .join(SourceType)
             .join(ProcessTargetObjectAttribute)
             .filter(ProcessTargetObjectAttribute.process_id == process)
             .order_by(
@@ -763,6 +769,7 @@ class ProcessTracker:
             target_attribute_list.append(
                 {
                     "target_name": attribute.source_name,
+                    "target_type": attribute.source_type_name,
                     "target_object_name": attribute.source_object_name,
                     "target_object_attribute_name": attribute.source_object_attribute_name,
                     "is_key": attribute.is_key,

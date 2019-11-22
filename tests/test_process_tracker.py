@@ -2078,6 +2078,7 @@ class TestProcessTracker(unittest.TestCase):
         expected_result = [
             {
                 "source_name": "source",
+                "source_type": "Undefined",
                 "source_object_name": "source_table",
                 "source_object_attribute_name": "attr_1",
                 "is_key": False,
@@ -2086,6 +2087,7 @@ class TestProcessTracker(unittest.TestCase):
             },
             {
                 "source_name": "source",
+                "source_type": "Undefined",
                 "source_object_name": "source_table",
                 "source_object_attribute_name": "attr_2",
                 "is_key": False,
@@ -2113,6 +2115,7 @@ class TestProcessTracker(unittest.TestCase):
         expected_result = [
             {
                 "target_name": "target",
+                "target_type": "Undefined",
                 "target_object_name": "target_table",
                 "target_object_attribute_name": "attr_1",
                 "is_key": False,
@@ -2121,6 +2124,7 @@ class TestProcessTracker(unittest.TestCase):
             },
             {
                 "target_name": "target",
+                "target_type": "Undefined",
                 "target_object_name": "target_table",
                 "target_object_attribute_name": "attr_2",
                 "is_key": False,
