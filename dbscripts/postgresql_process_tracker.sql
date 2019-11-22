@@ -256,7 +256,9 @@ create table process_tracker.process
 	process_tool_id integer
 		constraint process_fk03
 			references process_tracker.tool_lkup,
-	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
+	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp with time zone not null,
+	last_completed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp with time zone not null,
+	last_errored_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp with time zone not null,
 	schedule_frequency_id integer default 0 not null
 		constraint process_fk04
 			references process_tracker.schedule_frequency_lkup

@@ -1559,32 +1559,52 @@ class TestProcessTracker(unittest.TestCase):
     def test_change_run_status_complete(self):
         """
         Testing that when changing the run status from 'running' to 'complete' the run record updates successfully.
+        Process record is also updated for last_completed_date_time.
         :return:
         """
-        self.process_tracker.change_run_status(new_status="completed")
-
-        run_record = self.session.query(ProcessTracking).filter(
-            ProcessTracking.process_id == self.process_id
+        end_date = datetime.now()
+        self.process_tracker.change_run_status(
+            new_status="completed", end_date=end_date
         )
 
-        given_result = run_record[0].process_status_id
-        expected_result = self.process_tracker.process_status_complete
+        run_record = (
+            self.session.query(
+                ProcessTracking.process_status_id, Process.last_completed_run_date_time
+            )
+            .join(Process)
+            .filter(ProcessTracking.process_id == self.process_id)
+        )
+
+        given_result = [
+            run_record[0].process_status_id,
+            run_record[0].last_completed_run_date_time,
+        ]
+        expected_result = [self.process_tracker.process_status_complete, end_date]
 
         self.assertEqual(expected_result, given_result)
 
     def test_change_run_status_failed(self):
         """
         Testing that when changing the run status from 'running' to 'failed' the run record updates successfully.
+        Process record is also updated for last_failed_date_time.
         :return:
         """
-        self.process_tracker.change_run_status(new_status="failed")
+        end_date = datetime.now()
+        self.process_tracker.change_run_status(new_status="failed", end_date=end_date)
 
-        run_record = self.session.query(ProcessTracking).filter(
-            ProcessTracking.process_id == self.process_id
+        run_record = (
+            self.session.query(
+                ProcessTracking.process_status_id, Process.last_failed_run_date_time
+            )
+            .join(Process)
+            .filter(ProcessTracking.process_id == self.process_id)
         )
 
-        given_result = run_record[0].process_status_id
-        expected_result = self.process_tracker.process_status_failed
+        given_result = [
+            run_record[0].process_status_id,
+            run_record[0].last_failed_run_date_time,
+        ]
+        expected_result = [self.process_tracker.process_status_failed, end_date]
 
         self.assertEqual(expected_result, given_result)
 

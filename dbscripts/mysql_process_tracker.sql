@@ -246,6 +246,8 @@ create table process
 	process_tool_id int null,
 	last_failed_run_date_time datetime not null,
 	schedule_frequency_id int default 0 not null,
+	last_completed_run_date_time datetime not null,
+	last_errored_run_date_time datetime not null,
 	constraint process_name
 		unique (process_name),
 	constraint process_fk03
