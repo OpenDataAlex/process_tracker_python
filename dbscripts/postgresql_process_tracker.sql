@@ -3,7 +3,6 @@ SET search_path TO process_tracker;
 create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
-
 create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
@@ -303,7 +302,9 @@ create table process
 	last_failed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
 	schedule_frequency_id integer default 0 not null
 		constraint process_fk04
-			references schedule_frequency_lkup
+			references schedule_frequency_lkup,
+	last_completed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
+	last_errored_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null
 );
 
 comment on table process is 'Processes being tracked';

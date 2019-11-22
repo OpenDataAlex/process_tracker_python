@@ -267,20 +267,19 @@ class ProcessTracker:
                 new_status
             ]
 
-            if (
-                self.process_status_types[new_status] == self.process_status_complete
-            ) or (self.process_status_types[new_status] == self.process_status_failed):
-
-                self.logger.info("Process status changing to failed or completed.")
-
+            if self.process_status_types[new_status] == self.process_status_complete:
+                self.logger.info("Process status changing to completed.")
+                self.process.last_completed_run_date_time = end_date
                 self.process_tracking_run.process_run_end_date_time = end_date
 
-                if self.process_status_types[new_status] == self.process_status_failed:
-                    self.logger.info(
-                        "Process recording as failed.  Setting process last_failed_run_date_time."
-                    )
+            elif self.process_status_types[new_status] == self.process_status_failed:
 
-                    self.process.last_failed_run_date_time = end_date
+                self.logger.info(
+                    "Process recording as failed.  Setting process last_failed_run_date_time."
+                )
+
+                self.process.last_failed_run_date_time = end_date
+                self.process_tracking_run.process_run_end_date_time = end_date
 
             self.session.commit()
 
