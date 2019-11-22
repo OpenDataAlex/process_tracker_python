@@ -48,3 +48,8 @@ INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_
 INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (2, 'megabytes', 'MB');
 INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (3, 'gigabytes', 'GB');
 INSERT INTO process_tracker.filesize_type_lkup (filesize_type_id, filesize_type_name, filesize_type_code) VALUES (4, 'bytes', 'B ');
+
+INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (1, 'Undefined');
+INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (2, 'Database');
+INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (3, 'Internal');
+INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (4, 'External');

@@ -495,7 +495,7 @@ create table source_lkup
 		constraint source_lkup_pk
 			primary key,
 	source_name varchar(250) not null,
-	source_type_id integer
+	source_type_id integer not null default 1
 		constraint source_lkup_fk01
 			references source_type_lkup,
 	character_set_id integer
