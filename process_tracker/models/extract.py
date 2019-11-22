@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    Numeric,
     Sequence,
     String,
     UniqueConstraint,
@@ -128,9 +129,16 @@ class Extract(Base):
         ForeignKey("process_tracker.extract_filetype_lkup.extract_filetype_id"),
         nullable=True,
     )
+    extract_filesize = Column(Numeric, nullable=True)
+    extract_filesize_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.filesize_type_lkup.filesize_type_id"),
+        nullable=True,
+    )
 
     compression_type = relationship("ExtractCompressionType")
     extract_filetype = relationship("ExtractFileType")
+    extract_filesize_type = relationship("FileSizeType")
     extract_dataset_types = relationship(
         "ExtractDatasetType",
         back_populates="dataset_type_extracts",
@@ -314,6 +322,30 @@ class ExtractSourceObject(Base):
         return "<ExtractSourceObject extract_id=%s, source_object_id=%s>" % (
             self.extract_id,
             self.source_object_id,
+        )
+
+
+class FileSizeType(Base):
+    __tablename__ = "filesize_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    filesize_type_id = Column(
+        Integer,
+        Sequence("filesize_type_lkup_filesize_type_id_seq", schema="process_tracker"),
+        primary_key=True,
+        nullable=False,
+    )
+    filesize_type_name = Column(String(75), nullable=False, unique=True)
+    filesize_type_code = Column(String(2), nullable=False, unique=True)
+
+    UniqueConstraint(filesize_type_code, filesize_type_name)
+
+    def __repr__(self):
+
+        return "<FilesizeType id=%s, code=%s, name=%s>" % (
+            self.filesize_type_id,
+            self.filesize_type_code,
+            self.filesize_type_name,
         )
 
 

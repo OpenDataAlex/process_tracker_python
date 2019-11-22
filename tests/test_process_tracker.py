@@ -2082,6 +2082,7 @@ class TestProcessTracker(unittest.TestCase):
                 "source_object_attribute_name": "attr_1",
                 "is_key": False,
                 "is_filter": False,
+                "is_partition": False,
             },
             {
                 "source_name": "source",
@@ -2089,6 +2090,7 @@ class TestProcessTracker(unittest.TestCase):
                 "source_object_attribute_name": "attr_2",
                 "is_key": False,
                 "is_filter": False,
+                "is_partition": False,
             },
         ]
 
@@ -2115,6 +2117,7 @@ class TestProcessTracker(unittest.TestCase):
                 "target_object_attribute_name": "attr_1",
                 "is_key": False,
                 "is_filter": False,
+                "is_partition": False,
             },
             {
                 "target_name": "target",
@@ -2122,6 +2125,7 @@ class TestProcessTracker(unittest.TestCase):
                 "target_object_attribute_name": "attr_2",
                 "is_key": False,
                 "is_filter": False,
+                "is_partition": False,
             },
         ]
 
