@@ -99,6 +99,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         self.process_tracker = ProcessTracker(
             process_name="Testing Process Tracking Initialization",
+            process_run_name="Testing Process Tracking Initialization 01",
             process_type="Extract",
             actor_name="UnitTesting",
             tool_name="Spark",
@@ -1054,6 +1055,9 @@ class TestProcessTracker(unittest.TestCase):
         """
 
         self.process_tracker.change_run_status(new_status="completed")
+        self.process_tracker.process_run_name = (
+            "Testing Process Tracking Initialization 02"
+        )
         self.process_tracker.register_new_process_run()
 
         process_runs = (
@@ -1087,6 +1091,9 @@ class TestProcessTracker(unittest.TestCase):
             child_process_id=self.process_id,
         )
 
+        self.process_tracker.process_run_name = (
+            "Testing Process Tracking Initialization 02"
+        )
         self.process_tracker.register_new_process_run()
 
         given_count = (
@@ -2166,6 +2173,9 @@ class TestProcessTracker(unittest.TestCase):
             new_process_tracker.schedule_frequency.schedule_frequency_name
         )
 
+        expected_process_run_name = self.process_tracker.process_run_name
+        given_process_run_name = new_process_tracker.process_run_name
+
         self.assertEqual(expected_process_name_result, given_process_name_result)
         self.assertEqual(expected_actor_result, given_actor_result)
         self.assertEqual(expected_process_type_result, given_process_type_result)
@@ -2173,6 +2183,7 @@ class TestProcessTracker(unittest.TestCase):
         self.assertEqual(
             expected_schedule_frequency_result, given_schedule_frequency_result
         )
+        self.assertEqual(expected_process_run_name, given_process_run_name)
 
     def test_determine_process_sources(self):
         """

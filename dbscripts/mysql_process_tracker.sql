@@ -337,6 +337,9 @@ create table process_tracking
 	process_run_record_count int not null,
 	process_run_actor_id int null,
 	is_latest_run tinyint(1) not null,
+	process_run_name varchar(250) null,
+	constraint process_tracking_process_run_name_uindex
+		unique (process_run_name),
 	constraint process_tracking_ibfk_1
 		foreign key (process_id) references process (process_id),
 	constraint process_tracking_ibfk_2
@@ -344,6 +347,8 @@ create table process_tracking
 	constraint process_tracking_ibfk_3
 		foreign key (process_run_actor_id) references actor_lkup (actor_id)
 );
+
+
 
 create table error_tracking
 (

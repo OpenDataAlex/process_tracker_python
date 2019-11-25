@@ -364,7 +364,8 @@ create table process_tracking
 	process_run_actor_id integer
 		constraint process_tracking_fk03
 			references actor_lkup,
-	is_latest_run boolean default false
+	is_latest_run boolean default false,
+	process_run_name varchar(250) null
 );
 
 comment on table process_tracking is 'Tracking table of process runs.';
@@ -399,6 +400,9 @@ create index process_tracking_idx02
 
 create index process_tracking_idx03
 	on process_tracking (process_run_low_date_time, process_run_high_date_time);
+
+create unique index process_tracking_udx01
+	on process_tracking (process_run_name);
 
 create table cluster_process
 (
