@@ -60,6 +60,7 @@ class ProcessTracker:
     def __init__(
         self,
         process_name=None,
+        process_run_name=None,
         process_type=None,
         actor_name=None,
         tool_name=None,
@@ -77,6 +78,7 @@ class ProcessTracker:
         """
         ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
+        :param process_run_name: Optional name of the process run.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
         :param sources: A single source name or list of source names for the given process. If source_objects is set,
@@ -148,6 +150,7 @@ class ProcessTracker:
 
                 self.process_name = process_run.process.process_name
                 self.process_tracking_run = process_run
+                self.process_run_name = process_run.process_run_name
 
             else:
                 error_msg = "Process run not found based on id %s." % process_run_id
@@ -231,6 +234,7 @@ class ProcessTracker:
                 self.targets = None
 
             self.process_name = process_name
+            self.process_run_name = process_run_name
 
             self.process_tracking_run = self.register_new_process_run()
 
@@ -976,6 +980,7 @@ class ProcessTracker:
                 process_run_start_date_time=datetime.now(),
                 process_run_actor_id=self.actor.actor_id,
                 is_latest_run=True,
+                process_run_name=self.process_run_name,
             )
 
             self.session.add(new_run)

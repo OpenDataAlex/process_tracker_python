@@ -512,6 +512,7 @@ class ProcessTracking(Base):
         Integer, ForeignKey("process_tracker.actor_lkup.actor_id"), nullable=False
     )
     is_latest_run = Column(Boolean, nullable=False, default=False)
+    process_run_name = Column(String(250), unique=True, nullable=True)
 
     actor = relationship("Actor")
     errors = relationship(
