@@ -20,7 +20,7 @@ INSERT INTO process_tracker.error_type_lkup (error_type_id, error_type_name) VAL
 INSERT INTO process_tracker.process_type_lkup (process_type_id, process_type_name) VALUES (default, 'Extract');
 INSERT INTO process_tracker.process_type_lkup (process_type_id, process_type_name) VALUES (default, 'Load');
 
-INSERT INTO process_tracker.system_lkup (system_id, system_key, system_value) VALUES (default, 'version', '0.7.0');
+INSERT INTO process_tracker.system_lkup (system_id, system_key, system_value) VALUES (default, 'version', '0.8.0');
 
 INSERT INTO process_tracker.extract_compression_type_lkup (extract_compression_type_id, extract_compression_type) VALUES (1, 'zip');
 
