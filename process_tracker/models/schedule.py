@@ -2,19 +2,9 @@
 # Models for Schedule entities
 
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    Sequence,
-    String,
-    UniqueConstraint,
-)
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, Sequence, String
 
-from process_tracker.models.model_base import default_date, Base
+from process_tracker.models.model_base import Base
 
 
 class ScheduleFrequency(Base):
