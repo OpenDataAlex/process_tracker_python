@@ -91,9 +91,11 @@ class ProcessTracker:
         :type source_objects: dict of lists
         :param target_objects: Finer grained list of targets, including target objects (i.e. tables). Optional.
         :type target_objects: dict of lists
-        :param source_object_attributes: Even finer grained list of sources, including source objects (i.e. tables) and their attributes.  Optional.
+        :param source_object_attributes: Even finer grained list of sources, including source objects (i.e. tables) and
+        their attributes.  Optional.
         :type source_object_attributes: dict of lists
-        :param target_object_attributes: Even finer grained list of targets, including target objects (i.e. tables) and their attributes.  Optional.
+        :param target_object_attributes: Even finer grained list of targets, including target objects (i.e. tables) and
+        their attributes.  Optional.
         :type target_object_attributes: dict of lists
         :param config_location: Location where Process Tracker configuration file is. If not set, will use local home
                                 directory.
@@ -102,7 +104,8 @@ class ProcessTracker:
         :type dataset_types: list
         :param schedule_frequency: The general scheduling frequency for the process (i.e. hourly)
         :type schedule_frequency: string
-        :param process_run_id: If trying to access an already running process, provide the process run's id.  Object will be built for that specific process run.
+        :param process_run_id: If trying to access an already running process, provide the process run's id.
+        Object will be built for that specific process run.
         :type process_run_id: int
         """
         self.config_location = config_location
@@ -393,9 +396,9 @@ class ProcessTracker:
 
         if objects.count() >= 1:
             self.logger.info("Objects were not empty.")
-            for object in objects:
-                self.logger.debug("Adding object %s " % object)
-                source_list.append(object)
+            for obj in objects:
+                self.logger.debug("Adding object %s " % obj)
+                source_list.append(obj)
 
             return source_list
 
@@ -678,15 +681,15 @@ class ProcessTracker:
             )
         )
 
-        for filter in filters:
+        for data_filter in filters:
             filter_list.append(
                 {
-                    "source_name": filter.source_name,
-                    "source_object_name": filter.source_object_name,
-                    "source_object_attribute_name": filter.source_object_attribute_name,
-                    "filter_type_code": filter.filter_type_code,
-                    "filter_value_numeric": filter.filter_value_numeric,
-                    "filter_value_string": filter.filter_value_string,
+                    "source_name": data_filter.source_name,
+                    "source_object_name": data_filter.source_object_name,
+                    "source_object_attribute_name": data_filter.source_object_attribute_name,
+                    "filter_type_code": data_filter.filter_type_code,
+                    "filter_value_numeric": data_filter.filter_value_numeric,
+                    "filter_value_string": data_filter.filter_value_string,
                 }
             )
 

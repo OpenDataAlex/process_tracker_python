@@ -22,12 +22,7 @@ from process_tracker.models.extract import (
     ExtractSourceObject,
     ExtractStatus,
 )
-from process_tracker.models.source import (
-    Source,
-    SourceLocation,
-    SourceObjectAttribute,
-    SourceObjectLocation,
-)
+from process_tracker.models.source import SourceLocation, SourceObjectLocation
 from process_tracker.models.source import DatasetType
 
 
@@ -454,9 +449,9 @@ class ExtractTracker:
         """
         dataset_types = list()
 
-        for type in self.extract.extract_dataset_types:
+        for data_type in self.extract.extract_dataset_types:
             dataset_type = self.data_store.get_or_create_item(
-                model=DatasetType, dataset_type_id=type.dataset_type_id
+                model=DatasetType, dataset_type_id=data_type.dataset_type_id
             )
             dataset_types.append(dataset_type)
 
@@ -529,22 +524,22 @@ class ExtractTracker:
 
         if source_objects is not None:
 
-            for object in source_objects:
+            for src_object in source_objects:
                 self.logger.debug(
                     "Associating extract %s to source %s."
-                    % (self.extract.extract_id, object.source_object_id)
+                    % (self.extract.extract_id, src_object.source_object_id)
                 )
 
                 source_object = self.data_store.get_or_create_item(
                     model=ExtractSourceObject,
                     extract_id=self.extract.extract_id,
-                    source_object_id=object.source_object_id,
+                    source_object_id=src_object.source_object_id,
                 )
                 source_list.append(source_object)
 
                 self.data_store.get_or_create_item(
                     SourceObjectLocation,
-                    source_object_id=object.source_object_id,
+                    source_object_id=src_object.source_object_id,
                     location_id=self.extract.extract_location_id,
                 )
 
