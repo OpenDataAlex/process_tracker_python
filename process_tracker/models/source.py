@@ -13,10 +13,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from process_tracker.models.model_base import Base
+from process_tracker.models.model_base import Base, BaseColumn
 
 
-class CharacterSet(Base):
+class CharacterSet(Base, BaseColumn):
 
     __tablename__ = "character_set_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -37,7 +37,7 @@ class CharacterSet(Base):
         )
 
 
-class DataType(Base):
+class DataType(Base, BaseColumn):
 
     __tablename__ = "data_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -55,7 +55,7 @@ class DataType(Base):
         return "<DataType id=%s, name=%s>" % (self.data_type_id, self.data_type)
 
 
-class DatasetType(Base):
+class DatasetType(Base, BaseColumn):
 
     __tablename__ = "dataset_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -80,7 +80,7 @@ class DatasetType(Base):
         return "<DatasetType %s>" % self.dataset_type
 
 
-class FilterType(Base):
+class FilterType(Base, BaseColumn):
 
     __tablename__ = "filter_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -102,7 +102,7 @@ class FilterType(Base):
         )
 
 
-class Source(Base):
+class Source(Base, BaseColumn):
 
     __tablename__ = "source_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -131,7 +131,7 @@ class Source(Base):
         return "<Source (name=%s)>" % self.source_name
 
 
-class SourceContact(Base):
+class SourceContact(Base, BaseColumn):
 
     __tablename__ = "source_contact"
     __table_args__ = {"schema": "process_tracker"}
@@ -154,7 +154,7 @@ class SourceContact(Base):
     contacts = relationship("Contact")
 
 
-class SourceDatasetType(Base):
+class SourceDatasetType(Base, BaseColumn):
 
     __tablename__ = "source_dataset_type"
     __table_args__ = {"schema": "process_tracker"}
@@ -185,7 +185,7 @@ class SourceDatasetType(Base):
         )
 
 
-class SourceLocation(Base):
+class SourceLocation(Base, BaseColumn):
 
     __tablename__ = "source_location"
     __table_args__ = {"schema": "process_tracker"}
@@ -216,7 +216,7 @@ class SourceLocation(Base):
         )
 
 
-class SourceObject(Base):
+class SourceObject(Base, BaseColumn):
 
     __tablename__ = "source_object_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -262,7 +262,7 @@ class SourceObject(Base):
         )
 
 
-class SourceObjectLocation(Base):
+class SourceObjectLocation(Base, BaseColumn):
     __tablename__ = "source_object_location"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -291,7 +291,7 @@ class SourceObjectLocation(Base):
         )
 
 
-class SourceObjectAttribute(Base):
+class SourceObjectAttribute(Base, BaseColumn):
 
     __tablename__ = "source_object_attribute_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -339,7 +339,7 @@ class SourceObjectAttribute(Base):
         )
 
 
-class SourceObjectDatasetType(Base):
+class SourceObjectDatasetType(Base, BaseColumn):
 
     __tablename__ = "source_object_dataset_type"
     __table_args__ = {"schema": "process_tracker"}
@@ -370,7 +370,7 @@ class SourceObjectDatasetType(Base):
         )
 
 
-class SourceType(Base):
+class SourceType(Base, BaseColumn):
 
     __tablename__ = "source_type_lkup"
     __table_args__ = {"schema": "process_tracker"}

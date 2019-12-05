@@ -15,10 +15,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from process_tracker.models.model_base import default_date, Base
+from process_tracker.models.model_base import default_date, Base, BaseColumn
 
 
-class ErrorType(Base):
+class ErrorType(Base, BaseColumn):
 
     __tablename__ = "error_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -38,7 +38,7 @@ class ErrorType(Base):
         return "<ErrorType (name=%s)>" % self.error_type_name
 
 
-class ErrorTracking(Base):
+class ErrorTracking(Base, BaseColumn):
 
     __tablename__ = "error_tracking"
     __table_args__ = {"schema": "process_tracker"}
@@ -78,7 +78,7 @@ class ErrorTracking(Base):
         )
 
 
-class ProcessStatus(Base):
+class ProcessStatus(Base, BaseColumn):
 
     __tablename__ = "process_status_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -101,7 +101,7 @@ class ProcessStatus(Base):
         )
 
 
-class ProcessType(Base):
+class ProcessType(Base, BaseColumn):
 
     __tablename__ = "process_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -124,7 +124,7 @@ class ProcessType(Base):
         )
 
 
-class Process(Base):
+class Process(Base, BaseColumn):
 
     __tablename__ = "process"
     __table_args__ = {"schema": "process_tracker"}
@@ -179,7 +179,7 @@ class Process(Base):
         )
 
 
-class ProcessContact(Base):
+class ProcessContact(Base, BaseColumn):
 
     __tablename__ = "process_contact"
     __table_args__ = {"schema": "process_tracker"}
@@ -210,7 +210,7 @@ class ProcessContact(Base):
         )
 
 
-class ProcessDatasetType(Base):
+class ProcessDatasetType(Base, BaseColumn):
 
     __tablename__ = "process_dataset_type"
     __table_args__ = {"schema": "process_tracker"}
@@ -241,7 +241,7 @@ class ProcessDatasetType(Base):
         )
 
 
-class ProcessFilter(Base):
+class ProcessFilter(Base, BaseColumn):
 
     __tablename__ = "process_filter"
     __table_args__ = {"schema": "process_tracker"}
@@ -283,7 +283,7 @@ class ProcessFilter(Base):
         )
 
 
-class ProcessSource(Base):
+class ProcessSource(Base, BaseColumn):
 
     __tablename__ = "process_source"
     __table_args__ = {"schema": "process_tracker"}
@@ -312,7 +312,7 @@ class ProcessSource(Base):
         )
 
 
-class ProcessSourceObject(Base):
+class ProcessSourceObject(Base, BaseColumn):
     __tablename__ = "process_source_object"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -339,7 +339,7 @@ class ProcessSourceObject(Base):
         )
 
 
-class ProcessSourceObjectAttribute(Base):
+class ProcessSourceObjectAttribute(Base, BaseColumn):
     __tablename__ = "process_source_object_attribute"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -370,7 +370,7 @@ class ProcessSourceObjectAttribute(Base):
         )
 
 
-class ProcessTarget(Base):
+class ProcessTarget(Base, BaseColumn):
     __tablename__ = "process_target"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -397,7 +397,7 @@ class ProcessTarget(Base):
         )
 
 
-class ProcessTargetObject(Base):
+class ProcessTargetObject(Base, BaseColumn):
 
     __tablename__ = "process_target_object"
     __table_args__ = {"schema": "process_tracker"}
@@ -425,7 +425,7 @@ class ProcessTargetObject(Base):
         )
 
 
-class ProcessTargetObjectAttribute(Base):
+class ProcessTargetObjectAttribute(Base, BaseColumn):
     __tablename__ = "process_target_object_attribute"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -456,7 +456,7 @@ class ProcessTargetObjectAttribute(Base):
         )
 
 
-class ProcessDependency(Base):
+class ProcessDependency(Base, BaseColumn):
 
     __tablename__ = "process_dependency"
     __table_args__ = {"schema": "process_tracker"}
@@ -485,7 +485,7 @@ class ProcessDependency(Base):
         )
 
 
-class ProcessTracking(Base):
+class ProcessTracking(Base, BaseColumn):
 
     __tablename__ = "process_tracking"
     __table_args__ = {"schema": "process_tracker"}

@@ -2,10 +2,10 @@
 # Models for Actor entities
 
 from sqlalchemy import Column, Integer, Sequence, String
-from process_tracker.models.model_base import Base
+from process_tracker.models.model_base import Base, BaseColumn
 
 
-class Actor(Base):
+class Actor(Base, BaseColumn):
 
     __tablename__ = "actor_lkup"
     __table_args__ = {"schema": "process_tracker"}
