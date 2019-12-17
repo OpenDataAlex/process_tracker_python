@@ -74,7 +74,7 @@ class ExtractFileType(Base):
         primary_key=True,
         nullable=False,
     )
-    extract_filetype_code = Column(String(5), nullable=False)
+    extract_filetype_code = Column(String(25), nullable=False)
     extract_filetype = Column(String(75), nullable=False, unique=True)
     delimiter_char = Column(String(1), nullable=True)
     quote_char = Column(String(1), nullable=True)

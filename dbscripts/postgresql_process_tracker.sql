@@ -251,7 +251,7 @@ create table extract_filetype_lkup
 	extract_filetype_id serial not null
 		constraint extract_filetype_lkup_pk
 			primary key,
-	extract_filetype_code varchar(5) not null,
+	extract_filetype_code varchar(25) not null,
 	extract_filetype varchar(75) not null,
 	delimiter_char char,
 	quote_char char,

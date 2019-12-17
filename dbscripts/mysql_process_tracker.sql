@@ -74,7 +74,7 @@ create table extract_filetype_lkup
 (
 	extract_filetype_id int auto_increment
 		primary key,
-	extract_filetype_code varchar(5) not null,
+	extract_filetype_code varchar(25) not null,
 	extract_filetype varchar(75) not null,
 	delimiter_char char null,
 	quote_char char null,
