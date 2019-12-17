@@ -508,6 +508,8 @@ class ProcessTracking(Base):
     process_run_start_date_time = Column(DateTime, nullable=False)
     process_run_end_date_time = Column(DateTime, nullable=True)
     process_run_record_count = Column(Integer, nullable=False, default=0)
+    process_run_insert_count = Column(Integer, nullable=False, default=0)
+    process_run_update_count = Column(Integer, nullable=False, default=0)
     process_run_actor_id = Column(
         Integer, ForeignKey("process_tracker.actor_lkup.actor_id"), nullable=False
     )

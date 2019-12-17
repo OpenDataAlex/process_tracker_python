@@ -1323,22 +1323,53 @@ class ProcessTracker:
 
         self.session.commit()
 
-    def set_process_run_record_count(self, num_records):
+    def record_count_manager(self, original_count, num_records):
+        """
+        Given two record counts, one the overall count and the other the current count, process and return the adjusted
+        amount.
+        :param original_count: The original overall count of records
+        :type original_count: int
+        :param num_records: The adjusted count of records
+        :type num_records: int
+        """
+        if original_count == 0 or original_count is None:
+            return_count = num_records
+        else:
+            return_count = original_count + (num_records - original_count)
+
+        return return_count
+
+    def set_process_run_record_count(self, num_records, processing_type=None):
         """
         For the given process run, set the process_run_record_count for the number of records processed.  Will also
         update the process' total_record_count - the total number of records ever processed by that process
-        :param num_records:
+        :param num_records: Count of number of records processed.
+        :type num_records: int
+        :param processing_type: Type of records being processed.  Valid values: None, insert, update.  None will only
+                                update overall counts
         :return:
         """
         process_run_records = self.process.total_record_count
+        process_run_inserts = self.process_tracking_run.process_run_insert_count
+        process_run_updates = self.process_tracking_run.process_run_update_count
 
-        if process_run_records == 0 or process_run_records is None:
-
-            self.process.total_record_count = num_records
-        else:
-            self.process.total_record_count = self.process.total_record_count + (
-                num_records - process_run_records
+        if processing_type == "insert":
+            self.process_tracking_run.process_run_insert_count = self.record_count_manager(
+                original_count=process_run_inserts, num_records=num_records
             )
+        elif processing_type == "update":
+            self.process_tracking_run.process_run_update_count = self.record_count_manager(
+                original_count=process_run_updates, num_records=num_records
+            )
+        elif processing_type is not None:
+            error_msg = "Processing type not recognized."
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
+
+        self.process.total_record_count = self.record_count_manager(
+            original_count=process_run_records, num_records=num_records
+        )
 
         self.process_tracking_run.process_run_record_count = num_records
+
         self.session.commit()

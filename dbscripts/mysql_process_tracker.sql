@@ -338,6 +338,8 @@ create table process_tracking
 	process_run_actor_id int null,
 	is_latest_run tinyint(1) not null,
 	process_run_name varchar(250) null,
+	process_run_insert_count int default 0 not null,
+	process_run_update_count int default 0 not null,
 	constraint process_tracking_process_run_name_uindex
 		unique (process_run_name),
 	constraint process_tracking_ibfk_1
