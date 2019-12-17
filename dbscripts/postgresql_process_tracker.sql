@@ -365,7 +365,9 @@ create table process_tracking
 		constraint process_tracking_fk03
 			references actor_lkup,
 	is_latest_run boolean default false,
-	process_run_name varchar(250) null
+	process_run_name varchar(250) null,
+	process_run_insert_count int default 0 not null,
+	process_run_update_count int default 0 not null
 );
 
 comment on table process_tracking is 'Tracking table of process runs.';

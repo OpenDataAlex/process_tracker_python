@@ -1877,6 +1877,80 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_set_process_run_record_count_insert(self):
+        """
+        Testing that if record counts are provided for a given process_run, and the processing type is insert,
+        update the insert count for the process run.
+        """
+        initial_record_count = 1000
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="insert"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_insert_count
+        expected_count = 1000
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_set_process_run_record_count_insert_twice(self):
+        """
+        Testing that if record counts are provided for a given process_run multiple times, and the processing type is insert,
+        update the insert count for the process run.
+        """
+        initial_record_count = 1000
+        modified_record_count = 1500
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="insert"
+        )
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=modified_record_count, processing_type="insert"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_insert_count
+        expected_count = 1500
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_set_process_run_record_count_update(self):
+        """
+        Testing that if record counts are provided for a given process_run, and the processing type is update,
+        update the update count for the process run.
+        """
+        initial_record_count = 1000
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="update"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_update_count
+        expected_count = 1000
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_set_process_run_record_count_update_twice(self):
+        """
+        Testing that if record counts are provided for a given process_run multiple times, and the processing type is update,
+        update the update count for the process run.
+        """
+        initial_record_count = 1000
+        modified_record_count = 1500
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="update"
+        )
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=modified_record_count, processing_type="update"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_update_count
+        expected_count = 1500
+
+        self.assertEqual(expected_count, given_count)
+
     def test_register_source_dataset_type(self):
         """
         When both a source and dataset_type are provided, the source is registered to the dataset_type.
