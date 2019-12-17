@@ -73,12 +73,13 @@ class ProcessTracker:
         config_location=None,
         dataset_types=None,
         schedule_frequency=None,
-        process_run_id=None,
+        process_tracking_id=None,
     ):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
         :param process_run_name: Optional name of the process run.
+        :param process_type: Type of process the process_name is.  Optional if process already exists.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
         :param sources: A single source name or list of source names for the given process. If source_objects is set,
@@ -104,9 +105,9 @@ class ProcessTracker:
         :type dataset_types: list
         :param schedule_frequency: The general scheduling frequency for the process (i.e. hourly)
         :type schedule_frequency: string
-        :param process_run_id: If trying to access an already running process, provide the process run's id.
+        :param process_tracking_id: If trying to access an already running process, provide the process run's id.
         Object will be built for that specific process run.
-        :type process_run_id: int
+        :type process_tracking_id: int
         """
         self.config_location = config_location
         self.config = SettingsManager(config_location=self.config_location)
@@ -128,11 +129,13 @@ class ProcessTracker:
         self.process_status_failed = self.process_status_types["failed"]
         self.process_status_hold = self.process_status_types["on hold"]
 
-        if process_run_id is not None:
+        if process_tracking_id is not None:
             self.logger.info("Process run id provided.  Checking if exists.")
 
             process_run = self.data_store.get_or_create_item(
-                model=ProcessTracking, process_tracking_id=process_run_id, create=False
+                model=ProcessTracking,
+                process_tracking_id=process_tracking_id,
+                create=False,
             )
 
             if process_run is not None:
@@ -145,10 +148,10 @@ class ProcessTracker:
 
                 self.dataset_types = process_run.process.dataset_types
                 self.sources = self.determine_process_sources(
-                    process_run_id=process_run_id
+                    process_run_id=process_tracking_id
                 )
                 self.targets = self.determine_process_targets(
-                    process_run_id=process_run_id
+                    process_run_id=process_tracking_id
                 )
 
                 self.process_name = process_run.process.process_name
@@ -156,21 +159,21 @@ class ProcessTracker:
                 self.process_run_name = process_run.process_run_name
 
             else:
-                error_msg = "Process run not found based on id %s." % process_run_id
+                error_msg = (
+                    "Process run not found based on id %s." % process_tracking_id
+                )
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
         else:
-            if process_name is None or process_type is None:
-                error_msg = "process_name and process_type must be set."
+            if process_name is None is None:
+                error_msg = "process_name must be set."
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
 
             self.actor = self.data_store.get_or_create_item(
                 model=Actor, actor_name=actor_name
             )
-            self.process_type = self.data_store.get_or_create_item(
-                model=ProcessType, process_type_name=process_type
-            )
+
             self.tool = self.data_store.get_or_create_item(
                 model=Tool, tool_name=tool_name
             )
@@ -184,13 +187,27 @@ class ProcessTracker:
                     model=ScheduleFrequency, schedule_frequency_name=schedule_frequency
                 )
 
-            self.process = self.data_store.get_or_create_item(
-                model=Process,
-                process_name=process_name,
-                process_type_id=self.process_type.process_type_id,
-                process_tool_id=self.tool.tool_id,
-                schedule_frequency_id=self.schedule_frequency.schedule_frequency_id,
-            )
+            if process_type is None:
+
+                self.process = self.data_store.get_or_create_item(
+                    model=Process, process_name=process_name, create=False
+                )
+
+                self.process_type = self.process.process_type
+
+            else:
+
+                self.process_type = self.data_store.get_or_create_item(
+                    model=ProcessType, process_type_name=process_type
+                )
+
+                self.process = self.data_store.get_or_create_item(
+                    model=Process,
+                    process_name=process_name,
+                    process_type_id=self.process_type.process_type_id,
+                    process_tool_id=self.tool.tool_id,
+                    schedule_frequency_id=self.schedule_frequency.schedule_frequency_id,
+                )
 
             # Dataset types should be loaded before source and target because they are also used there.
 
@@ -325,7 +342,7 @@ class ProcessTracker:
         Based on the setting 'max_concurrent_failures', count the number of failures for that number of process runs.
         If the counts match, process will remain on hold.  If last run is 'on_hold' process will remain on hold.
         :param last_run_status: The status of the previous run
-        :param last_run_id:  The process_run_id of the previous run
+        :param last_run_id:  The process_tracking_id of the previous run
         :return:
         """
         self.logger.debug("Determining if process should be put on or remain on hold.")
@@ -362,7 +379,7 @@ class ProcessTracker:
 
     def determine_process_sources(self, process_run_id):
         """
-        Based on the process_run_id, find the given process' sources - either at the attribute, object, or source level
+        Based on the process_tracking_id, find the given process' sources - either at the attribute, object, or source level
         :param process_run_id: Process run identifier
         :type process_run_id: int
         :return: Array of source objects at lowest granularity.
@@ -425,7 +442,7 @@ class ProcessTracker:
 
     def determine_process_targets(self, process_run_id):
         """
-        Based on the process_run_id, find the given process' targets - either at the attribute, object, or source level
+        Based on the process_tracking_id, find the given process' targets - either at the attribute, object, or source level
         :param process_run_id: Process run identifier
         :type process_run_id: int
         :return: Array of source objects used as target for the process at lowest granularity.
@@ -641,13 +658,13 @@ class ProcessTracker:
         process_list = list()
 
         processes = (
-            self.data_store.session.query(Process.process_id)
+            self.data_store.session.query(Process)
             .join(ScheduleFrequency)
             .filter(ScheduleFrequency.schedule_frequency_name == frequency)
         )
 
         for process in processes:
-            process_list.append(process.process_id)
+            process_list.append(process)
 
         return process_list
 
@@ -1319,22 +1336,53 @@ class ProcessTracker:
 
         self.session.commit()
 
-    def set_process_run_record_count(self, num_records):
+    def record_count_manager(self, original_count, num_records):
+        """
+        Given two record counts, one the overall count and the other the current count, process and return the adjusted
+        amount.
+        :param original_count: The original overall count of records
+        :type original_count: int
+        :param num_records: The adjusted count of records
+        :type num_records: int
+        """
+        if original_count == 0 or original_count is None:
+            return_count = num_records
+        else:
+            return_count = original_count + (num_records - original_count)
+
+        return return_count
+
+    def set_process_run_record_count(self, num_records, processing_type=None):
         """
         For the given process run, set the process_run_record_count for the number of records processed.  Will also
         update the process' total_record_count - the total number of records ever processed by that process
-        :param num_records:
+        :param num_records: Count of number of records processed.
+        :type num_records: int
+        :param processing_type: Type of records being processed.  Valid values: None, insert, update.  None will only
+                                update overall counts
         :return:
         """
         process_run_records = self.process.total_record_count
+        process_run_inserts = self.process_tracking_run.process_run_insert_count
+        process_run_updates = self.process_tracking_run.process_run_update_count
 
-        if process_run_records == 0 or process_run_records is None:
-
-            self.process.total_record_count = num_records
-        else:
-            self.process.total_record_count = self.process.total_record_count + (
-                num_records - process_run_records
+        if processing_type == "insert":
+            self.process_tracking_run.process_run_insert_count = self.record_count_manager(
+                original_count=process_run_inserts, num_records=num_records
             )
+        elif processing_type == "update":
+            self.process_tracking_run.process_run_update_count = self.record_count_manager(
+                original_count=process_run_updates, num_records=num_records
+            )
+        elif processing_type is not None:
+            error_msg = "Processing type not recognized."
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
+
+        self.process.total_record_count = self.record_count_manager(
+            original_count=process_run_records, num_records=num_records
+        )
 
         self.process_tracking_run.process_run_record_count = num_records
+
         self.session.commit()

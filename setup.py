@@ -23,7 +23,7 @@ setuptools.setup(
         "google-compute-engine >= 2.8.13",
         "psycopg2-binary >= 2.8.2",
         "pymysql >= 0.9.3",
-        "pymssql >= 2.1.4",
+        "pymssql <3.0",
         "python-dateutil >= 2.8.0",
         "snowflake-sqlalchemy >= 1.1.13",
         "sqlalchemy >= 1.3.3",

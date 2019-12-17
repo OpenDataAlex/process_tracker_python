@@ -251,7 +251,7 @@ create table extract_filetype_lkup
 	extract_filetype_id serial not null
 		constraint extract_filetype_lkup_pk
 			primary key,
-	extract_filetype_code varchar(5) not null,
+	extract_filetype_code varchar(25) not null,
 	extract_filetype varchar(75) not null,
 	delimiter_char char,
 	quote_char char,
@@ -365,7 +365,9 @@ create table process_tracking
 		constraint process_tracking_fk03
 			references actor_lkup,
 	is_latest_run boolean default false,
-	process_run_name varchar(250) null
+	process_run_name varchar(250) null,
+	process_run_insert_count int default 0 not null,
+	process_run_update_count int default 0 not null
 );
 
 comment on table process_tracking is 'Tracking table of process runs.';

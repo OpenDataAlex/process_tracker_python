@@ -74,7 +74,7 @@ create table extract_filetype_lkup
 (
 	extract_filetype_id int auto_increment
 		primary key,
-	extract_filetype_code varchar(5) not null,
+	extract_filetype_code varchar(25) not null,
 	extract_filetype varchar(75) not null,
 	delimiter_char char null,
 	quote_char char null,
@@ -338,6 +338,8 @@ create table process_tracking
 	process_run_actor_id int null,
 	is_latest_run tinyint(1) not null,
 	process_run_name varchar(250) null,
+	process_run_insert_count int default 0 not null,
+	process_run_update_count int default 0 not null,
 	constraint process_tracking_process_run_name_uindex
 		unique (process_run_name),
 	constraint process_tracking_ibfk_1

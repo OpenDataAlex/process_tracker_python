@@ -1877,6 +1877,80 @@ class TestProcessTracker(unittest.TestCase):
 
         self.assertEqual(expected_result, given_result)
 
+    def test_set_process_run_record_count_insert(self):
+        """
+        Testing that if record counts are provided for a given process_run, and the processing type is insert,
+        update the insert count for the process run.
+        """
+        initial_record_count = 1000
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="insert"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_insert_count
+        expected_count = 1000
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_set_process_run_record_count_insert_twice(self):
+        """
+        Testing that if record counts are provided for a given process_run multiple times, and the processing type is insert,
+        update the insert count for the process run.
+        """
+        initial_record_count = 1000
+        modified_record_count = 1500
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="insert"
+        )
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=modified_record_count, processing_type="insert"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_insert_count
+        expected_count = 1500
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_set_process_run_record_count_update(self):
+        """
+        Testing that if record counts are provided for a given process_run, and the processing type is update,
+        update the update count for the process run.
+        """
+        initial_record_count = 1000
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="update"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_update_count
+        expected_count = 1000
+
+        self.assertEqual(expected_count, given_count)
+
+    def test_set_process_run_record_count_update_twice(self):
+        """
+        Testing that if record counts are provided for a given process_run multiple times, and the processing type is update,
+        update the update count for the process run.
+        """
+        initial_record_count = 1000
+        modified_record_count = 1500
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=initial_record_count, processing_type="update"
+        )
+
+        self.process_tracker.set_process_run_record_count(
+            num_records=modified_record_count, processing_type="update"
+        )
+
+        given_count = self.process_tracker.process_tracking_run.process_run_update_count
+        expected_count = 1500
+
+        self.assertEqual(expected_count, given_count)
+
     def test_register_source_dataset_type(self):
         """
         When both a source and dataset_type are provided, the source is registered to the dataset_type.
@@ -2008,7 +2082,7 @@ class TestProcessTracker(unittest.TestCase):
 
         given_result = process.find_process_by_schedule_frequency(frequency="hourly")
 
-        expected_result = [process.process.process_id]
+        expected_result = [process.process]
 
         self.assertEqual(expected_result, given_result)
 
@@ -2150,7 +2224,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
 
-        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+        new_process_tracker = ProcessTracker(process_tracking_id=process_run_id)
 
         expected_process_name_result = self.process_tracker.process_name
         given_process_name_result = new_process_tracker.process_name
@@ -2193,7 +2267,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
 
-        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+        new_process_tracker = ProcessTracker(process_tracking_id=process_run_id)
 
         given_sources = new_process_tracker.sources
         expected_sources = self.process_tracker.sources
@@ -2208,7 +2282,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
 
-        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+        new_process_tracker = ProcessTracker(process_tracking_id=process_run_id)
 
         given_targets = new_process_tracker.targets
         expected_targets = self.process_tracker.targets
@@ -2218,7 +2292,7 @@ class TestProcessTracker(unittest.TestCase):
     def test_ensure_nulls_caught_on_instantiation(self):
         """
         With the adding of the ability of have a process_tracking_id we have to allow for nulled values for process_name
-        and process_type.  If ProcessTracker is instantiated with either (or both) being null, an exception should be
+        .  If ProcessTracker is instantiated with process_name being null, an exception should be
         raised.
         :return:
         """
@@ -2227,6 +2301,20 @@ class TestProcessTracker(unittest.TestCase):
 
             ProcessTracker()
 
-        return self.assertTrue(
-            "process_name and process_type must be set." in str(context.exception)
+        return self.assertTrue("process_name must be set." in str(context.exception))
+
+    def test_ensure_process_type_returned_with_given_process_name(self):
+        """Ensuring that if just the process name is passed, the process type will be retrieved for that given process"""
+
+        self.process_tracker.change_run_status("completed")
+
+        test_process = ProcessTracker(
+            process_name="Testing Process Tracking Initialization",
+            actor_name="UnitTesting",
+            tool_name="Spark",
         )
+
+        given_result = test_process.process_type.process_type_name
+        expected_result = "Extract"
+
+        return self.assertEqual(expected_result, given_result)
