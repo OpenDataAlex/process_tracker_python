@@ -641,13 +641,13 @@ class ProcessTracker:
         process_list = list()
 
         processes = (
-            self.data_store.session.query(Process.process_id)
+            self.data_store.session.query(Process)
             .join(ScheduleFrequency)
             .filter(ScheduleFrequency.schedule_frequency_name == frequency)
         )
 
         for process in processes:
-            process_list.append(process.process_id)
+            process_list.append(process)
 
         return process_list
 

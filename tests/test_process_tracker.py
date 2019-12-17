@@ -2008,7 +2008,7 @@ class TestProcessTracker(unittest.TestCase):
 
         given_result = process.find_process_by_schedule_frequency(frequency="hourly")
 
-        expected_result = [process.process.process_id]
+        expected_result = [process.process]
 
         self.assertEqual(expected_result, given_result)
 
