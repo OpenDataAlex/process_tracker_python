@@ -2292,7 +2292,7 @@ class TestProcessTracker(unittest.TestCase):
     def test_ensure_nulls_caught_on_instantiation(self):
         """
         With the adding of the ability of have a process_tracking_id we have to allow for nulled values for process_name
-        and process_type.  If ProcessTracker is instantiated with either (or both) being null, an exception should be
+        .  If ProcessTracker is instantiated with process_name being null, an exception should be
         raised.
         :return:
         """
@@ -2301,6 +2301,20 @@ class TestProcessTracker(unittest.TestCase):
 
             ProcessTracker()
 
-        return self.assertTrue(
-            "process_name and process_type must be set." in str(context.exception)
+        return self.assertTrue("process_name must be set." in str(context.exception))
+
+    def test_ensure_process_type_returned_with_given_process_name(self):
+        """Ensuring that if just the process name is passed, the process type will be retrieved for that given process"""
+
+        self.process_tracker.change_run_status("completed")
+
+        test_process = ProcessTracker(
+            process_name="Testing Process Tracking Initialization",
+            actor_name="UnitTesting",
+            tool_name="Spark",
         )
+
+        given_result = test_process.process_type.process_type_name
+        expected_result = "Extract"
+
+        return self.assertEqual(expected_result, given_result)

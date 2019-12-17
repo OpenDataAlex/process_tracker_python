@@ -79,6 +79,7 @@ class ProcessTracker:
         ProcessTracker is the primary engine for tracking data integration processes.
         :param process_name: Name of the process being tracked.
         :param process_run_name: Optional name of the process run.
+        :param process_type: Type of process the process_name is.  Optional if process already exists.
         :param actor_name: Name of the person or environment runnning the process.
         :param tool_name: Name of the tool used to run the process.
         :param sources: A single source name or list of source names for the given process. If source_objects is set,
@@ -164,17 +165,15 @@ class ProcessTracker:
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
         else:
-            if process_name is None or process_type is None:
-                error_msg = "process_name and process_type must be set."
+            if process_name is None is None:
+                error_msg = "process_name must be set."
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
 
             self.actor = self.data_store.get_or_create_item(
                 model=Actor, actor_name=actor_name
             )
-            self.process_type = self.data_store.get_or_create_item(
-                model=ProcessType, process_type_name=process_type
-            )
+
             self.tool = self.data_store.get_or_create_item(
                 model=Tool, tool_name=tool_name
             )
@@ -188,13 +187,27 @@ class ProcessTracker:
                     model=ScheduleFrequency, schedule_frequency_name=schedule_frequency
                 )
 
-            self.process = self.data_store.get_or_create_item(
-                model=Process,
-                process_name=process_name,
-                process_type_id=self.process_type.process_type_id,
-                process_tool_id=self.tool.tool_id,
-                schedule_frequency_id=self.schedule_frequency.schedule_frequency_id,
-            )
+            if process_type is None:
+
+                self.process = self.data_store.get_or_create_item(
+                    model=Process, process_name=process_name, create=False
+                )
+
+                self.process_type = self.process.process_type
+
+            else:
+
+                self.process_type = self.data_store.get_or_create_item(
+                    model=ProcessType, process_type_name=process_type
+                )
+
+                self.process = self.data_store.get_or_create_item(
+                    model=Process,
+                    process_name=process_name,
+                    process_type_id=self.process_type.process_type_id,
+                    process_tool_id=self.tool.tool_id,
+                    schedule_frequency_id=self.schedule_frequency.schedule_frequency_id,
+                )
 
             # Dataset types should be loaded before source and target because they are also used there.
 
