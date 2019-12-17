@@ -2150,7 +2150,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
 
-        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+        new_process_tracker = ProcessTracker(process_tracking_id=process_run_id)
 
         expected_process_name_result = self.process_tracker.process_name
         given_process_name_result = new_process_tracker.process_name
@@ -2193,7 +2193,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
 
-        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+        new_process_tracker = ProcessTracker(process_tracking_id=process_run_id)
 
         given_sources = new_process_tracker.sources
         expected_sources = self.process_tracker.sources
@@ -2208,7 +2208,7 @@ class TestProcessTracker(unittest.TestCase):
         """
         process_run_id = self.process_tracker.process_tracking_run.process_tracking_id
 
-        new_process_tracker = ProcessTracker(process_run_id=process_run_id)
+        new_process_tracker = ProcessTracker(process_tracking_id=process_run_id)
 
         given_targets = new_process_tracker.targets
         expected_targets = self.process_tracker.targets

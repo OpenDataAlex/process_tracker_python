@@ -73,7 +73,7 @@ class ProcessTracker:
         config_location=None,
         dataset_types=None,
         schedule_frequency=None,
-        process_run_id=None,
+        process_tracking_id=None,
     ):
         """
         ProcessTracker is the primary engine for tracking data integration processes.
@@ -104,9 +104,9 @@ class ProcessTracker:
         :type dataset_types: list
         :param schedule_frequency: The general scheduling frequency for the process (i.e. hourly)
         :type schedule_frequency: string
-        :param process_run_id: If trying to access an already running process, provide the process run's id.
+        :param process_tracking_id: If trying to access an already running process, provide the process run's id.
         Object will be built for that specific process run.
-        :type process_run_id: int
+        :type process_tracking_id: int
         """
         self.config_location = config_location
         self.config = SettingsManager(config_location=self.config_location)
@@ -128,11 +128,13 @@ class ProcessTracker:
         self.process_status_failed = self.process_status_types["failed"]
         self.process_status_hold = self.process_status_types["on hold"]
 
-        if process_run_id is not None:
+        if process_tracking_id is not None:
             self.logger.info("Process run id provided.  Checking if exists.")
 
             process_run = self.data_store.get_or_create_item(
-                model=ProcessTracking, process_tracking_id=process_run_id, create=False
+                model=ProcessTracking,
+                process_tracking_id=process_tracking_id,
+                create=False,
             )
 
             if process_run is not None:
@@ -145,10 +147,10 @@ class ProcessTracker:
 
                 self.dataset_types = process_run.process.dataset_types
                 self.sources = self.determine_process_sources(
-                    process_run_id=process_run_id
+                    process_run_id=process_tracking_id
                 )
                 self.targets = self.determine_process_targets(
-                    process_run_id=process_run_id
+                    process_run_id=process_tracking_id
                 )
 
                 self.process_name = process_run.process.process_name
@@ -156,7 +158,9 @@ class ProcessTracker:
                 self.process_run_name = process_run.process_run_name
 
             else:
-                error_msg = "Process run not found based on id %s." % process_run_id
+                error_msg = (
+                    "Process run not found based on id %s." % process_tracking_id
+                )
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
         else:
@@ -325,7 +329,7 @@ class ProcessTracker:
         Based on the setting 'max_concurrent_failures', count the number of failures for that number of process runs.
         If the counts match, process will remain on hold.  If last run is 'on_hold' process will remain on hold.
         :param last_run_status: The status of the previous run
-        :param last_run_id:  The process_run_id of the previous run
+        :param last_run_id:  The process_tracking_id of the previous run
         :return:
         """
         self.logger.debug("Determining if process should be put on or remain on hold.")
@@ -362,7 +366,7 @@ class ProcessTracker:
 
     def determine_process_sources(self, process_run_id):
         """
-        Based on the process_run_id, find the given process' sources - either at the attribute, object, or source level
+        Based on the process_tracking_id, find the given process' sources - either at the attribute, object, or source level
         :param process_run_id: Process run identifier
         :type process_run_id: int
         :return: Array of source objects at lowest granularity.
@@ -425,7 +429,7 @@ class ProcessTracker:
 
     def determine_process_targets(self, process_run_id):
         """
-        Based on the process_run_id, find the given process' targets - either at the attribute, object, or source level
+        Based on the process_tracking_id, find the given process' targets - either at the attribute, object, or source level
         :param process_run_id: Process run identifier
         :type process_run_id: int
         :return: Array of source objects used as target for the process at lowest granularity.
