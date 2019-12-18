@@ -5,6 +5,10 @@ create table process_tracker.character_set_lkup
 	character_set_id int auto_increment
 		primary key,
 	character_set_name int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint character_set_lkup_character_set_name_uindex
 		unique (character_set_name)
 );
@@ -14,6 +18,10 @@ create table process_tracker.source_type_lkup
 	source_type_id int auto_increment
 		primary key,
 	source_type_name varchar(75) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint source_type_lkup_source_type_name_uindex
 		unique (source_type_name)
 );
@@ -23,6 +31,10 @@ create table schedule_frequency_lkup
 	schedule_frequency_id int auto_increment
 		primary key,
 	schedule_frequency_name varchar(25) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint schedule_frequency_lkup_schedule_frequency_name_uindex
 		unique (schedule_frequency_name)
 );
@@ -32,6 +44,10 @@ create table data_type_lkup
 	data_type_id int auto_increment
 		primary key,
 	data_type varchar(75) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint data_type_lkup_data_type_uindex
 		unique (data_type)
 );
@@ -42,6 +58,10 @@ create table contact_lkup
 		primary key,
 	contact_name varchar(250) not null,
 	contact_email varchar(750) null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint contact_lkup_contact_email_uindex
 		unique (contact_email),
 	constraint contact_lkup_contact_name_uindex
@@ -52,6 +72,10 @@ create table dataset_type_lkup
 (
 	dataset_type_id int auto_increment,
 	dataset_type varchar(250) null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint dataset_type_lkup_pk
 		primary key (dataset_type_id)
 )
@@ -67,6 +91,10 @@ create table actor_lkup
 	actor_id int auto_increment
 		primary key,
 	actor_name varchar(250) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint actor_name
 		unique (actor_name)
 );
@@ -79,6 +107,10 @@ create table extract_filetype_lkup
 	delimiter_char char null,
 	quote_char char null,
 	escape_char char null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint extract_filetype_lkup_extract_filetype_uindex
 		unique (extract_filetype)
 );
@@ -88,6 +120,10 @@ create table extract_compression_type_lkup
 	extract_compression_type_id int auto_increment
 		primary key,
 	extract_compression_type varchar(25) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint extract_compression_type_extract_compression_type_uindex
 		unique (extract_compression_type)
 );
@@ -97,6 +133,10 @@ create table error_type_lkup
 	error_type_id int auto_increment
 		primary key,
 	error_type_name varchar(250) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint error_type_name
 		unique (error_type_name)
 );
@@ -106,6 +146,10 @@ create table extract_status_lkup
 	extract_status_id int auto_increment
 		primary key,
 	extract_status_name varchar(75) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint extract_status_name
 		unique (extract_status_name)
 );
@@ -115,6 +159,10 @@ create table location_type_lkup
 	location_type_id int auto_increment
 		primary key,
 	location_type_name varchar(25) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint location_type_name
 		unique (location_type_name)
 );
@@ -128,6 +176,10 @@ create table location_lkup
 	location_type_id int null,
 	location_file_count int null,
 	location_bucket_name varchar(750) null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint location_name
 		unique (location_name),
 	constraint location_path
@@ -142,6 +194,10 @@ create table process_tracker.filesize_type_lkup
 		primary key,
 	filesize_type_name varchar(75) not null,
 	filesize_type_code char(2) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint filesize_type_lkup_filesize_type_code_uindex
 		unique (filesize_type_code),
 	constraint filesize_type_lkup_filesize_type_name_uindex
@@ -168,6 +224,10 @@ create table extract_tracking
 	extract_filetype_id int null,
 	extract_filesize numeric null,
 	extract_filesize_type_id int null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint extract_filename
 		unique (extract_filename),
 	constraint extract_tracking_fk03
@@ -193,6 +253,10 @@ create table process_tracker.extract_dependency
 (
 	parent_extract_id int not null,
 	child_extract_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (parent_extract_id, child_extract_id),
 	constraint extract_dependency_fk01
 		foreign key (parent_extract_id) references extract_tracking (extract_id),
@@ -206,6 +270,10 @@ create table process_status_lkup
 	process_status_id int auto_increment
 		primary key,
 	process_status_name varchar(75) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_status_name
 		unique (process_status_name)
 );
@@ -214,7 +282,11 @@ create table process_type_lkup
 (
 	process_type_id int auto_increment
 		primary key,
-	process_type_name varchar(250) not null
+	process_type_name varchar(250) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null
 );
 
 create table process_tracker.source_lkup
@@ -224,6 +296,10 @@ create table process_tracker.source_lkup
 	source_name varchar(250) not null,
 	source_type_id int default 1 not null ,
 	character_set_id int null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint source_name
 		unique (source_name),
 	constraint source_lkup_fk01
@@ -240,6 +316,10 @@ create table system_lkup
 		primary key,
 	system_key varchar(250) not null,
 	system_value varchar(250) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint system_key
 		unique (system_key)
 );
@@ -249,6 +329,10 @@ create table tool_lkup
 	tool_id int auto_increment
 		primary key,
 	tool_name varchar(250) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint tool_name
 		unique (tool_name)
 );
@@ -265,6 +349,10 @@ create table process
 	schedule_frequency_id int default 0 not null,
 	last_completed_run_date_time datetime not null,
 	last_errored_run_date_time datetime not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_name
 		unique (process_name),
 	constraint process_fk03
@@ -285,6 +373,10 @@ create table process_dependency
 (
 	parent_process_id int not null,
 	child_process_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (parent_process_id, child_process_id),
 	constraint process_dependency_ibfk_1
 		foreign key (parent_process_id) references process (process_id),
@@ -299,6 +391,10 @@ create table process_source
 (
 	source_id int not null,
 	process_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (source_id, process_id),
 	constraint process_source_ibfk_1
 		foreign key (source_id) references source_lkup (source_id),
@@ -313,6 +409,10 @@ create table process_target
 (
 	target_source_id int not null,
 	process_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (target_source_id, process_id),
 	constraint process_target_ibfk_1
 		foreign key (target_source_id) references source_lkup (source_id),
@@ -340,6 +440,10 @@ create table process_tracking
 	process_run_name varchar(250) null,
 	process_run_insert_count int default 0 not null,
 	process_run_update_count int default 0 not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_tracking_process_run_name_uindex
 		unique (process_run_name),
 	constraint process_tracking_ibfk_1
@@ -360,6 +464,10 @@ create table error_tracking
 	error_description varchar(750) null,
 	error_occurrence_date_time datetime not null,
 	process_tracking_id int null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint error_tracking_ibfk_1
 		foreign key (error_type_id) references error_type_lkup (error_type_id),
 	constraint error_tracking_ibfk_2
@@ -378,6 +486,10 @@ create table extract_process_tracking
 	process_tracking_id int not null,
 	extract_process_status_id int null,
 	extract_process_event_date_time datetime(6) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (extract_tracking_id, process_tracking_id),
 	constraint extract_process_tracking_ibfk_1
 		foreign key (extract_tracking_id) references extract_tracking (extract_id),
@@ -413,6 +525,10 @@ create table process_tracker.cluster_tracking_lkup
 	cluster_max_processing_unit varchar(3) null,
 	cluster_current_memory_usage int null,
 	cluster_current_process_usage int null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint cluster_tracking_cluster_name_uindex
 		unique (cluster_name)
 )
@@ -422,6 +538,10 @@ create table process_tracker.cluster_process
 (
 	cluster_id int not null,
 	process_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (cluster_id, process_id),
 	constraint cluster_process_fk01
 		foreign key (cluster_id) references process_tracker.cluster_tracking_lkup (cluster_id),
@@ -437,6 +557,10 @@ create table process_tracker.source_object_lkup
 	source_id int not null,
 	source_object_name varchar(250) null,
 	character_set_id int null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint source_object_lkup_udx01
 		unique (source_id, source_object_name),
 	constraint source_object_lkup_fk02
@@ -449,6 +573,10 @@ create table process_tracker.process_target_object
 (
 	process_id int not null,
 	target_object_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_target_object_pk
 		primary key (process_id, target_object_id),
 	constraint process_target_object_fk01
@@ -461,6 +589,10 @@ create table process_tracker.process_source_object
 (
 	process_id int not null,
 	source_object_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_source_object_pk
 		primary key (process_id, source_object_id),
 	constraint process_source_object_fk01
@@ -473,6 +605,10 @@ create table source_dataset_type
 (
 	source_id int not null,
 	dataset_type_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint source_dataset_type_pk
 		primary key (source_id, dataset_type_id),
 	constraint source_dataset_type_fk01
@@ -486,6 +622,10 @@ create table source_object_dataset_type
 (
 	source_object_id int not null,
 	dataset_type_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint source_object_dataset_type_pk
 		primary key (source_object_id, dataset_type_id),
 	constraint source_object_dataset_type_fk01
@@ -499,6 +639,10 @@ create table extract_dataset_type
 (
 	extract_id int not null,
 	dataset_type_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint extract_dataset_type_pk
 		primary key (extract_id, dataset_type_id),
 	constraint extract_dataset_type_fk01
@@ -512,6 +656,10 @@ create table process_dataset_type
 (
 	process_id int not null,
 	dataset_type_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_dataset_type_pk
 		primary key (process_id, dataset_type_id),
 	constraint process_dataset_type_fk01
@@ -525,6 +673,10 @@ create table source_contact
 (
 	source_id int not null,
 	contact_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (source_id, contact_id),
 	constraint source_contact_fk01
 		foreign key (source_id) references source_lkup (source_id),
@@ -536,6 +688,10 @@ create table process_contact
 (
 	process_id int not null,
 	contact_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (process_id, contact_id),
 	constraint process_contact_fk01
 		foreign key (process_id) references process (process_id),
@@ -559,6 +715,10 @@ create table source_object_attribute_lkup
 	is_key boolean default FALSE not null,
 	is_filter boolean default FALSE not null,
 	is_partition boolean default FALSE not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint source_object_attribute_lkup_udx01
 		unique (source_object_id, source_object_attribute_name),
 	constraint source_object_attribute_lkup_fk01
@@ -573,6 +733,10 @@ create table process_source_object_attribute
 	source_object_attribute_id int not null,
 	source_object_attribute_alias varchar(250) null,
 	source_object_attribute_expression varchar(250) null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (process_id, source_object_attribute_id),
 	constraint process_source_object_attribute_fk01
 		foreign key (process_id) references process (process_id),
@@ -586,6 +750,10 @@ create table if not exists process_target_object_attribute
 	target_object_attribute_id int not null,
 	target_object_attribute_alias varchar(250) null,
 	target_object_attribute_expression varchar(250) null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (process_id, target_object_attribute_id),
 	constraint process_target_object_attribute_fk01
 		foreign key (process_id) references process (process_id),
@@ -599,6 +767,10 @@ create table filter_type_lkup
 		primary key,
 	filter_type_code varchar(3) not null,
 	filter_type_name varchar(75) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint filter_type_lkup_filter_type_code_uindex
 		unique (filter_type_code),
 	constraint filter_type_lkup_filter_type_name_uindex
@@ -614,6 +786,10 @@ create table process_filter
 	filter_type_id int not null,
 	filter_value_string varchar(250) null,
 	filter_value_numeric decimal null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	constraint process_filter_udx
 		unique (process_id, source_object_attribute_id, filter_type_id),
 	constraint process_filter_fk01
@@ -628,6 +804,10 @@ create table process_tracker.extract_source
 (
 	extract_id int not null,
 	source_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (extract_id, source_id),
 	constraint extract_source_fk01
 		foreign key (extract_id) references process_tracker.extract_tracking (extract_id),
@@ -639,6 +819,10 @@ create table process_tracker.extract_source_object
 (
 	extract_id int not null,
 	source_object_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (extract_id, source_object_id),
 	constraint extract_source_object_fk01
 		foreign key (extract_id) references process_tracker.extract_tracking (extract_id),
@@ -650,6 +834,10 @@ create table process_tracker.source_location
 (
 	source_id int not null,
 	location_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (source_id, location_id),
 	constraint source_location_fk01
 		foreign key (source_id) references process_tracker.source_lkup (source_id),
@@ -661,6 +849,10 @@ create table process_tracker.source_object_location
 (
 	source_object_id int not null,
 	location_id int not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+    update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null,
 	primary key (source_object_id, location_id),
 	constraint source_object_location_fk01
 		foreign key (source_object_id) references process_tracker.source_object_lkup (source_object_id),

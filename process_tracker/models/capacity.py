@@ -5,10 +5,10 @@
 from sqlalchemy import Column, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import relationship
 
-from process_tracker.models.model_base import Base
+from process_tracker.models.model_base import Base, BaseColumn
 
 
-class Cluster(Base):
+class Cluster(Base, BaseColumn):
 
     __tablename__ = "cluster_tracking_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -34,7 +34,7 @@ class Cluster(Base):
         return "<Cluster (name=%s)>" % self.cluster_name
 
 
-class ClusterProcess(Base):
+class ClusterProcess(Base, BaseColumn):
 
     __tablename__ = "cluster_process"
     __table_args__ = {"schema": "process_tracker"}

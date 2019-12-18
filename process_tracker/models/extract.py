@@ -16,10 +16,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from process_tracker.models.model_base import Base
+from process_tracker.models.model_base import Base, BaseColumn
 
 
-class ExtractStatus(Base):
+class ExtractStatus(Base, BaseColumn):
 
     __tablename__ = "extract_status_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -42,7 +42,7 @@ class ExtractStatus(Base):
         )
 
 
-class ExtractCompressionType(Base):
+class ExtractCompressionType(Base, BaseColumn):
 
     __tablename__ = "extract_compression_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -63,7 +63,7 @@ class ExtractCompressionType(Base):
         return "<Extract Compression Type name=%s>" % (self.extract_compression_type)
 
 
-class ExtractFileType(Base):
+class ExtractFileType(Base, BaseColumn):
 
     __tablename__ = "extract_filetype_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -88,7 +88,7 @@ class ExtractFileType(Base):
         )
 
 
-class Extract(Base):
+class Extract(Base, BaseColumn):
 
     __tablename__ = "extract_tracking"
     __table_args__ = {"schema": "process_tracker"}
@@ -164,7 +164,7 @@ class Extract(Base):
         return str(Path(self.locations.location_path).joinpath(self.extract_filename))
 
 
-class ExtractDatasetType(Base):
+class ExtractDatasetType(Base, BaseColumn):
 
     __tablename__ = "extract_dataset_type"
     __table_args__ = {"schema": "process_tracker"}
@@ -194,7 +194,7 @@ class ExtractDatasetType(Base):
         )
 
 
-class ExtractDependency(Base):
+class ExtractDependency(Base, BaseColumn):
 
     __tablename__ = "extract_dependency"
     __table_args__ = {"schema": "process_tracker"}
@@ -223,7 +223,7 @@ class ExtractDependency(Base):
         )
 
 
-class ExtractProcess(Base):
+class ExtractProcess(Base, BaseColumn):
 
     __tablename__ = "extract_process_tracking"
     __table_args__ = {"schema": "process_tracker"}
@@ -263,7 +263,7 @@ class ExtractProcess(Base):
         )
 
 
-class ExtractSource(Base):
+class ExtractSource(Base, BaseColumn):
 
     __tablename__ = "extract_source"
     __table_args__ = {"schema": "process_tracker"}
@@ -294,7 +294,7 @@ class ExtractSource(Base):
         )
 
 
-class ExtractSourceObject(Base):
+class ExtractSourceObject(Base, BaseColumn):
 
     __tablename__ = "extract_source_object"
     __table_args__ = {"schema": "process_tracker"}
@@ -325,7 +325,7 @@ class ExtractSourceObject(Base):
         )
 
 
-class FileSizeType(Base):
+class FileSizeType(Base, BaseColumn):
     __tablename__ = "filesize_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
 
@@ -349,7 +349,7 @@ class FileSizeType(Base):
         )
 
 
-class LocationType(Base):
+class LocationType(Base, BaseColumn):
 
     __tablename__ = "location_type_lkup"
     __table_args__ = {"schema": "process_tracker"}
@@ -374,7 +374,7 @@ class LocationType(Base):
         )
 
 
-class Location(Base):
+class Location(Base, BaseColumn):
 
     __tablename__ = "location_lkup"
     __table_args__ = {"schema": "process_tracker"}
