@@ -921,3 +921,106 @@ create unique index filesize_type_lkup_filesize_type_name_uindex
 create unique index filesize_type_lkup_udx03
 	on filesize_type_lkup (filesize_type_code, filesize_type_name);
 
+
+CREATE OR REPLACE FUNCTION update_date_time_trigger()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        NEW."update_date_time" = NOW();
+        RETURN NEW;
+    END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER actor_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.actor_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER character_set_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.character_set_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER cluster_process_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.cluster_process FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER cluster_tracking_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.cluster_tracking_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER contact_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.contact_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER data_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.data_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER dataset_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.dataset_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER error_tracking_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.error_tracking FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER error_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.error_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_compression_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_compression_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_dataset_type_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_dataset_type FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_dependency_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_dependency FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_filetype_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_filetype_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_process_tracking_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_process_tracking FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_source_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_source FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_source_object_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_source_object FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_status_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_status_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER extract_tracking_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.extract_tracking FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER filesize_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.filesize_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER filter_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.filter_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER location_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.location_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_contact_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_contact FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_dataset_type_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_dataset_type FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_dependency_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_dependency FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_filter_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_filter FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_source_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_source FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_source_object_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_source_object FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_source_object_attribute_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_source_object_attribute FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_status_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_status_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_target_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_target FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_target_object_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_target_object FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_target_object_attribute_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_target_object_attribute FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_tracking_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_tracking FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER process_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.process_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER schedule_frequency_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.schedule_frequency_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_contact_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_contact FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_dataset_type_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_dataset_type FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_location_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_location FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_object_attribute_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_object_attribute_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_object_dataset_type_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_object_dataset_type FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_object_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_object_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_object_location_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_object_location FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER source_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.source_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER system_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.system_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER tool_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.tool_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
