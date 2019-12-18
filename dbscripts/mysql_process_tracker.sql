@@ -286,7 +286,7 @@ create table process_type_lkup
 	created_date_time timestamp default CURRENT_TIMESTAMP not null,
 	created_by int default 0 not null,
 	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
-	updated_by int default 0 not null,
+	updated_by int default 0 not null
 );
 
 create table process_tracker.source_lkup
