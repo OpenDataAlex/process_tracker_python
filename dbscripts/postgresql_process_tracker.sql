@@ -12,7 +12,11 @@ create table dataset_type_lkup
 	dataset_type_id serial not null
 		constraint dataset_type_lkup_pk
 			primary key,
-	dataset_type varchar(250)
+	dataset_type varchar(250),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table dataset_type_lkup is 'High level of dataset type categories';
@@ -27,7 +31,11 @@ create table error_type_lkup
 	error_type_id serial not null
 		constraint error_type_lkup_pk
 			primary key,
-	error_type_name varchar(250) not null
+	error_type_name varchar(250) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table error_type_lkup is 'Types of errors that are being tracked.';
@@ -47,7 +55,11 @@ create table error_tracking
 	error_type_id integer not null,
 	process_tracking_id integer not null,
 	error_description varchar(750),
-	error_occurrence_date_time timestamp not null
+	error_occurrence_date_time timestamp not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table error_tracking is 'Tracking of process errors';
@@ -68,7 +80,11 @@ create table tool_lkup
 	tool_id serial not null
 		constraint tool_lkup_pk
 			primary key,
-	tool_name varchar(250) not null
+	tool_name varchar(250) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table tool_lkup is 'List of tools that are used to run processes';
@@ -83,7 +99,11 @@ create table process_status_lkup
 	process_status_id serial not null
 		constraint process_status_lkup_pk
 			primary key,
-	process_status_name varchar(75) not null
+	process_status_name varchar(75) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_status_lkup is 'Process status states';
@@ -98,7 +118,11 @@ create table process_type_lkup
 	process_type_id serial not null
 		constraint process_type_lkup_pk
 			primary key,
-	process_type_name varchar(250) not null
+	process_type_name varchar(250) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_type_lkup is 'Valid process types for processes';
@@ -115,7 +139,11 @@ create table actor_lkup
 	actor_id serial not null
 		constraint actor_lkup_pk
 			primary key,
-	actor_name varchar(250) not null
+	actor_name varchar(250) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table actor_lkup is 'List of developers or applications that can run processes.';
@@ -130,7 +158,11 @@ create table extract_status_lkup
 	extract_status_id serial not null
 		constraint extract_status_lkup_pk
 			primary key,
-	extract_status_name varchar(75) not null
+	extract_status_name varchar(75) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table extract_status_lkup is 'List of valid extract processing statuses.';
@@ -145,7 +177,11 @@ create table location_type_lkup
 	location_type_id serial not null
 		constraint location_type_lkup_pk
 			primary key,
-	location_type_name varchar(25) not null
+	location_type_name varchar(25) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table location_type_lkup is 'Listing of location types';
@@ -166,7 +202,11 @@ create table location_lkup
 		constraint location_lkup_fk01
 			references location_type_lkup,
 	location_file_count integer,
-	location_bucket_name varchar(750)
+	location_bucket_name varchar(750),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table location_lkup is 'Locations where files are located.';
@@ -185,7 +225,11 @@ create table system_lkup
 		constraint system_lkup_pk
 			primary key,
 	system_key varchar(250) not null,
-	system_value varchar(250) not null
+	system_value varchar(250) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table system_lkup is 'ProcessTracker system information';
@@ -206,7 +250,11 @@ create table cluster_tracking_lkup
 	cluster_max_processing integer,
 	cluster_max_processing_unit varchar(3),
 	cluster_current_memory_usage integer,
-	cluster_current_process_usage integer
+	cluster_current_process_usage integer,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table cluster_tracking_lkup is 'Capacity cluster tracking';
@@ -222,7 +270,11 @@ create table contact_lkup
 		constraint contact_lkup_pk
 			primary key,
 	contact_name varchar(250) not null,
-	contact_email varchar(750)
+	contact_email varchar(750),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table contact_lkup owner to pt_admin;
@@ -238,7 +290,11 @@ create table extract_compression_type_lkup
 	extract_compression_type_id serial not null
 		constraint extract_compression_type_lkup_pk
 			primary key,
-	extract_compression_type varchar(25) not null
+	extract_compression_type varchar(25) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table extract_compression_type_lkup owner to pt_admin;
@@ -255,7 +311,11 @@ create table extract_filetype_lkup
 	extract_filetype varchar(75) not null,
 	delimiter_char char,
 	quote_char char,
-	escape_char char
+	escape_char char,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table extract_filetype_lkup owner to pt_admin;
@@ -268,7 +328,11 @@ create table data_type_lkup
 	data_type_id serial not null
 		constraint data_type_lkup_pk
 			primary key,
-	data_type varchar(75) not null
+	data_type varchar(75) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table data_type_lkup owner to pt_admin;
@@ -281,7 +345,11 @@ create table schedule_frequency_lkup
 	schedule_frequency_id serial not null
 		constraint schedule_frequency_lkup_pk
 			primary key,
-	schedule_frequency_name varchar(25) not null
+	schedule_frequency_name varchar(25) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table schedule_frequency_lkup owner to pt_admin;
@@ -304,7 +372,11 @@ create table process
 		constraint process_fk04
 			references schedule_frequency_lkup,
 	last_completed_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
-	last_errored_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null
+	last_errored_run_date_time timestamp default '1900-01-01 00:00:00'::timestamp without time zone not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process is 'Processes being tracked';
@@ -333,7 +405,11 @@ create table process_dependency
 		constraint process_dependency_fk02
 			references process,
 	constraint process_dependency_pk
-		primary key (child_process_id, parent_process_id)
+		primary key (child_process_id, parent_process_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_dependency is 'Dependency tracking between processes.';
@@ -367,7 +443,11 @@ create table process_tracking
 	is_latest_run boolean default false,
 	process_run_name varchar(250) null,
 	process_run_insert_count int default 0 not null,
-	process_run_update_count int default 0 not null
+	process_run_update_count int default 0 not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_tracking is 'Tracking table of process runs.';
@@ -415,7 +495,11 @@ create table cluster_process
 		constraint cluster_process_fk02
 			references process,
 	constraint cluster_process_pk
-		primary key (cluster_id, process_id)
+		primary key (cluster_id, process_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table cluster_process is 'Relationship tracking between processes and performance clusters.';
@@ -431,7 +515,11 @@ create table process_dataset_type
 		constraint process_dataset_type_fk02
 			references dataset_type_lkup,
 	constraint process_dataset_type_pk
-		primary key (process_id, dataset_type_id)
+		primary key (process_id, dataset_type_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_dataset_type is 'Relationship between process and dataset type';
@@ -447,7 +535,11 @@ create table process_contact
 		constraint process_contact_fk02
 			references contact_lkup,
 	constraint process_contact_pk
-		primary key (process_id, contact_id)
+		primary key (process_id, contact_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table process_contact owner to pt_admin;
@@ -461,7 +553,11 @@ create table filter_type_lkup
 		constraint filter_type_lkup_pk
 			primary key,
 	filter_type_code varchar(3) not null,
-	filter_type_name varchar(75) not null
+	filter_type_name varchar(75) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table filter_type_lkup owner to pt_admin;
@@ -477,7 +573,11 @@ create table source_type_lkup
 	source_type_id serial not null
 		constraint source_type_lkup_pk
 			primary key,
-	source_type_name varchar(75) not null
+	source_type_name varchar(75) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table source_type_lkup owner to pt_admin;
@@ -490,7 +590,11 @@ create table character_set_lkup
 	character_set_id serial not null
 		constraint character_set_lkup_pk
 			primary key,
-	character_set_name varchar(75) not null
+	character_set_name varchar(75) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table character_set_lkup owner to pt_admin;
@@ -506,7 +610,11 @@ create table source_lkup
 			references source_type_lkup,
 	character_set_id integer
 		constraint source_lkup_fk02
-			references character_set_lkup
+			references character_set_lkup,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table source_lkup is 'Source system where data originates.';
@@ -525,7 +633,11 @@ create table process_source
 		constraint process_source_fk02
 			references process,
 	constraint process_source_pk
-		primary key (source_id, process_id)
+		primary key (source_id, process_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_source is 'List of sources for given processes';
@@ -541,7 +653,11 @@ create table process_target
 		constraint process_target_fk02
 			references process,
 	constraint process_target_pk
-		primary key (target_source_id, process_id)
+		primary key (target_source_id, process_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_target is 'List of targets for given processes';
@@ -559,7 +675,11 @@ create table source_object_lkup
 	source_object_name varchar(250),
 	character_set_id integer
 		constraint source_object_lkup_fk02
-			references character_set_lkup
+			references character_set_lkup,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table source_object_lkup is 'Reference table for source/target objects.';
@@ -578,7 +698,11 @@ create table process_target_object
 		constraint process_target_object_fk02
 			references source_object_lkup,
 	constraint process_target_object_pk
-		primary key (process_id, target_object_id)
+		primary key (process_id, target_object_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_target_object is 'Relationship between processes and target objects';
@@ -594,7 +718,11 @@ create table process_source_object
 		constraint process_source_object_fk02
 			references source_object_lkup,
 	constraint process_source_object_pk
-		primary key (process_id, source_object_id)
+		primary key (process_id, source_object_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table process_source_object is 'Relationship between processes and source objects';
@@ -610,7 +738,11 @@ create table source_dataset_type
 		constraint source_dataset_type_fk02
 			references dataset_type_lkup,
 	constraint source_dataset_type_pk
-		primary key (source_id, dataset_type_id)
+		primary key (source_id, dataset_type_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table source_dataset_type is 'Relationship between source and dataset type';
@@ -626,7 +758,11 @@ create table source_object_dataset_type
 		constraint source_object_dataset_type_fk02
 			references dataset_type_lkup,
 	constraint source_object_dataset_type_pk
-		primary key (source_object_id, dataset_type_id)
+		primary key (source_object_id, dataset_type_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table source_object_dataset_type is 'Relationship between source object and dataset type';
@@ -642,7 +778,11 @@ create table source_contact
 		constraint source_contact_fk02
 			references contact_lkup,
 	constraint source_contact_pk
-		primary key (source_id, contact_id)
+		primary key (source_id, contact_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table source_contact owner to pt_admin;
@@ -667,7 +807,11 @@ create table source_object_attribute_lkup
 	default_value_number numeric,
 	is_key boolean default false not null,
 	is_filter boolean default false not null,
-	is_partition boolean default false not null
+	is_partition boolean default false not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table source_object_attribute_lkup owner to pt_admin;
@@ -686,7 +830,11 @@ create table process_source_object_attribute
 	source_object_attribute_alias varchar(250),
 	source_object_attribute_expression varchar(250),
 	constraint process_source_object_attribute_pk
-		primary key (process_id, source_object_attribute_id)
+		primary key (process_id, source_object_attribute_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table process_source_object_attribute owner to pt_admin;
@@ -702,7 +850,11 @@ create table process_target_object_attribute
 	target_object_attribute_alias varchar(250),
 	target_object_attribute_expression varchar(250),
 	constraint process_target_object_attribute_pk
-		primary key (process_id, target_object_attribute_id)
+		primary key (process_id, target_object_attribute_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table process_target_object_attribute owner to pt_admin;
@@ -722,7 +874,11 @@ create table process_filter
 		constraint process_filter_fk03
 			references filter_type_lkup,
 	filter_value_string varchar(250),
-	filter_value_numeric numeric
+	filter_value_numeric numeric,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table process_filter owner to pt_admin;
@@ -739,7 +895,11 @@ create table source_location
 		constraint source_location_fk02
 			references location_lkup,
 	constraint source_location_pk
-		primary key (source_id, location_id)
+		primary key (source_id, location_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table source_location owner to pt_admin;
@@ -753,7 +913,11 @@ create table source_object_location
 		constraint source_object_location_fk02
 			references location_lkup,
 	constraint source_object_location_pk
-		primary key (source_object_id, location_id)
+		primary key (source_object_id, location_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table source_object_location owner to pt_admin;
@@ -767,7 +931,11 @@ create table filesize_type_lkup
 		constraint filesize_type_lkup_pk
 			primary key,
 	filesize_type_name varchar(75) not null,
-	filesize_type_code char(2) not null
+	filesize_type_code char(2) not null,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table filesize_type_lkup owner to pt_admin;
@@ -803,7 +971,11 @@ create table extract_tracking
 	extract_filesize numeric,
 	extract_filesize_type_id integer
 		constraint extract_tracking_fk06
-			references filesize_type_lkup
+			references filesize_type_lkup,
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table extract_tracking is 'Tracking table for all extract/staging data files.';
@@ -845,7 +1017,11 @@ create table extract_process_tracking
 		constraint extract_process_tracking_fk03
 			references extract_status_lkup,
 	constraint extract_process_tracking_pk
-		primary key (process_tracking_id, extract_tracking_id)
+		primary key (process_tracking_id, extract_tracking_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table extract_process_tracking is 'Showing which processes have impacted which extracts';
@@ -861,7 +1037,11 @@ create table extract_dependency
 		constraint extract_dependency_fk02
 			references extract_tracking,
 	constraint extract_dependency_pk
-		primary key (parent_extract_id, child_extract_id)
+		primary key (parent_extract_id, child_extract_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table extract_dependency is 'Table tracking interdependencies between extract files.';
@@ -877,7 +1057,11 @@ create table extract_dataset_type
 		constraint extract_dataset_type_fk02
 			references dataset_type_lkup,
 	constraint extract_dataset_type_pk
-		primary key (extract_id, dataset_type_id)
+		primary key (extract_id, dataset_type_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 comment on table extract_dataset_type is 'Relationship between extract file and dataset type';
@@ -893,7 +1077,11 @@ create table extract_source
 		constraint extract_source_fk01
 			references source_lkup,
 	constraint extract_source_pk
-		primary key (extract_id, source_id)
+		primary key (extract_id, source_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table extract_source owner to pt_admin;
@@ -907,7 +1095,11 @@ create table extract_source_object
 		constraint extract_source_object_fk02
 			references source_object_lkup,
 	constraint extract_source_object_pk
-		primary key (extract_id, source_object_id)
+		primary key (extract_id, source_object_id),
+	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	created_by integer default 0 not null,
+	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
+	updated_by integer default 0 not null
 );
 
 alter table extract_source_object owner to pt_admin;
