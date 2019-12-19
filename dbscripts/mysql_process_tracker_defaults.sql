@@ -55,7 +55,7 @@ INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) 
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (3, 'Internal');
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (4, 'External');
 
-INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (0, 'Undefined');
-INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (3, 'Hard');
-INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (4, 'Soft');
+INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (1, 'Undefined');
+INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (2, 'Hard');
+INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (3, 'Soft');
 

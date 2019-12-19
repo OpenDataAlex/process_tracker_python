@@ -421,7 +421,7 @@ create table process_dependency
 			references process,
 	constraint process_dependency_pk
 		primary key (child_process_id, parent_process_id),
-	dependency_type_id int default 0 not null
+	dependency_type_id int default 1 not null
 	    constraint process_dependency_fk03
 		    references dependency_type_lkup,
 	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
@@ -1054,7 +1054,7 @@ create table extract_dependency
 	child_extract_id integer not null
 		constraint extract_dependency_fk02
 			references extract_tracking,
-	dependency_type_id int default 0 not null
+	dependency_type_id int default 1 not null
 	    constraint extract_dependency_fk03
 		    references dependency_type_lkup,
 	constraint extract_dependency_pk

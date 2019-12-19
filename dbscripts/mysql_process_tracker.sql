@@ -266,7 +266,7 @@ create table process_tracker.extract_dependency
 (
 	parent_extract_id int not null,
 	child_extract_id int not null,
-	dependency_type_id int default 0 not null,
+	dependency_type_id int default 1 not null,
 	created_date_time timestamp default CURRENT_TIMESTAMP not null,
 	created_by int default 0 not null,
 	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
@@ -389,7 +389,7 @@ create table process_dependency
 (
 	parent_process_id int not null,
 	child_process_id int not null,
-	dependency_type_id int default 0 not null,
+	dependency_type_id int default 1 not null,
 	created_date_time timestamp default CURRENT_TIMESTAMP not null,
 	created_by int default 0 not null,
 	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
