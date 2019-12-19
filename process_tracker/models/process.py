@@ -18,6 +18,26 @@ from sqlalchemy.orm import relationship
 from process_tracker.models.model_base import default_date, Base, BaseColumn
 
 
+class DependencyType(Base, BaseColumn):
+
+    __tablename__ = "dependency_type_lkup"
+    __table_args__ = {"schema": "process_tracker"}
+
+    dependency_type_id = Column(
+        Integer,
+        Sequence(
+            "dependency_type_lkup_dependency_type_id_seq", schema="process_tracker"
+        ),
+        primary_key=True,
+        nullable=False,
+    )
+    dependency_type_name = Column(String(75), unique=True, nullable=False)
+
+    def __repr__(self):
+
+        return "<DependencyType (name=%s)>" % self.dependency_type_name
+
+
 class ErrorType(Base, BaseColumn):
 
     __tablename__ = "error_type_lkup"
@@ -472,6 +492,12 @@ class ProcessDependency(Base, BaseColumn):
         ForeignKey("process_tracker.process.process_id"),
         primary_key=True,
         nullable=False,
+    )
+    dependency_type_id = Column(
+        Integer,
+        ForeignKey("process_tracker.dependency_type_lkup.dependency_type_id"),
+        nullable=False,
+        default=0,
     )
 
     child_process = relationship("Process", foreign_keys=[child_process_id])

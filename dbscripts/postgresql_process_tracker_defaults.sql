@@ -53,3 +53,7 @@ INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) 
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (2, 'Database');
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (3, 'Internal');
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (4, 'External');
+
+INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (0, 'Undefined');
+INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (1, 'Hard');
+INSERT INTO process_tracker.dependency_type_lkup (dependency_type_id, dependency_type_name) VALUES (2, 'Soft');

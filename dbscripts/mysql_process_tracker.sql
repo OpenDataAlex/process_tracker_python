@@ -1,5 +1,18 @@
 USE process_tracker;
 
+create table process_tracker.dependency_type_lkup
+(
+	dependency_type_id int auto_increment
+		primary key,
+	dependency_type_name varchar(75) not null,
+	created_date_time timestamp default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+	updated_by int default 0 not null,
+	constraint dependency_type_lkup_dependency_type_name_uindex
+		unique (dependency_type_name)
+);
+
 create table process_tracker.character_set_lkup
 (
 	character_set_id int auto_increment
@@ -253,6 +266,7 @@ create table process_tracker.extract_dependency
 (
 	parent_extract_id int not null,
 	child_extract_id int not null,
+	dependency_type_id int default 0 not null,
 	created_date_time timestamp default CURRENT_TIMESTAMP not null,
 	created_by int default 0 not null,
 	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
@@ -261,7 +275,9 @@ create table process_tracker.extract_dependency
 	constraint extract_dependency_fk01
 		foreign key (parent_extract_id) references extract_tracking (extract_id),
 	constraint extract_dependency_fk02
-		foreign key (child_extract_id) references extract_tracking (extract_id)
+		foreign key (child_extract_id) references extract_tracking (extract_id),
+	constraint extract_dependency_fk03
+		foreign key (dependency_type_id) references dependency_type_lkup (dependency_type_id)
 )
 comment 'Table tracking interdependencies between extract files.';
 
@@ -373,6 +389,7 @@ create table process_dependency
 (
 	parent_process_id int not null,
 	child_process_id int not null,
+	dependency_type_id int default 0 not null,
 	created_date_time timestamp default CURRENT_TIMESTAMP not null,
 	created_by int default 0 not null,
 	update_date_time timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP not null,
@@ -381,7 +398,9 @@ create table process_dependency
 	constraint process_dependency_ibfk_1
 		foreign key (parent_process_id) references process (process_id),
 	constraint process_dependency_ibfk_2
-		foreign key (child_process_id) references process (process_id)
+		foreign key (child_process_id) references process (process_id),
+	constraint process_dependency_fk03
+		foreign key (dependency_type_id) references dependency_type_lkup (dependency_type_id)
 );
 
 create index child_process_id

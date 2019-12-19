@@ -7,6 +7,21 @@ create schema process_tracker;
 
 alter schema process_tracker owner to pt_admin;
 
+create table process_tracker.dependency_type_lkup
+(
+	dependency_type_id serial not null
+		constraint dependency_type_lkup_pk
+			primary key,
+	dependency_type_name varchar(75) not null,
+	created_date_time timestamptz default CURRENT_TIMESTAMP not null,
+	created_by int default 0 not null,
+	update_date_time timestamptz default CURRENT_TIMESTAMP not null,
+	updated_by int default 0 not null
+);
+
+create unique index dependency_type_lkup_dependency_type_name_uindex
+	on process_tracker.dependency_type_lkup (dependency_type_name);
+
 create table dataset_type_lkup
 (
 	dataset_type_id serial not null
@@ -406,6 +421,9 @@ create table process_dependency
 			references process,
 	constraint process_dependency_pk
 		primary key (child_process_id, parent_process_id),
+	dependency_type_id int default 0 not null
+	    constraint process_dependency_fk03
+		    references dependency_type_lkup,
 	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
 	created_by integer default 0 not null,
 	update_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
@@ -1036,6 +1054,9 @@ create table extract_dependency
 	child_extract_id integer not null
 		constraint extract_dependency_fk02
 			references extract_tracking,
+	dependency_type_id int default 0 not null
+	    constraint extract_dependency_fk03
+		    references dependency_type_lkup,
 	constraint extract_dependency_pk
 		primary key (parent_extract_id, child_extract_id),
 	created_date_time timestamp with time zone default CURRENT_TIMESTAMP not null,
@@ -1136,6 +1157,8 @@ CREATE TRIGGER data_type_lkup_update_date_time_trg BEFORE UPDATE
     ON process_tracker.data_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
 CREATE TRIGGER dataset_type_lkup_update_date_time_trg BEFORE UPDATE
     ON process_tracker.dataset_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
+CREATE TRIGGER dependency_type_lkup_update_date_time_trg BEFORE UPDATE
+    ON process_tracker.dependency_type_lkup FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
 CREATE TRIGGER error_tracking_update_date_time_trg BEFORE UPDATE
     ON process_tracker.error_tracking FOR EACH ROW EXECUTE PROCEDURE update_date_time_trigger();
 CREATE TRIGGER error_type_lkup_update_date_time_trg BEFORE UPDATE

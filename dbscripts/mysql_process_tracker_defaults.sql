@@ -54,3 +54,4 @@ INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) 
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (2, 'Database');
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (3, 'Internal');
 INSERT INTO process_tracker.source_type_lkup (source_type_id, source_type_name) VALUES (4, 'External');
+
