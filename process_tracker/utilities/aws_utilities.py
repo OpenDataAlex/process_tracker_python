@@ -15,6 +15,11 @@ class AwsUtilities:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(self.log_level)
 
+        logging.getLogger("boto3").setLevel(logging.CRITICAL)
+        logging.getLogger("botocore").setLevel(logging.CRITICAL)
+        logging.getLogger("s3transfer").setLevel(logging.CRITICAL)
+        logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+
         self.s3 = boto3.resource("s3")
 
         self.url_match = re.compile(
