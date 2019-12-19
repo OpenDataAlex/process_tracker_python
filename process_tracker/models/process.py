@@ -497,7 +497,7 @@ class ProcessDependency(Base, BaseColumn):
         Integer,
         ForeignKey("process_tracker.dependency_type_lkup.dependency_type_id"),
         nullable=False,
-        default=0,
+        default=1,
     )
 
     child_process = relationship("Process", foreign_keys=[child_process_id])

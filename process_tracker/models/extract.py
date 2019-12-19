@@ -215,7 +215,7 @@ class ExtractDependency(Base, BaseColumn):
         Integer,
         ForeignKey("process_tracker.dependency_type_lkup.dependency_type_id"),
         nullable=False,
-        default=0,
+        default=1,
     )
 
     child_extract = relationship("Extract", foreign_keys=[child_extract_id])
