@@ -93,21 +93,45 @@ class ExtractTracker:
         self.extract_status_deleted = self.extract_status_types["deleted"]
         self.extract_status_error = self.extract_status_types["error"]
 
-        if extract_id is not None:
+        self.compression_type = compression_type
+        self.compression_type_id = None
+        self.dataset_types = None
+        self.extract = None
+        self.extract_id = extract_id
+        self.extract_process = None
+        self.filename = filename
+        self.file_size = file_size
+        self.filetype = filetype
+        self.full_filename = None
+        self.location = location
+        self.location_name = location_name
+        self.location_path = location_path
+        self.sources = None
+        self.source_objects = None
+        self.status = status
+
+        self.initialize_extract_tracker()
+
+    def initialize_extract_tracker(self):
+        """
+        Initialize extract_tracker object based on values passed on call.
+        :return:
+        """
+
+        if self.extract_id is not None:
             self.logger.info("Extract id provided.  Attempting to reconstruct.")
 
-            extract = self.data_store.get_or_create_item(
-                model=Extract, extract_id=extract_id, create=False
+            self.extract = self.data_store.get_or_create_item(
+                model=Extract, extract_id=self.extract_id, create=False
             )
-            self.filename = extract.extract_filename
-            self.location = extract.locations
-            self.compression_type = extract.compression_type
+            self.filename = self.extract.extract_filename
+            self.location = self.extract.locations
+            self.compression_type = self.extract.compression_type
             if self.compression_type is None:
                 self.compression_type_id = None
             else:
                 self.compression_type_id = self.compression_type.compression_type_id
-            self.filetype = extract.extract_filetype
-            self.extract = extract
+            self.filetype = self.extract.extract_filetype
             self.full_filename = self.get_full_filename()
             self.dataset_types = self.get_dataset_types()
             self.extract_process = self.retrieve_extract_process()
@@ -126,60 +150,60 @@ class ExtractTracker:
                 self.file_size = None
 
         else:
-            if filename is None:
+            if self.filename is None:
                 error_msg = "Filename must be provided."
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
 
-            self.filename = filename
-
-            if location is not None:
+            if self.location is not None:
                 self.logger.info("Location object provided.")
-                self.location = location
-            elif location_path is not None:
+                self.location = self.location
+            elif self.location_path is not None:
                 self.logger.info("Location path provided.  Creating Location object.")
                 self.location = LocationTracker(
-                    location_name=location_name,
-                    location_path=location_path,
+                    location_name=self.location_name,
+                    location_path=self.location_path,
                     data_store=self.data_store,
                 )
             else:
                 raise Exception("A location object or location_path must be provided.")
 
-            if compression_type is not None:
+            if self.compression_type is not None:
                 self.logger.info("Finding compression type.")
                 try:
                     self.compression_type = self.data_store.get_or_create_item(
                         model=ExtractCompressionType,
                         create=False,
-                        extract_compression_type=compression_type,
+                        extract_compression_type=self.compression_type,
                     )
                 except Exception:
-                    error_msg = "%s is not a valid compression type." % compression_type
+                    error_msg = (
+                        "%s is not a valid compression type." % self.compression_type
+                    )
                     self.logger.error(error_msg)
                     raise Exception(error_msg)
 
                 self.compression_type_id = (
                     self.compression_type.extract_compression_type_id
                 )
-            else:
-                self.compression_type_id = None
 
-            if filetype is not None:
+            if self.filetype is not None:
                 self.logger.info(
                     "File type provided.  Verifying it is a valid filetype."
                 )
                 try:
                     self.filetype = self.data_store.get_or_create_item(
-                        model=ExtractFileType, create=False, extract_filetype=filetype
+                        model=ExtractFileType,
+                        create=False,
+                        extract_filetype=self.filetype,
                     )
                 except Exception:
-                    error_msg = "%s is not a valid file type." % filetype
+                    error_msg = "%s is not a valid file type." % self.filetype
                     self.logger.error(error_msg)
                     raise Exception(error_msg)
             else:
                 # Need to try to determine the filetype based on the extension of the filename.
-                file_extension = os.path.splitext(filename)[1]
+                file_extension = os.path.splitext(self.filename)[1]
                 file_extension = file_extension.replace(".", "")
                 self.logger.info(
                     "Trying to find record for file extension: %s" % file_extension
@@ -194,23 +218,23 @@ class ExtractTracker:
 
             self.extract = self.data_store.get_or_create_item(
                 model=Extract,
-                extract_filename=filename,
+                extract_filename=self.filename,
                 extract_location_id=self.location.location.location_id,
                 extract_compression_type_id=self.compression_type_id,
                 extract_filetype_id=self.filetype.extract_filetype_id,
             )
 
-            self.full_filename = self.get_full_filename(location_path=location_path)
+            self.full_filename = self.get_full_filename(
+                location_path=self.location_path
+            )
+
+            self.extract_process = self.retrieve_extract_process()
 
             if self.process_run.dataset_types is not None:
                 self.logger.info("Associating dataset type(s) with extract.")
                 self.dataset_types = self.register_extract_dataset_types(
                     dataset_types=self.process_run.dataset_types
                 )
-            else:
-                self.dataset_types = None
-
-            self.extract_process = self.retrieve_extract_process()
 
             if self.process_run.source_objects is not None:
                 self.logger.info(
@@ -232,22 +256,19 @@ class ExtractTracker:
 
             else:
                 self.logger.info("No source system(s) to associate to.")
-                self.sources = None
 
-            if status is not None:
+            if self.status is not None:
                 self.logger.info("Status was provided by user.")
-                self.change_extract_status(new_status=status)
+                self.change_extract_status(new_status=self.status)
             else:
                 self.logger.info("Status was not provided.  Initializing.")
                 self.extract.extract_status_id = self.extract_status_initializing
 
-            if file_size is not None:
-                split_filesize = self.file_size_splitter(file_size=file_size)
+            if self.file_size is not None:
+                split_filesize = self.file_size_splitter(file_size=self.file_size)
 
                 self.extract.extract_filesize = split_filesize[0]
                 self.extract.extract_filesize_type = split_filesize[1]
-
-            self.file_size = file_size
 
             self.session.commit()
 

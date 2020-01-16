@@ -129,12 +129,41 @@ class ProcessTracker:
         self.process_status_failed = self.process_status_types["failed"]
         self.process_status_hold = self.process_status_types["on hold"]
 
-        if process_tracking_id is not None:
+        self.process_name = process_name
+        self.process_run_name = process_run_name
+        self.process_type = process_type
+        self.actor_name = actor_name
+        self.tool_name = tool_name
+        self.sources = sources
+        self.targets = targets
+        self.source_objects = source_objects
+        self.target_objects = target_objects
+        self.source_object_attributes = source_object_attributes
+        self.target_object_attributes = target_object_attributes
+        self.dataset_types = dataset_types
+        self.schedule_frequency = schedule_frequency
+        self.process_tracking_id = process_tracking_id
+
+        self.actor = None
+        self.tool = None
+        self.process = None
+        self.process_tracking_run = None
+
+        self.initialize_process_tracker()
+
+    def initialize_process_tracker(self):
+        """
+        Based on values passed through init, initialize and set up ProcessTracker object, either from scratch or
+        re-instantiating.
+        :return:
+        """
+
+        if self.process_tracking_id is not None:
             self.logger.info("Process run id provided.  Checking if exists.")
 
             process_run = self.data_store.get_or_create_item(
                 model=ProcessTracking,
-                process_tracking_id=process_tracking_id,
+                process_tracking_id=self.process_tracking_id,
                 create=False,
             )
 
@@ -148,10 +177,10 @@ class ProcessTracker:
 
                 self.dataset_types = process_run.process.dataset_types
                 self.sources = self.determine_process_sources(
-                    process_run_id=process_tracking_id
+                    process_run_id=self.process_tracking_id
                 )
                 self.targets = self.determine_process_targets(
-                    process_run_id=process_tracking_id
+                    process_run_id=self.process_tracking_id
                 )
 
                 self.process_name = process_run.process.process_name
@@ -160,37 +189,38 @@ class ProcessTracker:
 
             else:
                 error_msg = (
-                    "Process run not found based on id %s." % process_tracking_id
+                    "Process run not found based on id %s." % self.process_tracking_id
                 )
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
         else:
-            if process_name is None is None:
+            if self.process_name is None:
                 error_msg = "process_name must be set."
                 self.logger.error(error_msg)
                 raise Exception(error_msg)
 
             self.actor = self.data_store.get_or_create_item(
-                model=Actor, actor_name=actor_name
+                model=Actor, actor_name=self.actor_name
             )
 
             self.tool = self.data_store.get_or_create_item(
-                model=Tool, tool_name=tool_name
+                model=Tool, tool_name=self.tool_name
             )
 
-            if schedule_frequency is None:
+            if self.schedule_frequency is None:
                 self.schedule_frequency = self.data_store.get_or_create_item(
                     model=ScheduleFrequency, schedule_frequency_name="unscheduled"
                 )
             else:
                 self.schedule_frequency = self.data_store.get_or_create_item(
-                    model=ScheduleFrequency, schedule_frequency_name=schedule_frequency
+                    model=ScheduleFrequency,
+                    schedule_frequency_name=self.schedule_frequency,
                 )
 
-            if process_type is None:
+            if self.process_type is None:
 
                 self.process = self.data_store.get_or_create_item(
-                    model=Process, process_name=process_name, create=False
+                    model=Process, process_name=self.process_name, create=False
                 )
 
                 self.process_type = self.process.process_type
@@ -198,12 +228,12 @@ class ProcessTracker:
             else:
 
                 self.process_type = self.data_store.get_or_create_item(
-                    model=ProcessType, process_type_name=process_type
+                    model=ProcessType, process_type_name=self.process_type
                 )
 
                 self.process = self.data_store.get_or_create_item(
                     model=Process,
-                    process_name=process_name,
+                    process_name=self.process_name,
                     process_type_id=self.process_type.process_type_id,
                     process_tool_id=self.tool.tool_id,
                     schedule_frequency_id=self.schedule_frequency.schedule_frequency_id,
@@ -211,50 +241,46 @@ class ProcessTracker:
 
             # Dataset types should be loaded before source and target because they are also used there.
 
-            if dataset_types is not None:
+            if self.dataset_types is not None:
                 self.dataset_types = self.register_process_dataset_types(
-                    dataset_types=dataset_types
+                    dataset_types=self.dataset_types
                 )
             else:
                 self.dataset_types = None
 
-            # sources, source_objects, or source_object_attributes should be set, not multiple.  Always go with lower grain if possible.
+            # sources, source_objects, or source_object_attributes should be set, not multiple.  Always go with
+            # lower grain if possible.
 
-            self.source_object_attributes = None
-            self.source_objects = None
-
-            if source_object_attributes is not None:
+            if self.source_object_attributes is not None:
                 self.source_object_attributes = self.register_process_sources(
-                    source_object_attributes=source_object_attributes
+                    source_object_attributes=self.source_object_attributes
                 )
                 self.sources = self.source_object_attributes
-            elif source_objects is not None:
+            elif self.source_objects is not None:
                 self.source_objects = self.register_process_sources(
-                    source_objects=source_objects
+                    source_objects=self.source_objects
                 )
                 self.sources = self.source_objects
-            elif sources is not None:
-                self.sources = self.register_process_sources(sources=sources)
+            elif self.sources is not None:
+                self.sources = self.register_process_sources(sources=self.sources)
             else:
                 self.sources = None
 
-            # targets, target_objects, or target_object_attributes should be set, not multiple.  Always go with lower grain if possible.
+            # targets, target_objects, or target_object_attributes should be set, not multiple.  Always go with lower
+            # grain if possible.
 
-            if target_object_attributes is not None:
+            if self.target_object_attributes is not None:
                 self.targets = self.register_process_targets(
-                    target_object_attributes=target_object_attributes
+                    target_object_attributes=self.target_object_attributes
                 )
-            elif target_objects is not None:
+            elif self.target_objects is not None:
                 self.targets = self.register_process_targets(
-                    target_objects=target_objects
+                    target_objects=self.target_objects
                 )
-            elif targets is not None:
-                self.targets = self.register_process_targets(targets=targets)
+            elif self.targets is not None:
+                self.targets = self.register_process_targets(targets=self.targets)
             else:
                 self.targets = None
-
-            self.process_name = process_name
-            self.process_run_name = process_run_name
 
             self.process_tracking_run = self.register_new_process_run()
 
