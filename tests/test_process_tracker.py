@@ -2127,7 +2127,7 @@ class TestProcessTracker(unittest.TestCase):
             filter_value_string="testing",
         )
 
-        given_result = process.find_process_filters(process=process.process.process_id)
+        given_result = process.find_process_filters()
 
         expected_result = [
             {
@@ -2152,9 +2152,7 @@ class TestProcessTracker(unittest.TestCase):
             source_object_attributes={"source": {"source_table": ["attr_1", "attr_2"]}},
         )
 
-        given_result = process.find_process_source_attributes(
-            process=process.process.process_id
-        )
+        given_result = process.find_process_source_attributes()
 
         expected_result = [
             {
@@ -2189,9 +2187,7 @@ class TestProcessTracker(unittest.TestCase):
             target_object_attributes={"target": {"target_table": ["attr_1", "attr_2"]}},
         )
 
-        given_result = process.find_process_target_attributes(
-            process=process.process.process_id
-        )
+        given_result = process.find_process_target_attributes()
 
         expected_result = [
             {

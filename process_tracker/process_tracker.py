@@ -694,11 +694,9 @@ class ProcessTracker:
 
         return process_list
 
-    def find_process_filters(self, process):
+    def find_process_filters(self):
         """
         For the given process, find the filters required for querying the source system.
-        :param process: The process' process id.
-        :type process: integer
         """
 
         filter_list = list()
@@ -716,7 +714,7 @@ class ProcessTracker:
             .join(SourceObject, SourceObjectAttribute.source_objects)
             .join(Source)
             .join(FilterType)
-            .filter(ProcessFilter.process_id == process)
+            .filter(ProcessFilter.process_id == self.process.process_id)
             .order_by(
                 Source.source_name,
                 SourceObject.source_object_name,
@@ -738,11 +736,9 @@ class ProcessTracker:
 
         return filter_list
 
-    def find_process_source_attributes(self, process):
+    def find_process_source_attributes(self):
         """
         For the given process, find the attributes used for process sources.
-        :param process:
-        :return:
         """
 
         source_attribute_list = list()
@@ -761,7 +757,7 @@ class ProcessTracker:
             .join(Source, SourceObject.sources)
             .join(SourceType)
             .join(ProcessSourceObjectAttribute)
-            .filter(ProcessSourceObjectAttribute.process_id == process)
+            .filter(ProcessSourceObjectAttribute.process_id == self.process.process_id)
             .order_by(
                 Source.source_name,
                 SourceObject.source_object_name,
@@ -784,11 +780,9 @@ class ProcessTracker:
 
         return source_attribute_list
 
-    def find_process_target_attributes(self, process):
+    def find_process_target_attributes(self):
         """
         For the given process, find the attributes used for process targets.
-        :param process:
-        :return:
         """
 
         target_attribute_list = list()
@@ -807,7 +801,7 @@ class ProcessTracker:
             .join(Source, SourceObject.sources)
             .join(SourceType)
             .join(ProcessTargetObjectAttribute)
-            .filter(ProcessTargetObjectAttribute.process_id == process)
+            .filter(ProcessTargetObjectAttribute.process_id == self.process.process_id)
             .order_by(
                 Source.source_name,
                 SourceObject.source_object_name,
@@ -830,17 +824,15 @@ class ProcessTracker:
 
         return target_attribute_list
 
-    def get_latest_tracking_record(self, process):
+    def get_latest_tracking_record(self):
         """
         For the given process, find the latest tracking record.
-        :param process: The process' process_id.
-        :type process: integer
         :return:
         """
 
         instance = (
             self.session.query(ProcessTracking)
-            .filter(ProcessTracking.process_id == process.process_id)
+            .filter(ProcessTracking.process_id == self.process.process_id)
             .order_by(ProcessTracking.process_run_id.desc())
             .first()
         )
@@ -962,7 +954,7 @@ class ProcessTracker:
         child_process = aliased(Process)
         parent_process = aliased(Process)
 
-        last_run = self.get_latest_tracking_record(process=self.process)
+        last_run = self.get_latest_tracking_record()
 
         new_run_flag = True
         new_run_id = 1
