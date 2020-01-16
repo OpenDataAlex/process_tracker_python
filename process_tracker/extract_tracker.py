@@ -37,7 +37,6 @@ class ExtractTracker:
         status=None,
         compression_type=None,
         filetype=None,
-        config_location=None,
         extract_id=None,
         file_size=None,
     ):
@@ -60,17 +59,13 @@ class ExtractTracker:
         :type compression_type: String
         :param filetype: Optional file type of the extract. Will try to be derived from the filename if not provided.
         :type filetype: string
-        :param config_location: Optional location for the process_tracker configuration file.
-        :type config_location: string
         :param extract_id: If trying to work with a specific extract that's in process, provide the id and it will be
         reconstructed.
         :type extract_id: int
         :param file_size: The size of the file (i.e. 2.21MB)
         :type file_size: str
         """
-        log_level = SettingsManager(
-            config_location=config_location
-        ).determine_log_level()
+        log_level = "INFO"
 
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)

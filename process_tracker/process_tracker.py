@@ -934,11 +934,7 @@ class ProcessTracker:
 
                 self.logger.debug("Registering file %s." % file)
                 ExtractTracker(
-                    process_run=self,
-                    filename=file,
-                    location=location,
-                    status="ready",
-                    config_location=self.config_location,
+                    process_run=self, filename=file, location=location, status="ready"
                 )
 
         if file_count != 0:
