@@ -4,7 +4,7 @@ How to contribute
 Want to participate/contribute to ProcessTracking?  Feel free to add any enhancements, feature requests, etc.
 
 Getting Started
-```````````````
+---------------
 
 * Check out the project's development branch and create a new Python 3.7+ virtualenv.
 * Install pipenv::
@@ -58,7 +58,7 @@ Making Changes
             $ coverage report
 
 Submitting Changes
-``````````````````
+------------------
 
 * Push your changes to the feature branch in your fork of the repository.
 * Submit a pull request to the main repository
@@ -67,7 +67,7 @@ Submitting Changes
 
 
 Additional Resources
-````````````````````
+--------------------
 
 * `General GitHub documentation <http://help.github.com/>`_
 * `GitHub pull request documentation <https://help.github.com/en/articles/about-pull-requests>`_
