@@ -27,24 +27,17 @@ Getting Started
   - Fork the repository on GitHub if you want to contribute code/docs
 
 Making Changes
-``````````````
-
-* **ProcessTracking** uses `git-flow <http://nvie.com/posts/a-successful-git-branching-model/>`_ as the git branching model
-
-  * **All commits should be made to the dev branch**
-  * `Install git-flow <https://github.com/nvie/gitflow>`_ and create a `feature` branch with the following command::
-
-            $ git flow feature start <name of your feature>
+--------------
 
 * Make commits of logical units with complete documentation.
 
+  * Code should be formatted with black.
   * Check for unnecessary whitespace with `git diff --check` before committing.
   * Make sure you have added the necessary tests for your changes.
 
   * Test coverage is currently tracked via `coveralls.io <https://coveralls.io/github/OpenDataAlex/>`_
   * Aim for 100% coverage on your code
-
-    * If this is not possible, explain why in your commit message. This may be an indication that your code should be refactored.
+   * If this is not possible, explain why in your commit message. This may be an indication that your code should be refactored.
 * To make sure your tests pass, run::
 
             $ python setup.py test
