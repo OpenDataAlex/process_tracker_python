@@ -17,7 +17,7 @@ jobs:
         run: cp ${GITHUB_WORKSPACE}/configs/process_tracker_config_dev.ini ${GITHUB_WORKSPACE}/.process_tracker/process_tracker_config_dev.ini
 
       - name: install python
-        uses: gabrielfalcao/pyenc-action@v7
+        uses: gabrielfalcao/pyenv-action@v7
         with:
           default: 3.8.6
           command: pip install -U pip
