@@ -37,14 +37,16 @@ jobs:
     services:
       postgres:
         image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
 
     steps:
       - name: run postgresql account creation
-        run: psql -f dbscripts/postgresql_account_create.sql -U postgres
+        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_account_create.sql -U postgres
       - name: run postgresql database creation
-        run: psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
+        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
       - name: run postgresql database defaults creation
-        run: psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres
+        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres
 
       - name: run test suite
         run: make test
@@ -66,11 +68,11 @@ jobs:
 
     steps:
        - name: run mysql account creation
-         run: mysql -u root < dbscripts/mysql_account_create.sql
+         run: mysql -u root < ${GITHUB_WORKSPACE}/dbscripts/mysql_account_create.sql
        - name: run mysql database creation
-         run: mysql -u root < dbscripts/mysql_process_tracker.sql
+         run: mysql -u root < ${GITHUB_WORKSPACE}/dbscripts/mysql_process_tracker.sql
        - name: run mysql database defaults creation
-         run: mysql -u root < dbscripts/mysql_process_tracker_defaults.sql
+         run: mysql -u root < ${GITHUB_WORKSPACE}/dbscripts/mysql_process_tracker_defaults.sql
 
        - name: run test suite
          run: make test
