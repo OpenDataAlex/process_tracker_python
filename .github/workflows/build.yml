@@ -9,9 +9,12 @@ jobs:
     steps:
       - name: checkout repo code
         uses: actions/checkout@v2
+        
+      - name: create app directory
+        run: mkdir ${{ GITHUB_WORKSPACE }}/.process_tracker
 
       - name: place config file
-         run: cp configs/process_tracker_config_dev.ini $HOME/.process_tracker/process_tracker_config_dev.ini
+        run: cp ${{ GITHUB_WORKSPACE}}/configs/process_tracker_config_dev.ini ${{ GITHUB_WORKSPACE}}/.process_tracker/process_tracker_config_dev.ini
 
       - name: install python
         uses: gabrielfalcao/pyenc-action@v7
