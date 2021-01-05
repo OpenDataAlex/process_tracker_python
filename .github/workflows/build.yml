@@ -1,0 +1,93 @@
+name: process-tracker-python
+on:
+  push:
+  pull_request:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo code
+          uses: actions/checkout@v2
+
+      - name: place config file
+        with:
+          command: cp configs/process_tracker_config_dev.ini $HOME/.process_tracker/process_tracker_config_dev.ini
+
+      - name: install python
+        uses: gabrielfalcao/pyenc-action@v7
+        with:
+          default: 3.8.6
+          command: pip install -U pip
+
+      - name: install requirements
+        run: pipenv install --dev
+
+  postgresql-test:
+    needs: setup
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+
+    steps:
+      - name: run postgresql account creation
+        with:
+          command: psql -f dbscripts/postgresql_account_create.sql -U postgres
+      - name: run postgresql database creation
+        with:
+          command: psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
+      - name: run postgresql database defaults creation
+        with:
+          command: psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres
+
+      - name: run test suite
+        run: make test
+
+      - name: Coveralls Results
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel: true
+          github-token: ${{ secrets.github_token }}
+          flag-name: Unit Test
+
+
+  mysql-test:
+    needs: setup
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql
+
+    steps:
+       - name: run mysql account creation
+        with:
+          command: mysql -u root < dbscripts/mysql_account_create.sql
+      - name: run mysql database creation
+        with:
+          command: mysql -u root < dbscripts/mysql_process_tracker.sql
+      - name: run mysql database defaults creation
+        with:
+          command: mysql -u root < dbscripts/mysql_process_tracker_defaults.sql
+
+      - name: run test suite
+        run: make test
+
+      - name: Coveralls Results
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel: true
+          github-token: ${{ secrets.github_token }}
+          flag-name: Unit Test
+
+
+  finish:
+    needs: [mysql-test, postgresql-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          github-token: ${{ secrets.github_token }}
+          parallel-finished: true
+
