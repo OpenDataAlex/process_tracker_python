@@ -24,6 +24,9 @@ jobs:
           
       - name: install pipenv
         run: pip install pipenv
+      
+      - name: install cython (dependency)
+        run: pip install cython
 
       - name: install requirements
         run: pipenv install --dev
