@@ -61,24 +61,24 @@ jobs:
 
     steps:
        - name: run mysql account creation
-        with:
-          command: mysql -u root < dbscripts/mysql_account_create.sql
-      - name: run mysql database creation
-        with:
-          command: mysql -u root < dbscripts/mysql_process_tracker.sql
-      - name: run mysql database defaults creation
-        with:
-          command: mysql -u root < dbscripts/mysql_process_tracker_defaults.sql
+         with:
+           command: mysql -u root < dbscripts/mysql_account_create.sql
+       - name: run mysql database creation
+         with:
+           command: mysql -u root < dbscripts/mysql_process_tracker.sql
+       - name: run mysql database defaults creation
+         with:
+           command: mysql -u root < dbscripts/mysql_process_tracker_defaults.sql
 
-      - name: run test suite
-        run: make test
+       - name: run test suite
+         run: make test
 
-      - name: Coveralls Results
-        uses: AndreMiras/coveralls-python-action@develop
-        with:
-          parallel: true
-          github-token: ${{ secrets.github_token }}
-          flag-name: Unit Test
+       - name: Coveralls Results
+         uses: AndreMiras/coveralls-python-action@develop
+         with:
+           parallel: true
+           github-token: ${{ secrets.github_token }}
+           flag-name: Unit Test
 
 
   finish:
