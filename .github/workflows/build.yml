@@ -11,8 +11,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: place config file
-        with:
-          command: cp configs/process_tracker_config_dev.ini $HOME/.process_tracker/process_tracker_config_dev.ini
+         run: cp configs/process_tracker_config_dev.ini $HOME/.process_tracker/process_tracker_config_dev.ini
 
       - name: install python
         uses: gabrielfalcao/pyenc-action@v7
@@ -32,14 +31,11 @@ jobs:
 
     steps:
       - name: run postgresql account creation
-        with:
-          command: psql -f dbscripts/postgresql_account_create.sql -U postgres
+        run: psql -f dbscripts/postgresql_account_create.sql -U postgres
       - name: run postgresql database creation
-        with:
-          command: psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
+        run: psql -f dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
       - name: run postgresql database defaults creation
-        with:
-          command: psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres
+        run: psql -f dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres
 
       - name: run test suite
         run: make test
@@ -61,14 +57,11 @@ jobs:
 
     steps:
        - name: run mysql account creation
-         with:
-           command: mysql -u root < dbscripts/mysql_account_create.sql
+         run: mysql -u root < dbscripts/mysql_account_create.sql
        - name: run mysql database creation
-         with:
-           command: mysql -u root < dbscripts/mysql_process_tracker.sql
+         run: mysql -u root < dbscripts/mysql_process_tracker.sql
        - name: run mysql database defaults creation
-         with:
-           command: mysql -u root < dbscripts/mysql_process_tracker_defaults.sql
+         run: mysql -u root < dbscripts/mysql_process_tracker_defaults.sql
 
        - name: run test suite
          run: make test
