@@ -21,6 +21,9 @@ jobs:
         with:
           default: 3.8.6
           command: pip install -U pip
+          
+      - name: install pipenv
+        run: pip install pipenv
 
       - name: install requirements
         run: pipenv install --dev
