@@ -43,10 +43,19 @@ jobs:
     steps:
       - name: run postgresql account creation
         run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_account_create.sql -U postgres
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
       - name: run postgresql database creation
         run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker.sql process_tracker -U postgres
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
       - name: run postgresql database defaults creation
         run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
 
       - name: run test suite
         run: make test
