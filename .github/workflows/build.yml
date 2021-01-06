@@ -4,8 +4,19 @@ on:
   pull_request:
 
 jobs:
-  setup:
+  
+  postgresql-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: 
+          - 5432:5432
+
     steps:
       - name: checkout repo code
         uses: actions/checkout@v2
@@ -30,20 +41,7 @@ jobs:
 
       - name: install requirements
         run: pipenv install --dev
-
-  postgresql-test:
-    needs: setup
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_HOST: localhost
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-
-    steps:
+        
       - name: run postgresql account creation
         run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_account_create.sql -U postgres -h localhost
       - name: run postgresql database creation
@@ -63,13 +61,36 @@ jobs:
 
 
   mysql-test:
-    needs: setup
     runs-on: ubuntu-latest
     services:
       mysql:
         image: mysql
 
     steps:
+       - name: checkout repo code
+         uses: actions/checkout@v2
+        
+       - name: create app directory
+         run: mkdir ${GITHUB_WORKSPACE}/.process_tracker
+
+       - name: place config file
+         run: cp ${GITHUB_WORKSPACE}/configs/process_tracker_config_dev.ini ${GITHUB_WORKSPACE}/.process_tracker/process_tracker_config_dev.ini
+
+       - name: install python
+         uses: gabrielfalcao/pyenv-action@v7
+         with:
+           default: 3.8.6
+           command: pip install -U pip
+          
+       - name: install pipenv
+         run: pip install pipenv
+      
+       - name: install cython (dependency)
+         run: pip install cython
+
+       - name: install requirements
+         run: pipenv install --dev
+       
        - name: run mysql account creation
          run: mysql -u root < ${GITHUB_WORKSPACE}/dbscripts/mysql_account_create.sql
        - name: run mysql database creation
