@@ -43,11 +43,11 @@ jobs:
         run: pipenv install --dev
         
       - name: run postgresql account creation
-        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_account_create.sql -U postgres -h localhost
+        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_account_create.sql -U postgres -h localhost -p postgres
       - name: run postgresql database creation
-        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker.sql process_tracker -U postgres -h localhost
+        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker.sql process_tracker -U postgres -h localhost -p postgres
       - name: run postgresql database defaults creation
-        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres -h localhost
+        run: psql -f ${GITHUB_WORKSPACE}/dbscripts/postgresql_process_tracker_defaults.sql process_tracker -U postgres -h localhost -p postgres
 
       - name: run test suite
         run: make test
