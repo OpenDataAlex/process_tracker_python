@@ -56,7 +56,7 @@ jobs:
           PGPASSWORD: postgres
 
       - name: run test suite
-        run: pipenv run python manage.py test
+        run: pipenv run pytest
 
       - name: Coveralls Results
         uses: AndreMiras/coveralls-python-action@develop
@@ -107,7 +107,7 @@ jobs:
          run: mysql -u root -h 127.0.0.1 < ${GITHUB_WORKSPACE}/dbscripts/mysql_process_tracker_defaults.sql
 
        - name: run test suite
-         run: make test
+         run: pipenv run pytest
 
        - name: Coveralls Results
          uses: AndreMiras/coveralls-python-action@develop
